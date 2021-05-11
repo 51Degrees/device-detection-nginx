@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<title>User-Agent Client Hints Example</title>
+	</head>
+	<body>
+		
+		<h2>User Agent Client Hints Example</h2>
+	    <p>Select the <strong>Use User Agent Client Hints</strong> button below, to use User Agent Client Hint headers in evidence for device detections.</p>
+	    <button type='button' onclick='redirect()'>Use User Agent Client Hints</button>
+		<div id=description></div>
+		
+		<script>
+		    // This script will run when button will be clicked and device detection request will again 
+		    // be sent to the server with all additional client hints that was requested in the previous
+		    // response by the server.
+		    // Following sequence will be followed.
+		    // 1. User will send the first request to the web server for detection.
+		    // 2. Web Server will return the properties in response based on the headers sent in the request. Along 
+		    // with the properties, it will also send a new header field Accept-CH in response indicating the additional
+		    // evidence it needs. It builds the new response header using SetHeader[Component name]Accept-CH properties 
+		    // where Component Name is the name of the component for which properties are required.
+		    // 3. When 'Use User Agent Client Hints' button will be clicked, device detection request will again 
+		    // be sent to the server with all additional client hints that was requested in the previous
+		    // response by the server.
+		    // 4. Web Server will return the properties based on the new User Agent Client Hint headers 
+		    // being used as evidence.
+		
+		    function redirect() {
+		        sessionStorage.reloadAfterPageLoad = true;
+		        window.location.reload(true);
+		        }
+		
+		    window.onload = function () { 
+		        if ( sessionStorage.reloadAfterPageLoad ) {
+		        document.getElementById('description').innerHTML = '<p>The information shown below is determined using <strong>User Agent Client Hints</strong> that was sent in the request to obtain additional evidence. If no additional information appears then it may indicate an external problem such as <strong>User Agent Client Hints</strong> being disabled in your browser.</p>';
+		        sessionStorage.reloadAfterPageLoad = false;
+		        }
+		        else{
+		        document.getElementById('description').innerHTML = '<p>The following values are determined by sever-side device detection on the first request.</p>';
+		        }
+		    }
+		</script>
+		
+		<div id='content'>
+			<p>
+				<strong>Hardware Vendor: </strong> HardwareVendor
+				<br />
+				<strong>Hardware Name: </strong> HardwareName
+				<br />
+				<strong>Device Type: </strong> DeviceType
+				<br />
+				<strong>Platform Vendor: </strong> PlatformVendor
+				<br />
+				<strong>Platform Name: </strong> PlatformName
+				<br />
+				<strong>Platform Version: </strong> PlatformVersion
+				<br />
+				<strong>Browser Vendor: </strong> BrowserVendor
+				<br />
+				<strong>Browser Name: </strong> BrowserName
+				<br />
+				<strong>Browser Version: </strong> BrowserVersion
+			</p>
+		</div>
+	</body>
+</html>

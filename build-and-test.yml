@@ -1,0 +1,343 @@
+name: Build and Test Device Detection Nginx
+
+pr:
+- master
+- develop
+
+trigger: none
+
+stages:
+
+- stage: Data
+  jobs:
+  - job: Get_Enterprise_DataFile
+    pool:
+      name: Hosted Ubuntu 1604
+
+    steps:
+    
+    - script: |
+        curl "https://distributor.51degrees.com/api/v2/download?LicenseKeys=$(licensekey)&Type=HashV41&Download=True&Product=V4Enterprise" --output Enterprise-HashV41.hash.gz
+      displayName: 'Download Latest Data File'
+
+    - task: ExtractFiles@1
+      displayName: 'Extract Data File'
+      inputs:
+        archiveFilePatterns: 'Enterprise-HashV41.hash.gz'
+        cleanDestinationFolder: false
+
+    - script: |
+          mv $(Build.SourcesDirectory)/Enterprise-HashV41.hash  $(Build.ArtifactStagingDirectory)/51Degrees-EnterpriseV4.1.hash
+      displayName: 'Move Data File'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'enterpriseFile'
+        publishLocation: 'Container'
+
+- stage: Linux
+  dependsOn: [Data]
+  jobs:
+  - job: Build_And_Test
+  
+    timeoutInMinutes: 120
+
+    strategy:
+      matrix:
+        ubuntu 18.04 nginx 1.19.0:
+          imageName: 'ubuntu-18.04'
+          nginxVersion: '1.19.0'
+        ubuntu 18.04 nginx 1.19.5:
+          imageName: 'ubuntu-18.04'
+          nginxVersion: '1.19.5'
+        ubuntu 18.04 nginx 1.19.10:
+          imageName: 'ubuntu-18.04'
+          nginxVersion: '1.19.10'
+        ubuntu 18.04 nginx 1.20.0:
+          imageName: 'ubuntu-18.04'
+          nginxVersion: '1.20.0'
+        ubuntu 20.04 nginx 1.19.0:
+          imageName: 'ubuntu-20.04'
+          nginxVersion: '1.19.0'
+        ubuntu 20.04 nginx 1.19.5:
+          imageName: 'ubuntu-20.04'
+          nginxVersion: '1.19.5'
+        ubuntu 20.04 nginx 1.19.10:
+          imageName: 'ubuntu-20.04'
+          nginxVersion: '1.19.10'
+        ubuntu 20.04 nginx 1.20.0:
+          imageName: 'ubuntu-20.04'
+          nginxVersion: '1.20.0'
+
+    pool:
+      vmImage: $(imageName)
+
+    steps:
+
+    - checkout: self
+      submodules: recursive
+      lfs: true
+
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Enterprise Data File'
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'enterpriseFile'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - bash: |
+        # mv $(System.ArtifactsDirectory)/enterpriseFile/51Degrees-EnterpriseV4.1.hash  $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
+        cd data
+        echo "Extract the data file used for testing."
+        gzip -d Enterprise-HashV41.hash.gz
+        echo "Move the data file to $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash"
+        mv Enterprise-HashV41.hash $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
+        cd ..
+      displayName: 'Move Data File'
+
+    - bash: |
+        # cpan will ask for auto configuration first time it is run so answer 'yes'.
+        echo y | sudo cpan
+        sudo cpan  App::cpanminus
+        sudo cpanm TAP::Formatter::JUnit
+      displayName: 'Install perl libraries for test output formatters'
+
+    - bash: |
+        make install STATIC_BUILD=1 FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+      displayName: 'Static Build'
+      
+    - bash: |
+        make install FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+      displayName: 'Dynamic Build'
+
+    # This step will download the nginx-tests suite
+    - bash: |
+        make test FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_dynamic_results.xml
+      displayName: 'Test With Dynamic Build'
+      condition: succeeded()
+
+    - bash: |
+        make test-full FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_TEST_OUTPUT=nginx-plus-module-prove-test-verbose-$(nginxVersion)
+      displayName: 'Test Full With Dynamic Build'
+      condition: and(succeeded(), ne(variables.nginxVersion, variables.nginxCertifiedVersion))
+    
+    # Download nginx-repo.key to install certified version of Nginx Plus for testing
+    - task: DownloadSecureFile@1
+      displayName: 'Download nginx-repo.key'
+      name: nginxRepoKey
+      inputs:
+        secureFile: nginx-repo.key
+      condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
+
+    # Download nginx-repo.crt to install certified version of Nginx Plus for testing
+    - task: DownloadSecureFile@1
+      displayName: 'Download nginx-repo.crt'
+      name: nginxRepoCrt
+      inputs:
+        secureFile: nginx-repo.crt
+      condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
+
+    # Install Nginx Plus and run the certification test
+    - bash: |
+        # Uninstall existing Nginx
+        sudo apt-get purge nginx -y
+        
+        # Create ssl directory for Nginx Plus
+        sudo mkdir -p /etc/ssl/nginx
+        
+        # Copy the nginx-repo.* file to the created directory
+        echo "cp $(nginxRepoKey.secureFilePath) /etc/ssl/nginx"
+        sudo cp $(nginxRepoKey.secureFilePath) /etc/ssl/nginx
+        echo "cp $(nginxRepoCrt.secureFilePath) /etc/ssl/nginx"
+        sudo cp $(nginxRepoCrt.secureFilePath) /etc/ssl/nginx
+        
+        # Download and add NGINX signing key and App-protect security updates signing key:
+        sudo wget https://cs.nginx.com/static/keys/nginx_signing.key && sudo apt-key add nginx_signing.key
+        
+        # Install apt utils
+        sudo apt-get install apt-transport-https lsb-release ca-certificates
+        
+        # Add Nginx Plus repository
+        printf "deb https://plus-pkgs.nginx.com/ubuntu `lsb_release -cs` nginx-plus\n" | sudo tee /etc/apt/sources.list.d/nginx-plus.list
+        
+        # Download nginx-plus apt configuration files to /etc/apt/apt.conf.d
+        sudo wget -P /etc/apt/apt.conf.d https://cs.nginx.com/static/files/90nginx
+        
+        # Update the repository and install Nginx Plus
+        sudo apt-get update
+        sudo apt-get install nginx-plus -y
+        
+        # Check if installation successfully
+        if [ -f /usr/sbin/nginx ]; then
+          /usr/sbin/nginx -v 2>&1 | grep -c $(nginxCertifiedVersion)
+          if [ $? -ne 0 ]; then
+            echo 'Failed to install Nginx Plus $(nginxCertifiedVersion)'
+            exit 1
+          fi
+          echo 'Successfully installed'
+          echo 'Nginx plus verson'
+          /usr/sbin/nginx -v
+        else
+          echo 'Failed to install Nginx Plus $(nginxCertifiedVersion)'
+          exit 1
+        fi
+        
+        # Run the full test and obtain the report
+        TEST_NGINX_BINARY="/usr/sbin/nginx" TEST_NGINX_GLOBALS="load_module $PWD/build/modules/ngx_http_51D_module.so;" TEST_NGINX_GLOBALS_HTTP="51D_file_path $PWD/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash;" prove -v tests/51degrees.t tests/nginx-tests :: 51Degrees-EnterpriseV4.1.hash > nginx-plus-module-prove-test-verbose-$(nginxVersion) 2>&1
+      displayName: 'Install Nginx Plus and run Certification Test'
+      condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
+
+    - bash: |
+        make test-examples FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_examples_dynamic_results.xml
+      displayName: 'Test Examples With Dynamic Build'
+      condition: succeeded()
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+      inputs:
+        SourceFolder: '$(build.sourcesdirectory)'
+        Contents: |
+          $(System.DefaultWorkingDirectory)/build/modules/*.so
+          $(System.DefaultWorkingDirectory)/nginx-plus-module-prove-test-verbose-$(nginxVersion)
+        TargetFolder: '$(build.artifactstagingdirectory)'
+        CleanTargetFolder: true
+
+    - bash: |
+        # Install Microsoft Edge
+        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+        sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
+        sudo rm microsoft.gpg
+        
+        sudo apt-get update
+        sudo apt-get install microsoft-edge-dev -y
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+
+        # Get version of edge installed
+        if [ ! -f /opt/microsoft/msedge-dev/msedge ]; then
+          echo 'Can not find Edge Dev executable.'
+          exit 1
+        fi
+        export EDGE_VERSION=`/opt/microsoft/msedge-dev/msedge --product-version`
+
+        # Download the driver for microsoft edge
+        mkdir driver
+        cd driver
+        wget https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver/$EDGE_VERSION/edgedriver_linux64.zip
+        unzip edgedriver_linux64.zip
+      displayName: 'Install Edge and Edge Driver for CDN tests'
+      workingDirectory: tests/examples/jsExample
+
+    - bash: |
+        # Start nginx with the example
+        cp -p examples/hash/jsExample/javascript.conf build/nginx.conf
+        sed -i "s/Lite/Enterprise/g" build/nginx.conf
+        # Remove the documentation block
+        sed -i "/\/\*\*/,/\*\//d" build/nginx.conf
+        ./nginx
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+
+        # Run the selenium test
+        error_code=0
+        cd tests/examples/jsExample
+        export PATH=$PATH:$PWD/driver
+        npm install
+        npm test
+        if [ $? -ne 0 ]; then
+          error_code=1
+        fi
+        cd ../../..
+
+        # Terminate nginx
+        ./nginx -s quit
+        if [ $? -ne 0 ]; then
+          error_code=1
+        fi
+        exit $error_code
+      displayName: 'Test CDN example With Dynamic Build'
+      condition: succeeded()
+
+    - bash: |
+        sudo apt-get update -y
+        sudo apt-get install cmake apache2-dev libapr1-dev libaprutil1-dev -y
+        cd tests/performance
+        mkdir build
+        cd build
+        cmake ..
+
+        if [ $? -eq 0 ]; then
+          cmake --build .
+        else
+          echo "Failed to initialise build with CMake"
+          exit 1
+        fi
+
+        if [ $? -eq 0 ]; then
+          ./runPerf.sh
+        else
+          echo "Failed to build performance test"
+          exit 1
+        fi
+      displayName: 'Performance Test'
+      condition: succeeded()
+
+    - bash: |
+        make mem-check STATIC_BUILD=1 FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+      displayName: 'Static Build With Memory Check'
+      
+    - bash: |
+        make mem-check FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+      displayName: 'Dynamic Build With Memory Check'
+      
+    - bash: |
+        make test FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_dynamic_mem_results.xml
+      displayName: 'Test Dynamic Build With Memory Check'
+      condition: succeeded()
+
+    - bash: |
+        make test-examples FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_examples_dynamic_mem_results.xml
+      displayName: 'Test Examples With Dynamic Build and Memory Check'
+      condition: succeeded()
+    
+    # This step might display 'Failed' message due to high performance overhead
+    # However, this is acceptable since the test is run with Memory Check enabled
+    # Rebuild the test without Memory Check enabled should make it pass.
+    # Also, there will be memory leak error messages for 1.19.0 and 1.20.0 nginx.
+    # This has been observed to be an issue with nginx during a reload, since the same
+    # error message is seen where 51Degrees module is not being loaded.
+    - bash: |
+        if [ -f tests/performance/build/ApacheBench-prefix/src/ApacheBench-build/bin/ab ]; then
+          ./test.sh
+        else
+          echo 'The performance test need to be build first.'
+          exit 1
+        fi
+      displayName: 'Stress Test with Memory Check'
+      condition: succeeded()
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+      inputs:
+        SourceFolder: '$(build.sourcesdirectory)'
+        Contents: '**'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+        CleanTargetFolder: true
+      condition: failed()
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'drop-$(imageName)-$(nginxVersion)'
+
+    - task: PublishTestResults@2
+      condition: true
+      inputs:
+        testResultsFormat: 'JUnit'
+        testRunTitle: 'Ubuntu $(imageName) Nginx $(nginxVersion) Tests'
+        testResultsFiles: '**/*results.xml'

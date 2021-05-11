@@ -1,0 +1,48 @@
+{
+  "name": "fiftyone.test.cdn",
+  "version": "1.0.0",
+  "description": "Test for device-detection-nginx CDN support",
+  "main": "cdn.test.js",
+  "directories": {
+    "test": "./"
+  },
+  "scripts": {
+    "test": "jest --ci --reportes=default --reporters=jest-junit"
+  },
+  "jest-junit": {
+    "outputName": "cdn_test_results.xml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/51Degrees/device-detection-nginx/tests/example/jsExample"
+  },
+  "author": "51Degrees",
+  "contributors": [
+    "Filip Hnízdo <filip@octophin.com> (https://octophindigital.com/)",
+    "Steve Ballantine <stephen@51degrees.com> (https://51degrees.com)",
+    "Ben Shilito <ben@51degrees.com> (https://51degrees.com)",
+    "Joseph Dix <joseph@51degrees.com> (https://51degrees.com)",
+    "Tung Pham <tung@51degrees.com> (https://51degrees.com)"
+  ],
+  "dependencies": {
+    "selenium-webdriver": "^4.0.0-beta.2",
+    "jest-junit": "latest"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsdoc": "^25.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-jest": "^23.13.2",
+    "jest": "^24.9.0",
+    "jest-junit": "^9.0.0"
+  },
+  "license": "EUPL-1.2",
+  "files": [
+    "build",
+    "*.js"
+  ]
+}

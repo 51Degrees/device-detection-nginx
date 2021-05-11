@@ -1,0 +1,173 @@
+<script src="http://localhost:8888/51D.js"></script>
+<script>fiftyoneDegreesManager = function() {
+    'use-strict';
+	var responseText = 'not found';
+
+	var completed = false;
+
+	// changeFuncs is an array of functions. When onChange is called and passed
+    // a function, the function is registered and is called when processing is
+    // complete.
+    var changeFuncs = [];
+
+	// startsWith polyfill.
+    var startsWith = function(source, searchValue){
+        return source.lastIndexOf(searchValue, 0) === 0;
+    }
+
+    // Get cookies with the '51D_' prefix that have been added to the request
+    // and return the data as key value pairs. This method is needed to extract
+    // cookie values for inclusion in the GET or POST request for situations
+    // where CORS will prevent cookies being sent to third parties.
+    var getFodCookies = function(){
+        var keyValuePairs = document.cookie.split(/; */);
+        var fodCookies = [];
+        for(var i = 0; i < keyValuePairs.length; i++) {
+            var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
+            if(startsWith(name, "51D_")){
+                var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+                fodCookies[name] = value;
+            }
+        }
+        return fodCookies;
+    };
+
+    // Extract key value pairs from the '51D_' prefixed cookies and concatenates
+    // them to form a query string for the subsequent json refresh.
+    var getParametersFromCookies = function(){
+        var fodCookies = getFodCookies();
+        var keyValuePairs = [];
+        for (var key in fodCookies) {
+            if (fodCookies.hasOwnProperty(key)) {
+                keyValuePairs.push(key+"="+fodCookies[key]);
+            }
+        }
+        return keyValuePairs;
+    };
+
+    // Standard method to create a CORS HTTP request ready to send data.
+    var createCORSRequest = function(method, url) {
+        var xhr;
+        try {
+            xhr = new XMLHttpRequest();
+        } catch(err){
+            xhr = null;
+        }
+        if (xhr !== null && "withCredentials" in xhr) {
+			console.log("With credentials");
+            // Check if the XMLHttpRequest object has a "withCredentials"
+            // property.
+            // "withCredentials" only exists on XMLHTTPRequest2 objects.
+            xhr.open(method, url, true);
+			console.log("After open");
+        } else if (typeof XDomainRequest != "undefined") {
+			console.log("Without credentials");
+            // Otherwise, check if XDomainRequest.
+            // XDomainRequest only exists in IE, and is IE's way of making CORS
+            // requests.
+            xhr = new XDomainRequest();
+            xhr.open(method, url);
+        } else {
+			console.log("None of the above");
+            // Otherwise, CORS is not supported by the browser.
+            xhr = null;
+        }
+        return xhr;
+    };
+
+	// Function logs errors, used to 'reject' a promise or for error callbacks.
+    var catchError = function(value) {
+        console.log(value.message || value);
+    }
+
+	var fireChangeFuncs = function(response) {
+        for (var i = 0; i < changeFuncs.length; i++) {
+            if (typeof changeFuncs[i] === 'function' &&
+                changeFuncs[i].length === 1) {
+                changeFuncs[i](response);
+            }
+        }
+    }
+
+    // Sends the cookie parameters that have been set by the executed Javascript
+    // in the POST body of a new request to refresh the json data. Resolve is
+    // called with the new json if the request is processed as expected. Reject
+    // is called if there was a problem. The parameters are send as a POST
+    // request so that encoding and data length issues are minimised.
+    var processRequest = function(resolve, reject){
+		console.log("process request internal");
+		var params = getParametersFromCookies();
+		
+        // Request URL with a license key and User-Agent if provided.
+        var xhr = createCORSRequest('GET', 'http://localhost:8888/overrides?' + params.join('&').replace(/%20/g, '+'));
+
+        // If there is no support for HTTP requests then call reject and throw
+        // a no CORS support error.
+        if (!xhr) {
+			console.log("CORS error");
+            reject(new Error('CORS not supported'));
+            return;
+        }
+
+        xhr.onload = function () {
+			console.log("Request completed");
+            // Get the response body from the request.
+            var responseHeader = xhr.getResponseHeader('x-screenpixelswidth');
+			console.log(xhr);
+			console.log(xhr.getAllResponseHeaders());
+			
+            completed = true;
+            // json updated so fire 'on change' functions
+            // This must happen after completed = true in order
+            // for 'complete' functions to fire.
+			fireChangeFuncs(responseHeader);
+            resolve(responseHeader);
+        };
+
+        xhr.onerror = function () {
+			console.log("Error xhr");
+            // An error occurred with the request. Return the details in the
+            // call to reject method.
+            reject(Error(xhr.statusText));
+        };
+
+		console.log("After call");
+		
+        // Send the cookie parameters as the POST body.
+		xhr.send();
+    }
+
+	this.onChange = function(resolve) {
+		changeFuncs.push(resolve);
+	}
+
+    this.complete = function(resolve, properties) {
+        if(completed){
+            resolve(responseText);
+        }else{
+            this.onChange(function(data) {
+                if(completed){
+                    resolve(data);
+                }
+            })
+        }
+    };
+	
+	console.log("process request");
+	processRequest(function(response) {
+		responseText = response;
+	}, catchError);
+}
+
+var fod = new fiftyoneDegreesManager();
+</script>
+<script>
+window.onload = function() {
+	fod.complete(function (data) {
+		document.getElementById('screenpixelswidth').innerHTML = "Screen Pixels Width: <span id=widthvalue style=\"font-weight: bold\">" + data + "</span>";
+	});
+}
+</script>
+<body>
+<p id=screenpixelswidth></p>
+</body> 

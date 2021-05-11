@@ -1,0 +1,35 @@
+worker_processes 4;
+
+load_module ${MODULES_DIR}/ngx_http_51D_module.so;
+
+working_directory coredumps/;
+worker_rlimit_core 500M;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+    51D_file_path ${DATA_FILE_DIR}/51Degrees-LiteV4.1.hash;
+
+	51D_value_separator ^sep^;
+	51D_drift 1;
+	51D_difference 1;
+	51D_allow_unmatched on;
+	51D_use_performance_graph on;
+	51D_use_predictive_graph off;
+
+    server {
+        listen       127.0.0.1:3000;
+        server_name  localhost;
+		
+		location /calibrate {
+			# Do nothing
+		}
+
+		location /process {
+			51D_match_all x-ismobile IsMobile;
+			add_header x-ismobile $http_x_ismobile;
+		}
+    }
+}
