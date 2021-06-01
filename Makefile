@@ -10,7 +10,7 @@ $(eval $(API):;@:)
 
 ifneq (test,$(firstword $(MAKECMDGOALS)))
 	API := hash
-	ARGS := -DFIFTYONEDEGREES_HASH -DFIFTYONEDEGREES_NO_THREADING -Wall -Wno-unused-variable -Wno-missing-braces
+	ARGS := -std=gnu11 -Wall -Wno-unused-variable -Wno-missing-braces
 endif
 
 
