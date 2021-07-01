@@ -1,0 +1,4 @@
+trigger: none
+
+stages:
+- template: shared-build-and-test-stages.yml

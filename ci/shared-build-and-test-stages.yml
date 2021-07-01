@@ -1,18 +1,14 @@
-name: Build and Test Device Detection Nginx
-
-pr:
-- master
-- develop
-
-trigger: none
-
 stages:
 
 - stage: Data
   jobs:
   - job: Get_Enterprise_DataFile
+
+    variables:
+    - template: shared-variables.yml
+
     pool:
-      name: Hosted Ubuntu 1604
+      vmImage: $(linux18Image)
 
     steps:
     
@@ -40,9 +36,15 @@ stages:
   dependsOn: [Data]
   jobs:
   - job: Build_And_Test
-  
+
     timeoutInMinutes: 120
 
+    # Variables can't be used in matrix so use
+    # static string for image name instead of
+    # shared variables.
+    # NOTE: There aren't debug entries since
+    # the memory leak tests require Debug build,
+    # covering Debug tests per configuration.
     strategy:
       matrix:
         ubuntu 18.04 nginx 1.19.0:
@@ -88,13 +90,7 @@ stages:
         downloadPath: '$(System.ArtifactsDirectory)'
 
     - bash: |
-        # mv $(System.ArtifactsDirectory)/enterpriseFile/51Degrees-EnterpriseV4.1.hash  $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
-        cd data
-        echo "Extract the data file used for testing."
-        gzip -d Enterprise-HashV41.hash.gz
-        echo "Move the data file to $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash"
-        mv Enterprise-HashV41.hash $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
-        cd ..
+        mv $(System.ArtifactsDirectory)/enterpriseFile/51Degrees-EnterpriseV4.1.hash  $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
       displayName: 'Move Data File'
 
     - bash: |
@@ -111,6 +107,35 @@ stages:
     - bash: |
         make install FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
       displayName: 'Dynamic Build'
+
+    - bash: |
+        cd tests
+        echo "Clean any existing nginx-tests folder."
+        if [ -d nginx-tests ]; then
+          rm -rf nginx-tests
+          if [ -d nginx-tests ]; then
+            echo "ERROR: Failed to remove nginx-tests."
+            exit 1
+          fi
+          echo "Removed nginx-tests folder."
+        fi
+
+        echo "Clone the nginx-tests source."
+        git clone https://github.com/nginx/nginx-tests.git
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Failed to clone nginx-tests source."
+          exit 1
+        fi
+
+        cd nginx-tests
+        echo "Try to revert back to before the breacking changes."
+        git reset --hard 6bf30e564c06b404876f0bd44ace8431b3541f24
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Failed to revert to before nginx-tests breaking changes for 1.19.0 and 1.19.5."
+          exit 1
+        fi
+      displayName: Use nginx-tests version before breaking changes for 1.19.0 and 1.19.5'
+      condition: and(succeeded(), or(eq(variables['nginxVersion'], '1.19.0'), eq(variables['nginxVersion'], '1.19.5')))
 
     # This step will download the nginx-tests suite
     - bash: |
@@ -203,6 +228,7 @@ stages:
           $(System.DefaultWorkingDirectory)/nginx-plus-module-prove-test-verbose-$(nginxVersion)
         TargetFolder: '$(build.artifactstagingdirectory)'
         CleanTargetFolder: true
+      condition: succeededOrFailed()
 
     - bash: |
         # Install Microsoft Edge
@@ -334,6 +360,7 @@ stages:
       inputs:
         pathtoPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop-$(imageName)-$(nginxVersion)'
+      condition: succeededOrFailed()
 
     - task: PublishTestResults@2
       condition: true
