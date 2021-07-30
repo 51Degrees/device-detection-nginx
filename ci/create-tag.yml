@@ -1,18 +1,10 @@
 trigger:
-  - master
+  - main
   - develop
   - release/*
 
 # Don't trigger for a pull request
 pr: none
-
-# Schedule to run overnight
-schedules:
-- cron: "0 20 * * *"
-  displayName: Daily overnight build
-  branches:
-    include:
-    - develop
 
 # Use shared variables
 variables:
@@ -25,10 +17,7 @@ resources:
       name: common-ci # Name of the actual repository
 
 stages:
-- template: shared-build-and-test-stages.yml
-
 - stage: Tagging
-  dependsOn: Linux
   
   jobs:
   - template: shared-create-tag-job.yml@ciTemplates

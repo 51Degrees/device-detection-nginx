@@ -1,8 +1,14 @@
+parameters:
+- name: runTests
+  type: string
+  default: 'On'
+
 stages:
 
 - stage: Data
   jobs:
   - job: Get_Enterprise_DataFile
+    condition: ne(${{ parameters.runTests }}, 'Off')
 
     variables:
     - template: shared-variables.yml
@@ -36,6 +42,7 @@ stages:
   dependsOn: [Data]
   jobs:
   - job: Build_And_Test
+    condition: ne(${{ parameters.runTests }}, 'Off')
 
     timeoutInMinutes: 120
 
@@ -88,18 +95,18 @@ stages:
         downloadType: 'single'
         artifactName: 'enterpriseFile'
         downloadPath: '$(System.ArtifactsDirectory)'
-
+    
     - bash: |
         mv $(System.ArtifactsDirectory)/enterpriseFile/51Degrees-EnterpriseV4.1.hash  $(Build.SourcesDirectory)/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash
       displayName: 'Move Data File'
-
+    
     - bash: |
         # cpan will ask for auto configuration first time it is run so answer 'yes'.
         echo y | sudo cpan
         sudo cpan  App::cpanminus
-        sudo cpanm TAP::Formatter::JUnit
+        sudo cpanm --force TAP::Formatter::JUnit
       displayName: 'Install perl libraries for test output formatters'
-
+    
     - bash: |
         make install STATIC_BUILD=1 FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
       displayName: 'Static Build'
@@ -107,7 +114,7 @@ stages:
     - bash: |
         make install FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
       displayName: 'Dynamic Build'
-
+    
     - bash: |
         cd tests
         echo "Clean any existing nginx-tests folder."
@@ -119,14 +126,14 @@ stages:
           fi
           echo "Removed nginx-tests folder."
         fi
-
+    
         echo "Clone the nginx-tests source."
         git clone https://github.com/nginx/nginx-tests.git
         if [ $? -ne 0 ]; then
           echo "ERROR: Failed to clone nginx-tests source."
           exit 1
         fi
-
+    
         cd nginx-tests
         echo "Try to revert back to before the breacking changes."
         git reset --hard 6bf30e564c06b404876f0bd44ace8431b3541f24
@@ -136,13 +143,13 @@ stages:
         fi
       displayName: Use nginx-tests version before breaking changes for 1.19.0 and 1.19.5'
       condition: and(succeeded(), or(eq(variables['nginxVersion'], '1.19.0'), eq(variables['nginxVersion'], '1.19.5')))
-
+    
     # This step will download the nginx-tests suite
     - bash: |
         make test FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_dynamic_results.xml
       displayName: 'Test With Dynamic Build'
       condition: succeeded()
-
+    
     - bash: |
         make test-full FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_TEST_OUTPUT=nginx-plus-module-prove-test-verbose-$(nginxVersion)
       displayName: 'Test Full With Dynamic Build'
@@ -155,7 +162,7 @@ stages:
       inputs:
         secureFile: nginx-repo.key
       condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
-
+    
     # Download nginx-repo.crt to install certified version of Nginx Plus for testing
     - task: DownloadSecureFile@1
       displayName: 'Download nginx-repo.crt'
@@ -163,7 +170,7 @@ stages:
       inputs:
         secureFile: nginx-repo.crt
       condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
-
+    
     # Install Nginx Plus and run the certification test
     - bash: |
         # Uninstall existing Nginx
@@ -213,12 +220,12 @@ stages:
         TEST_NGINX_BINARY="/usr/sbin/nginx" TEST_NGINX_GLOBALS="load_module $PWD/build/modules/ngx_http_51D_module.so;" TEST_NGINX_GLOBALS_HTTP="51D_file_path $PWD/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash;" prove -v tests/51degrees.t tests/nginx-tests :: 51Degrees-EnterpriseV4.1.hash > nginx-plus-module-prove-test-verbose-$(nginxVersion) 2>&1
       displayName: 'Install Nginx Plus and run Certification Test'
       condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
-
+    
     - bash: |
         make test-examples FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_examples_dynamic_results.xml
       displayName: 'Test Examples With Dynamic Build'
       condition: succeeded()
-
+    
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
       inputs:
@@ -231,14 +238,24 @@ stages:
       condition: succeededOrFailed()
 
     - bash: |
-        # Install Microsoft Edge
-        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-        sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
-        sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
-        sudo rm microsoft.gpg
+        # NOTE: We are currently use a hard code version of Edge as the latest stable does not
+        # come with a driver yet. Once the driver is available the following commented script
+        # can be used.
+        ## Install Microsoft Edge
+        # curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        # sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+        # sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
+        # sudo rm microsoft.gpg
+        # 
+        # sudo apt-get update
+        # sudo apt-get install microsoft-edge-dev -y
+        wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-dev/microsoft-edge-dev_93.0.910.5-1_amd64.deb
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
         
-        sudo apt-get update
-        sudo apt-get install microsoft-edge-dev -y
+        # The stable version does not have a associate driver. Use a specific one
+        sudo apt install ./microsoft-edge-dev_93.0.910.5-1_amd64.deb
         if [ $? -ne 0 ]; then
           exit 1
         fi
