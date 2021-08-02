@@ -41,7 +41,7 @@ my $t_lite = 1;
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-    $n += 10;
+    $n += 0;
     $t_lite = 0;
 }
 my $t = Test::Nginx->new()->has(qw/http/)->plan($n);
@@ -93,7 +93,8 @@ my $chromeUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML
 # Test responseHeader.conf example.
 ###############################################################################
 
-if (!$t_lite) {
+# TODO: Enable when UACH is supported
+if (!$t_lite && 0) {
 	my $r = get_with_ch_ua('/response.html', $chromeCHUA);
 	like($r, qr/Accept-CH: SEC-CH-[a-zA-Z\-]+(,SEC-CH-[a-zA-Z\-])*/, 'Response Header');
 	like($r, qr/Platform Name:.*NoMatch/, 'Get Platform Name using Client Hint');

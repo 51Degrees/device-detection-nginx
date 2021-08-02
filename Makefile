@@ -10,7 +10,7 @@ $(eval $(API):;@:)
 
 ifneq (test,$(firstword $(MAKECMDGOALS)))
 	API := hash
-	ARGS := -DFIFTYONEDEGREES_HASH -DFIFTYONEDEGREES_NO_THREADING -Wall -Wno-unused-variable -Wno-missing-braces
+	ARGS := -std=gnu11 -Wall -Wno-unused-variable -Wno-missing-braces
 endif
 
 
@@ -73,7 +73,7 @@ configure: build
 	cd $(CURDIR)/vendor/nginx-$(VERSION) && \
 	./configure \
 	--prefix=$(CURDIR)/build \
-	--with-ld-opt="-lm $(MEM_LD_FLAGS)" \
+	--with-ld-opt="-lm -latomic $(MEM_LD_FLAGS)" \
 	$(MODULE_ARG)=$(CURDIR)/51Degrees_module \
 	--with-compat \
 	--with-cc-opt="$(ARGS) $(MEM_CC_FLAGS)" \

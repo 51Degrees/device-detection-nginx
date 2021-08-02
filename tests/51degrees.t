@@ -31,7 +31,7 @@ my $t_lite = 1;
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-	$n += 14;
+	$n += 8;
 	$t_lite = 0;
 }
 
@@ -364,10 +364,11 @@ if (!$t_lite) {
 }
 
 ###############################################################################
-# Test overrides
+# Test response headers
 ###############################################################################
 
-if (!$t_lite) {
+# TODO: Enable and UACH is supported
+if (!$t_lite && 0) {
 	# Set Client Hints response headers locally
 	$r = get_with_ua('/clienthints', $chrome89UserAgent);
 	like($r, qr/Accept-CH: SEC-CH-[a-zA-Z-]+(,SEC-CH-[a-zA-Z-]+)*/, 'Set Client Hints response header locally.');
@@ -418,7 +419,10 @@ if (!$t_lite) {
 	# Javascript using property with Client Hints response headers on.
 	$r = get_content_with_ua('/51D-chua.js', $chrome89UserAgent);
 	like($r, qr/document\.cookie.*51D_ScreenPixelsWidth.*/, 'Javascript response content to get ScreenPixelsWidth.');
-	like($r, qr/Accept-CH: SEC-CH-[a-zA-Z-]+(,SEC-CH-[a-zA-Z-]+)*/, 'Set Client Hints response header locally.');
+	# TODO: Enable once UACH is supported
+	if (0) {
+		like($r, qr/Accept-CH: SEC-CH-[a-zA-Z-]+(,SEC-CH-[a-zA-Z-]+)*/, 'Set Client Hints response header locally.');
+	}
 }
 
 # Javascript using non property.
