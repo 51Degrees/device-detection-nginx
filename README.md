@@ -179,6 +179,7 @@ To build 51Degrees Device Detection V4 module, the following libraries are requi
 - zlib1g-dev
 - libpcre3
 - libpcre3-dev
+- libatomic
 
 To build the module only, run the following command. This will output to `ngx_http_51D_module.so` in `build/modules` directory.
 ```
