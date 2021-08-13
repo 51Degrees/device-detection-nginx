@@ -1539,6 +1539,50 @@ static ngx_str_t* empty_string(ngx_http_request_t *r) {
 }
 
 /**
+ * Search and get the evidence from the query string.
+ * @param r the nginx http request
+ * @param variableName the variable name to search for
+ * @return the evidence
+ */
+static ngx_str_t *
+get_evidence_from_query_string_base(ngx_http_request_t *r, ngx_str_t *variableName) {
+	u_char *src, *dst;
+	ngx_uint_t variableNameHash;
+	ngx_variable_value_t *variable;
+	ngx_str_t *evidence;
+
+	variableNameHash = ngx_hash_strlow(variableName->data,
+		variableName->data,
+		variableName->len);
+	variable = ngx_http_get_variable(r, variableName, variableNameHash);
+	if (variable->not_found == 0 && (int)variable->len > 0) {
+		evidence = (ngx_str_t *)ngx_palloc(r->pool, sizeof(ngx_str_t));
+		if (evidence == NULL) {
+			report_insufficient_memory_status(r->connection->log);
+			return NULL;
+		}
+
+		evidence->data =
+			(u_char *)ngx_palloc(
+				r->pool, sizeof(u_char) * (size_t)variable->len + 1);
+		if (evidence->data == NULL) {
+			report_insufficient_memory_status(r->connection->log);
+			return NULL;
+		}
+
+		src = variable->data;
+		dst = evidence->data;
+		ngx_unescape_uri(&dst, &src, variable->len, 0);
+		evidence->len = dst - evidence->data;
+		evidence->data[evidence->len] = '\0';
+	}
+	else {
+		evidence = empty_string(r);
+	}
+	return evidence;
+}
+
+/**
  * Search and get the evidence from the query string. If the variable does not
  * contains 'arg_' prefix, add it as this is required by nginx.
  * @param r the nginx http request
@@ -1578,35 +1622,7 @@ get_evidence_from_query_string(ngx_http_request_t *r, ngx_str_t *variableName) {
 		queryVarName = *variableName;
 	}
 
-	variableNameHash = ngx_hash_strlow(queryVarName.data,
-		queryVarName.data,
-		queryVarName.len);
-	variable = ngx_http_get_variable(r, &queryVarName, variableNameHash);
-	if (variable->not_found == 0 && (int)variable->len > 0) {
-		evidence = (ngx_str_t *)ngx_palloc(r->pool, sizeof(ngx_str_t));
-		if (evidence == NULL) {
-			report_insufficient_memory_status(r->connection->log);
-			return NULL;
-		}
-
-		evidence->data =
-			(u_char *)ngx_palloc(
-				r->pool, sizeof(char*) * (size_t)variable->len + 1);
-		if (evidence->data == NULL) {
-			report_insufficient_memory_status(r->connection->log);
-			return NULL;
-		}
-
-		src = variable->data;
-		dst = evidence->data;
-		ngx_unescape_uri(&dst, &src, variable->len, 0);
-		evidence->len = dst - evidence->data;
-		evidence->data[evidence->len] = '\0';
-	}
-	else {
-		evidence = empty_string(r);
-	}
-	return evidence;
+	return get_evidence_from_query_string_base(r, &queryVarName);
 }
 
 /**
@@ -2023,7 +2039,7 @@ ngx_http_51D_get_user_agent(
 	ngx_str_t *userAgent;
 	// Get the User-Agent from the request or variable.
 	if (data != NULL && (int)data->variableName.len > 0) {
-		userAgent = get_evidence_from_query_string(r, &data->variableName);
+		userAgent = get_evidence_from_query_string_base(r, &data->variableName);
 	}
 	else if (r->headers_in.user_agent != NULL) {
 		userAgent = &r->headers_in.user_agent[0].value;
