@@ -24,7 +24,7 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 23;
+my $n = 24;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
@@ -133,8 +133,9 @@ http {
 
 		location /variable {
 			51D_match_single x-ismobile-from-var IsMobile $arg_ua;
+			51D_match_single x-ismobile-from-wrong-var IsMobile $ua;
 			add_header x-ismobile-from-var $http_x_ismobile_from_var;
-			add_header x-ua $arg_ua;
+			add_header x-ismobile-from-wrong-var $http_x_ismobile_from_wrong_var;
 		}
 
 		location /overrides {
@@ -342,6 +343,7 @@ like($r, qr/x-ismobile: False/, 'Opera desktop header');
 # Match with a parameter passed from the config.
 $r = get_with_ua('/variable?ua='.uri_escape($mobileUserAgent), $desktopUserAgent);
 like($r, qr/x-ismobile-from-var: True/, 'Match single from parameter');
+like($r, qr/x-ismobile-from-wrong-var: False/, 'Match single from parameter with wrong name');
 
 # Match all with a parameter passed from the config.
 $r = get_with_ua('/all?User-Agent='.uri_escape($mobileUserAgent), $desktopUserAgent);
