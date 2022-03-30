@@ -244,34 +244,21 @@ stages:
       condition: succeededOrFailed()
 
     - bash: |
-        # NOTE: We are currently use a hard code version of Edge as the latest stable does not
-        # come with a driver yet. Once the driver is available the following commented script
-        # can be used.
         ## Install Microsoft Edge
-        # curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-        # sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
-        # sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
-        # sudo rm microsoft.gpg
-        # 
-        # sudo apt-get update
-        # sudo apt-get install microsoft-edge-dev -y
-        wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-dev/microsoft-edge-dev_96.0.1047.2-1_amd64.deb
-        if [ $? -ne 0 ]; then
-          exit 1
-        fi
+        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+        sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-stable.list'
+        sudo rm microsoft.gpg
         
-        # The stable version does not have a associate driver. Use a specific one
-        sudo apt install ./microsoft-edge-dev_96.0.1047.2-1_amd64.deb
-        if [ $? -ne 0 ]; then
-          exit 1
-        fi
+        sudo apt-get update
+        sudo apt-get install microsoft-edge-stable -y
 
         # Get version of edge installed
-        if [ ! -f /opt/microsoft/msedge-dev/msedge ]; then
-          echo 'Can not find Edge Dev executable.'
+        if [ ! -f /opt/microsoft/msedge/msedge ]; then
+          echo 'Can not find Edge Stable executable.'
           exit 1
         fi
-        export EDGE_VERSION=`/opt/microsoft/msedge-dev/msedge --product-version`
+        export EDGE_VERSION=`/opt/microsoft/msedge/msedge --product-version`
 
         # Download the driver for microsoft edge
         mkdir driver
