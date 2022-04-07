@@ -1725,8 +1725,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 		ngx_uint_t i;
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
-				STRING(
-					dataSet->b.b.uniqueHeaders->items[i].name.data.ptr);
+				dataSet->b.b.uniqueHeaders->items[i].name;
 			searchResult =
 				search_headers_in(
 					r, (u_char *)headerName, ngx_strlen(headerName));
