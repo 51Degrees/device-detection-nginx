@@ -89,7 +89,7 @@ The above gave you a quick overview of how to use Nginx 51Degrees Device Detecti
 ## Latest releases
 The latest releases of 51Degrees Nginx module can be found on [Github](https://github.com/51Degrees/device-detection-nginx/releases).
 
-For the supported platforms and Nginx version, please check [Version Support page](http://51degrees.com/documentation/_info__version_support.html) for latest update. At the time of writing, the followings are supported:
+For the supported platforms and Nginx version, please check the [tested versions page](https://51degrees.com/documentation/_info__tested_versions.html) for latest update. At the time of writing, the followings are supported:
 - Platform Ubuntu-18.04 and 20.04, 64bit.
 - Nginx version: 1.19.0, 1.19.5, 1.19.10 and 1.20.0
 
