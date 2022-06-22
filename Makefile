@@ -76,7 +76,7 @@ configure: build
 	--with-ld-opt="-lm -latomic $(MEM_LD_FLAGS)" \
 	$(MODULE_ARG)=$(CURDIR)/51Degrees_module \
 	--with-compat \
-	--with-cc-opt="$(ARGS) $(MEM_CC_FLAGS)" \
+	--with-cc-opt="$(ARGS) $(MEM_CC_FLAGS) -fcommon" \
 	--with-debug \
 	--sbin-path=$(CURDIR) \
 	--conf-path="nginx.conf" \
