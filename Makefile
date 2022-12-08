@@ -3,6 +3,13 @@ ifndef FIFTYONEDEGREES_NGINX_VERSION
 else
 	VERSION := $(FIFTYONEDEGREES_NGINX_VERSION)
 endif
+
+ifndef DONT_CLEAN_TESTS
+	CLEANTESTS := 1
+else
+	CLEANTESTS := 0
+endif
+
 TESTS := tests/51degrees.t
 
 
@@ -46,8 +53,10 @@ clean:
 	if [ -f "vendor/nginx-$(VERSION)/Makefile" ]; then \
 		cd $(CURDIR)/vendor/nginx-$(VERSION) && make clean; \
 	fi
-	if [ -d "tests/nginx-tests" ]; then \
-		rm -r tests/nginx-tests; \
+	if [ "$(CLEANTESTS)" -eq "1" ]; then \
+		if [ -d "tests/nginx-tests" ]; then \
+			rm -r tests/nginx-tests; \
+		fi; \
 	fi;
 
 build: clean
@@ -113,10 +122,12 @@ mem-check: set-mem install
 	
 test-prep:
 	if [ ! -f "tests/nginx-tests/lib/Test/Nginx.pm" ]; then \
-	rm -r tests/nginx-tests*; \
-	cd tests && curl -L -O "http://hg.nginx.org/nginx-tests/archive/tip.tar.gz"; \
-	tar zxf tip.tar.gz; \
-	mv nginx-tests* nginx-tests; \
+		if ls tests/nginx-tests* 1> /dev/null 2>&1; then \
+			rm -r tests/nginx-tests*; \
+		fi; \
+		cd tests && curl -L -O "http://hg.nginx.org/nginx-tests/archive/tip.tar.gz"; \
+		tar zxf tip.tar.gz; \
+		mv nginx-tests* nginx-tests; \
 	fi;
 
 test-full:

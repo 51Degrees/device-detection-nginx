@@ -141,7 +141,7 @@ stages:
         fi
     
         cd nginx-tests
-        echo "Try to revert back to before the breacking changes."
+        echo "Try to revert back to before the breaking changes."
         git reset --hard 6bf30e564c06b404876f0bd44ace8431b3541f24
         if [ $? -ne 0 ]; then
           echo "ERROR: Failed to revert to before nginx-tests breaking changes for 1.19.0 and 1.19.5."
@@ -150,6 +150,38 @@ stages:
       displayName: Use nginx-tests version before breaking changes for 1.19.0 and 1.19.5'
       condition: and(succeeded(), or(eq(variables['nginxVersion'], '1.19.0'), eq(variables['nginxVersion'], '1.19.5')))
     
+    - bash: |
+        cd tests
+        echo "Clean any existing nginx-tests folder."
+        if [ -d nginx-tests ]; then
+          rm -rf nginx-tests
+          if [ -d nginx-tests ]; then
+            echo "ERROR: Failed to remove nginx-tests."
+            exit 1
+          fi
+          echo "Removed nginx-tests folder."
+        fi
+    
+        echo "Clone the nginx-tests source."
+        git clone https://github.com/nginx/nginx-tests.git
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Failed to clone nginx-tests source."
+          exit 1
+        fi
+    
+        cd nginx-tests
+        echo "Try to revert back to before the breaking changes."
+        git reset --hard 3356f91a3fdae372d0946e4c89a9413f558c8017
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Failed to revert to before nginx-tests breaking changes for 1.21.3."
+          exit 1
+        fi
+      displayName: Use nginx-tests version before breaking changes for 1.21.3'
+      condition: and(succeeded(), eq(variables['nginxVersion'], '1.21.3'))
+    
+
+
+
     # This step will download the nginx-tests suite
     - bash: |
         make test FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=test_dynamic_results.xml
@@ -225,6 +257,7 @@ stages:
         # Run the full test and obtain the report
         TEST_NGINX_BINARY="/usr/sbin/nginx" TEST_NGINX_GLOBALS="load_module $PWD/build/modules/ngx_http_51D_module.so;" TEST_NGINX_GLOBALS_HTTP="51D_file_path $PWD/device-detection-cxx/device-detection-data/51Degrees-EnterpriseV4.1.hash;" prove -v tests/51degrees.t tests/nginx-tests :: 51Degrees-EnterpriseV4.1.hash > nginx-plus-module-prove-test-verbose-$(nginxVersion) 2>&1
       displayName: 'Install Nginx Plus and run Certification Test'
+      failOnStderr: false
       condition: and(succeeded(), eq(variables.nginxVersion, variables.nginxCertifiedVersion))
     
     - bash: |
@@ -276,6 +309,7 @@ stages:
         sed -i "/\/\*\*/,/\*\//d" build/nginx.conf
         ./nginx
         if [ $? -ne 0 ]; then
+          echo "Failed to start Nginx"
           exit 1
         fi
 
@@ -284,8 +318,10 @@ stages:
         cd tests/examples/jsExample
         export PATH=$PATH:$PWD/driver
         npm install
+        npx browserslist@latest --update-db
         npm test
         if [ $? -ne 0 ]; then
+          echo "Failed selenium tests"
           error_code=1
         fi
         cd ../../..
@@ -293,10 +329,12 @@ stages:
         # Terminate nginx
         ./nginx -s quit
         if [ $? -ne 0 ]; then
+          echo "Failed to exit Nginx"
           error_code=1
         fi
         exit $error_code
       displayName: 'Test CDN example With Dynamic Build'
+      failOnStderr: false
       condition: succeeded()
 
     - bash: |
@@ -324,11 +362,11 @@ stages:
       condition: succeeded()
 
     - bash: |
-        make mem-check STATIC_BUILD=1 FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+        make mem-check STATIC_BUILD=1 FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion) DONT_CLEAN_TESTS=1
       displayName: 'Static Build With Memory Check'
       
     - bash: |
-        make mem-check FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion)
+        make mem-check FIFTYONEDEGREES_NGINX_VERSION=$(nginxVersion) DONT_CLEAN_TESTS=1
       displayName: 'Dynamic Build With Memory Check'
       
     - bash: |
