@@ -1,0 +1,5 @@
+name: Nightly Package Update
+
+on:
+  workflow_dispatch:
+  
