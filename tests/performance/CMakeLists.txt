@@ -31,9 +31,9 @@ download_file(
 )
 
 add_custom_target(perf ALL
-    COMMAND cp ../runPerf.sh .
-	COMMAND cp ../nginx.conf.template .
-    DEPENDS ../runPerf.sh ../nginx.conf.template
+    COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/runPerf.sh .
+	COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.template .
+    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/runPerf.sh ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.template
 
     VERBATIM
 )

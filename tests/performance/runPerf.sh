@@ -8,9 +8,17 @@ CAL=calibrate
 PRO=process
 PERF=./ApacheBench-prefix/src/ApacheBench-build/bin/runPerf.sh
 
+# Get the repo directory as an absolute path
+ORIGINPATH="$(pwd)"
+cd $FULLPATH/../../../
+REPO_DIR="$(pwd)"
+cd $ORIGINPATH
+
+echo $REPO_DIR
+
 # Create the nginx.conf
-MODULES_DIR=$FULLPATH/../../../build/modules
-DATA_FILE_DIR=$FULLPATH/../../../device-detection-cxx/device-detection-data
+MODULES_DIR=$REPO_DIR/build/modules
+DATA_FILE_DIR=$REPO_DIR/device-detection-cxx/device-detection-data
 sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.template > ./nginx.conf
 sed -i "s/\${DATA_FILE_DIR}/${DATA_FILE_DIR//\//\\/}/g" ./nginx.conf
 
@@ -21,23 +29,15 @@ echo > ../../../build/html/process
 # Create coredumps folder
 mkdir -p coredumps
 
-# Run the nginx server here so we have more control over how to closing it.
-$FULLPATH/../../../nginx -c $FULLPATH/nginx.conf
-
-RESPONSE=`curl -I 127.0.0.1:3000 | grep -c "200 OK"`
-if [ $RESPONSE -gt '0' ]; then
-	echo "Server is up and alive."
-else
-	echo "Failed: server failed to start."
-	exit 1
-fi
+# Backup the current config and replace with the test config
+mv $REPO_DIR/build/nginx.conf $REPO_DIR/build/nginx.conf.bkp
+cp $FULLPATH/nginx.conf $REPO_DIR/build/nginx.conf
 
 # Run the performrance
-$PERF -n $PASSES -s "echo \"Service is runned externally from parent script.\"" -c $CAL -p $PRO -h $HOST
+$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST
 
-# Close the nginx server here
-echo "Close the running nginx."
-$FULLPATH/../../../nginx -s quit 
+# Replace the original config
+mv $REPO_DIR/build/nginx.conf.bkp $REPO_DIR/build/nginx.conf
 
 # Remove coredumps folder
 if [ ! "$(find coredumps -type f)" ]; then

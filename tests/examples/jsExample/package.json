@@ -25,18 +25,18 @@
     "Tung Pham <tung@51degrees.com> (https://51degrees.com)"
   ],
   "dependencies": {
-    "selenium-webdriver": "^4.0.0-beta.2",
-    "jest-junit": "latest"
+    "jest-junit": "latest",
+    "selenium-webdriver": "^4.0.0-beta.2"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jest": "^23.13.2",
     "eslint-plugin-jsdoc": "^25.4.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-jest": "^23.13.2",
     "jest": "^24.9.0",
     "jest-junit": "^9.0.0"
   },
