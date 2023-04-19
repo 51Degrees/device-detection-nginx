@@ -1,0 +1,4 @@
+name: Nightly Submodule Update
+
+on:
+  workflow_dispatch:
