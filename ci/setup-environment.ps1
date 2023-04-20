@@ -84,7 +84,7 @@ if ($FullTests -eq $True) {
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
 
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
-    wget -qO - https://cs.nginx.com/static/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+    curl -O https://nginx.org/keys/nginx_signing.key && sudo apt-key add ./nginx_signing.key
 
     Write-Output "Install apt utils"
     sudo apt-get install apt-transport-https lsb-release ca-certificates wget gnupg2 ubuntu-keyring
