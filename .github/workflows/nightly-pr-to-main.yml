@@ -41,19 +41,9 @@ jobs:
       - name: Get Pull Requests
         id: get_pull_requests
         shell: pwsh
-        working-directory: ${{ github.workspace }}/common/${{ github.event.repository.name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN  }}
+        working-directory: ${{ github.workspace }}/common/
         run: |
-          $Ids = $(hub pr list -f "%I," -b main)
-          if ($Ids -ne $Null) {
-            $Ids = $Ids.Trim(",")
-            Write-Output "Pull request ids are: $Ids"
-            echo pull_request_ids="[$Ids]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-          } else {
-            Write-Output "No pull requests to be checked."
-            echo pull_request_ids="[0]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-          }
+          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ githb.event.repository.name }}
           
   # Run the common workflow on each pull request
   Nightly_PR_to_Main:
