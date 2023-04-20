@@ -24,10 +24,10 @@ jobs:
           
       # Setup git to use the correct access token
       - name: Configure Git
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN  }}
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/common/
         run: |
-          . ${{ github.workspace }}/common/steps/configure-git.ps1 -RepoName ${{ github.event.repository.name }}
+          . ${{ github.workspace }}/common/steps/configure-git.ps1 -GitHubToken ${{ secrets.ACCESS_TOKEN }}
           
       # Clone this repository
       - name: Clone Repo
