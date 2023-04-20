@@ -80,21 +80,22 @@ if ($FullTests -eq $True) {
     sudo mkdir -p /etc/ssl/nginx
 
     Write-Output "Copy the nginx-repo.* file to the created directory"
-    sudo Copy-Item [IO.Path]::Combine($RepoPath, "nginx-repo.key") /etc/ssl/nginx
-    sudo Copy-Item [IO.Path]::Combine($RepoPath, "nginx-repo.crt") /etc/ssl/nginx
+    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
+    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
 
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
-    wget https://cs.nginx.com/static/keys/nginx_signing.key && sudo apt-key add nginx_signing.key
+    wget -qO - https://cs.nginx.com/static/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
 
     Write-Output "Install apt utils"
-    sudo apt-get install apt-transport-https lsb-release ca-certificates
+    sudo apt-get install apt-transport-https lsb-release ca-certificates wget gnupg2 ubuntu-keyring
 
     Write-Output "Add Nginx Plus repository"
-    printf "deb https://plus-pkgs.nginx.com/ubuntu `lsb_release -cs` nginx-plus\n" | sudo tee /etc/apt/sources.list.d/nginx-plus.list
-
+    # Add allow-insecure because there is an issue with the signing of the NGINX Plus repository.
+    printf "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg allow-insecure=yes] https://pkgs.nginx.com/plus/ubuntu $(lsb_release -cs) nginx-plus\n" | sudo tee /etc/apt/sources.list.d/nginx-plus.list
+    
     Write-Output "Download nginx-plus apt configuration files to /etc/apt/apt.conf.d"
-    sudo wget -P /etc/apt/apt.conf.d https://cs.nginx.com/static/files/90nginx
-
+    sudo wget -P /etc/apt/apt.conf.d https://cs.nginx.com/static/files/90pkgs-nginx
+    
     Write-Output "Update the repository and install Nginx Plus"
     sudo apt-get update
     sudo apt-get install nginx-plus -y
