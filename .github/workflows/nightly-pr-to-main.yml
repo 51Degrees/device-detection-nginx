@@ -43,7 +43,7 @@ jobs:
         shell: pwsh
         working-directory: ${{ github.workspace }}/common/
         run: |
-          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ githb.event.repository.name }}
+          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ github.event.repository.name }}
           
   # Run the common workflow on each pull request
   Nightly_PR_to_Main:
