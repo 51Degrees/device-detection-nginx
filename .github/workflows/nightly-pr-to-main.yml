@@ -1,0 +1,72 @@
+name: Nigthly PR to Main
+
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so quote this string
+    - cron:  '0 0 * * *'
+    
+jobs:
+  # Get all the pull requests that are going to main
+  Get_Pull_Requests:
+    outputs:
+      pull_request_ids: ${{ steps.get_pull_requests.outputs.pull_request_ids }}
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout the common repo containing scripts
+      - name: Checkout Common
+        uses: actions/checkout@v2
+        with:
+          repository: 51degrees/common-ci
+          ref: gh-refact
+          path: common
+          
+      # Setup git to use the correct access token
+      - name: Configure Git
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN  }}
+        run: |
+          . ${{ github.workspace }}/common/steps/configure-git.ps1 -RepoName ${{ github.event.repository.name }}
+          
+      # Clone this repository
+      - name: Clone Repo
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/common/
+        run: |
+          . ${{ github.workspace }}/common/constants.ps1
+          . ${{ github.workspace }}/common/steps/clone-repo.ps1 -RepoName ${{ github.event.repository.name }} -Branch main
+        
+      # Get all the pull requests into main, and output the ids
+      - name: Get Pull Requests
+        id: get_pull_requests
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/common/${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN  }}
+        run: |
+          $Ids = $(hub pr list -f "%I," -b main)
+          if ($Ids -ne $Null) {
+            $Ids = $Ids.Trim(",")
+            Write-Output "Pull request ids are: $Ids"
+            echo pull_request_ids="[$Ids]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+          } else {
+            Write-Output "No pull requests to be checked."
+            echo pull_request_ids="[0]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
+          
+  # Run the common workflow on each pull request
+  Nightly_PR_to_Main:
+    needs: Get_Pull_Requests
+    strategy:
+      fail-fast: false
+      matrix:
+        id: ${{ fromJSON(needs.Get_Pull_Requests.outputs.pull_request_ids) }}
+      
+    uses: 51Degrees/common-ci/.github/workflows/nightly-pr-to-main.yml@main
+    with:
+      repo-name: ${{ github.event.repository.name }}
+      pull-request-id: ${{ matrix.id }}
+    secrets: 
+      token: ${{ secrets.ACCESS_TOKEN }}
+      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'

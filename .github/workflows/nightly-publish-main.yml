@@ -1,0 +1,17 @@
+name: Nigthly Publish Main
+
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so quote this string
+    - cron:  '0 1 * * *'
+    
+jobs:
+  # Run the common workflow to test and publish the main branch
+  Nightly_Publish_Main:
+    uses: 51Degrees/common-ci/.github/workflows/nightly-publish-main.yml@main
+    with:
+      repo-name: ${{ github.event.repository.name }}
+    secrets: 
+      token: ${{ secrets.ACCESS_TOKEN }}
+      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
