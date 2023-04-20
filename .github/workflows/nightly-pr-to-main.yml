@@ -40,6 +40,8 @@ jobs:
       # Get all the pull requests into main, and output the ids
       - name: Get Pull Requests
         id: get_pull_requests
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         shell: pwsh
         working-directory: ${{ github.workspace }}/common/
         run: |
