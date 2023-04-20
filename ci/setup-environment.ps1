@@ -80,8 +80,8 @@ if ($FullTests -eq $True) {
     sudo mkdir -p /etc/ssl/nginx
 
     Write-Output "Copy the nginx-repo.* file to the created directory"
-    sudo Copy-Item $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
-    sudo Copy-Item $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
+    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
+    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
 
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
     wget https://cs.nginx.com/static/keys/nginx_signing.key && sudo apt-key add nginx_signing.key
