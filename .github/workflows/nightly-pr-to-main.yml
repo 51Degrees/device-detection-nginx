@@ -43,7 +43,8 @@ jobs:
         shell: pwsh
         working-directory: ${{ github.workspace }}/common/
         run: |
-          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ github.event.repository.name }}
+          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ github.event.repository.name }} -VariableName PullRequestIds
+          Write-Output pull_request_ids="[$([string]::Join(",", $ValidIds))]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
           
   # Run the common workflow on each pull request
   Nightly_PR_to_Main:
