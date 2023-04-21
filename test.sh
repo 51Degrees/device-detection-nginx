@@ -12,6 +12,7 @@ fi
 FAILED=0
 if [ "$DATA_FILE_NAME" == "" ]; then
 DATA_FILE_NAME="51Degrees-LiteV4.1.hash"
+fi
 
 ## Set text macros. ##
 RED='\033[0;31m'
