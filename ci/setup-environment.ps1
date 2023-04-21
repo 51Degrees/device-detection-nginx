@@ -98,7 +98,7 @@ if ($FullTests -eq $True) {
     
     Write-Output "Update the repository and install Nginx Plus"
     sudo apt-get update
-    sudo apt-get install nginx-plus -y
+    sudo apt-get install nginx-plus -y --allow-unauthenticated
 
     Write-Output "Check if installation successfully"
     if (Test-Path "/usr/sbin/nginx") {
