@@ -42,7 +42,7 @@ try {
         $env:PATH="$($env:PATH):$pwd/driver"
         npm install
         npx browserslist@latest --update-db
-        npm .\test.sh
+        npm test
     }
     finally {
         
