@@ -48,7 +48,9 @@ try {
         cmake --build .
 
         Write-Output "Running performance test"
+        $env:DATA_FILE_NAME="TAC-HashV41.hash"
         ./runPerf.sh
+        $env:DATA_FILE_NAME=$Null
 
         Write-Output "Writing performance test results"
         $Results = Get-Content ./summary.json | ConvertFrom-Json
@@ -85,7 +87,9 @@ try {
 
     Write-Output "Run stress tests using ApacheBench"
     if (Test-Path -Path "tests/performance/build/ApacheBench-prefix/src/ApacheBench-build/bin/ab") {
+        $env:DATA_FILE_NAME="TAC-HashV41.hash"
         ./test.sh
+        $env:DATA_FILE_NAME=$Null
     }
     else {
         Write-Error 'The performance test need to be build first.'

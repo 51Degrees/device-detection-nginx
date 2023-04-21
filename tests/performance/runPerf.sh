@@ -21,6 +21,9 @@ MODULES_DIR=$REPO_DIR/build/modules
 DATA_FILE_DIR=$REPO_DIR/device-detection-cxx/device-detection-data
 sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.template > ./nginx.conf
 sed -i "s/\${DATA_FILE_DIR}/${DATA_FILE_DIR//\//\\/}/g" ./nginx.conf
+if [ "$DATA_FILE_NAME" ]; then
+	sed -i "s/51Degrees-LiteV4\.1\.hash/${DATA_FILE_NAME}/g" nginx.conf
+fi
 
 # Create required directories and target files for service
 echo > ../../../build/html/calibrate

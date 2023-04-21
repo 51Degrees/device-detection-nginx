@@ -10,6 +10,8 @@ if [ "$RELOADSTODO" == "" ]; then
 RELOADSTODO=5
 fi
 FAILED=0
+if [ "$DATA_FILE_NAME" == "" ]; then
+DATA_FILE_NAME="51Degrees-LiteV4.1.hash"
 
 ## Set text macros. ##
 RED='\033[0;31m'
@@ -41,7 +43,7 @@ echo "}" >> build/nginx.conf
 echo "" >> build/nginx.conf
 echo "http {" >> build/nginx.conf
 echo "	## set the datafile ##" >> build/nginx.conf
-echo "	51D_file_path ./device-detection-cxx/device-detection-data/51Degrees-LiteV4.1.hash;" >> build/nginx.conf
+echo "	51D_file_path ./device-detection-cxx/device-detection-data/${DATA_FILE_NAME};" >> build/nginx.conf
 echo "  51D_use_performance_graph on;" >> build/nginx.conf
 echo "  51D_use_predictive_graph off;" >> build/nginx.conf
 echo "" >> build/nginx.conf
