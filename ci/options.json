@@ -4,7 +4,6 @@
     "Image": "ubuntu-20.04",
     "Name": "Ubuntu20_Nginx1.21.3",
     "NginxVersion": "1.21.3",
-    "FullTests": true,
     "RunPerformance": true
   },
   {
@@ -13,5 +12,4 @@
     "NginxVersion": "1.21.3",
     "MemCheck": true
   }
-
 ]
