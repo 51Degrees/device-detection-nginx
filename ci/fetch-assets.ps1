@@ -3,6 +3,7 @@ param (
     [string]$RepoName,
     [Parameter(Mandatory=$true)]
     [string]$DeviceDetection,
+    [string]$DeviceDetectionUrl,
     [Parameter(Mandatory=$true)]
     [string]$NginxKey,
     [Parameter(Mandatory=$true)]
@@ -12,7 +13,7 @@ param (
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 
 Write-Output "Downloading Hash data file"
-./steps/fetch-hash-assets.ps1 -RepoName $RepoName -LicenseKey $DeviceDetection
+./steps/fetch-hash-assets.ps1 -RepoName $RepoName -LicenseKey $DeviceDetection -Url $DeviceDetectionUrl
 
 Write-Output "Moving Hash data file"
 Move-Item $RepoPath/TAC-HashV41.hash  $RepoPath/device-detection-cxx/device-detection-data/TAC-HashV41.hash
