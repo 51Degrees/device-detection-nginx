@@ -12,6 +12,7 @@ jobs:
     uses: 51Degrees/common-ci/.github/workflows/nightly-publish-main.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
+      build-platform: ubuntu-latest
     secrets: 
       token: ${{ secrets.ACCESS_TOKEN }}
       asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
