@@ -5,11 +5,5 @@
     "Name": "Ubuntu20_Nginx1.23.2",
     "NginxVersion": "1.23.2",
     "RunPerformance": true
-  },
-  {
-    "Image": "ubuntu-20.04",
-    "Name": "Ubuntu20_Nginx1.23.2_MemCheck",
-    "NginxVersion": "1.23.2",
-    "MemCheck": true
   }
 ]
