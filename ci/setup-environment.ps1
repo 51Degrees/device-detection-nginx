@@ -23,7 +23,7 @@ $ParsedVersion = [System.Version]::Parse($NginxVersion)
 if ($ParsedVersion -le [System.Version]::Parse("1.19.5")) {
     $TestCommit = "6bf30e564c06b404876f0bd44ace8431b3541f24"
 }
-elseif ($ParsedVersion -le [System.Version]::Parse("1.21.3")) {
+elseif ($ParsedVersion -le [System.Version]::Parse("1.23.2")) {
     $TestCommit = "3356f91a3fdae372d0946e4c89a9413f558c8017"
 }
 else {
