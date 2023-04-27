@@ -1,5 +1,0 @@
-variables:
-- name: linux18Image
-  value: 'ubuntu-18.04'
-- name: linux20Image
-  value: 'ubuntu-20.04'

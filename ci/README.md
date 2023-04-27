@@ -1,7 +1,17 @@
-# API Specific CI/CD Approach
-This API does not produce packages so use `tag-repository` approach as described in `common-ci` `README.md`.
+# API Specific CI Approach
 
-Differences:
-- There is no `create-packages` pipeline, but `tag-repository` pipeline.
-- `deploy` pipeline only push tag and branch to GitHub.
-- `Debug` entries are not required in the strategy matrix for `Build and Test` pipeline since the `Memory Leak` tests require to be run with `Debug` build, so it already covers the `Debug` testing.
+For the general CI Approach, see [common-ci](https://github.com/51degrees/common-ci).
+
+### Differences
+- There are no packages produced by this repository, so the only output from the `Nightly Publish Main` workflow is a new tag and release.
+- The package update step does not update dependencies from a package manager in the same way as other repos. Instead it checks the supported versions on the [NGINX Plus Releases](https://docs.nginx.com/nginx/releases/) page, and uses that to update `options.json` to ensure they are tested.
+
+### Build Options
+
+The additional build options for this repo are:
+| Option | Type | Default | Purpose |
+| ------ | --------- | ---- | ------- |
+| `NginxVersion` | string | `1.21.3` | The version of the opensource NGINX code to use for building and testing. |
+| `MemCheck` | bool | `false` | If true the binaries are built in Debug, with memory checks enabled. |
+| `BuildMethod` | string | `dynamic` | Can be either `static` or `dynamic` to determine how the nginx module is built |
+| `FullTests` | bool | `false` | If true, then the full NGINX test suite is run. This should be set to true for the latest NGINX Plus version. |

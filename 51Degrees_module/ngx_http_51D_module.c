@@ -1626,6 +1626,26 @@ get_evidence_from_query_string(ngx_http_request_t *r, ngx_str_t *variableName) {
 }
 
 /**
+ * Check whether there is a cookie with the name supplied.
+ * @param r pointer to a http request
+ * @param s name of the cookie to look for
+ * @param cookie pointer to an ngx_str_t to write the value to
+ * @return true if the cookie was found
+ */
+static bool has_cookie_value(
+	ngx_http_request_t *r,
+	ngx_str_t *s,
+	ngx_str_t *cookie) {
+#if nginx_version >= 1023002
+	return ngx_http_parse_multi_header_lines(r, r->headers_in.cookie, s, cookie)
+		!= NULL;
+#else
+	return ngx_http_parse_multi_header_lines(&r->headers_in.cookies, s, cookie)
+		!= NGX_DECLINED;
+#endif
+}
+
+/**
  * Add evidence required by the Hash device detection from cookie and query
  * string.
  * @param r pointer to a http request
@@ -1637,8 +1657,7 @@ static void
 add_override_evidence_from_cookie_and_query(
 	ngx_http_request_t *r,
 	ResultsHash *results,
-	EvidenceKeyValuePairArray *evidence,
-	ngx_array_t *cookies) {
+	EvidenceKeyValuePairArray *evidence) {
 	ngx_uint_t i;
 	ngx_str_t s, cookie;
 	OverrideProperty property;
@@ -1672,8 +1691,7 @@ add_override_evidence_from_cookie_and_query(
 			}
 
 			// Find evidence in cookie
-			if (ngx_http_parse_multi_header_lines(cookies, &s, &cookie)
-				!= NGX_DECLINED) {
+			if (has_cookie_value(r, &s, &cookie) == true) {
 				EvidenceAddString(
 					evidence,
 					FIFTYONE_DEGREES_EVIDENCE_COOKIE,
@@ -1759,7 +1777,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 		}
 
 		add_override_evidence_from_cookie_and_query(
-			r, results, evidence, &r->headers_in.cookies);
+			r, results, evidence);
 	}
 	else {
 		report_insufficient_memory_status(r->connection->log);
