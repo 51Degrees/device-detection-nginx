@@ -23,3 +23,15 @@ Write-Output $NginxKey >> $RepoPath/nginx-repo.key
 
 Write-Output "Writing NGINX Plus repo certificate"
 Write-Output $NginxCert >> $RepoPath/nginx-repo.crt
+
+$DataFileDir = [IO.Path]::Combine($RepoPath, "device-detection-cxx", "device-detection-data")
+
+Push-Location $DataFileDir
+try {
+    Write-Output "Pulling evidence files"
+    git lfs pull -I "*.csv" 
+    git lfs pull -I "*.yml"
+}
+finally {
+    Pop-Location
+}
