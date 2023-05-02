@@ -118,9 +118,9 @@ http {
 
         location /redirect {
              51D_match_single x-ismobile IsMobile;
-             #if ($http_x_ismobile ~ "True") {
-             # return 301 https://mobilesite;
-             #}
+             if ($http_x_ismobile ~ "True") {
+              return 301 https://mobilesite;
+             }
         }
 
 		location /locations {
@@ -440,12 +440,12 @@ like($r, qr/51Degrees Javascript not available/, 'Javascript response content bo
 ###############################################################################
 
 # Redirect mobile using the IsMobile property.
-#$r = get_with_ua('/redirect', $mobileUserAgent);
-#like($r, qr/301 Moved Permanently/, 'Redirected to mobile');
+$r = get_with_ua('/redirect', $mobileUserAgent);
+like($r, qr/301 Moved Permanently/, 'Redirected to mobile');
 
 # Redirect desktop using the IsMobile property.
-#$r = get_with_ua('/redirect', $desktopUserAgent);
-#unlike($r, qr/301 Moved Permanently/, 'Didn\'t redirect for desktop');
+$r = get_with_ua('/redirect', $desktopUserAgent);
+unlike($r, qr/301 Moved Permanently/, 'Didn\'t redirect for desktop');
 
 ###############################################################################
 
