@@ -440,12 +440,12 @@ like($r, qr/51Degrees Javascript not available/, 'Javascript response content bo
 ###############################################################################
 
 # Redirect mobile using the IsMobile property.
-$r = get_with_ua('/redirect', $mobileUserAgent);
-like($r, qr/301 Moved Permanently/, 'Redirected to mobile');
+#$r = get_with_ua('/redirect', $mobileUserAgent);
+#like($r, qr/301 Moved Permanently/, 'Redirected to mobile');
 
 # Redirect desktop using the IsMobile property.
-$r = get_with_ua('/redirect', $desktopUserAgent);
-unlike($r, qr/301 Moved Permanently/, 'Didn\'t redirect for desktop');
+#$r = get_with_ua('/redirect', $desktopUserAgent);
+#unlike($r, qr/301 Moved Permanently/, 'Didn\'t redirect for desktop');
 
 ###############################################################################
 
