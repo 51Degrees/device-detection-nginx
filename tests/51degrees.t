@@ -118,9 +118,9 @@ http {
 
         location /redirect {
              51D_match_single x-ismobile IsMobile;
-             if ($http_x_ismobile ~ "True") {
-              return 301 https://mobilesite;
-             }
+             #if ($http_x_ismobile ~ "True") {
+             # return 301 https://mobilesite;
+             #}
         }
 
 		location /locations {
