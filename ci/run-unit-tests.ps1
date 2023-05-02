@@ -26,7 +26,6 @@ try {
 
     Write-Output "Running 51Degrees unit tests"
     make test FIFTYONEDEGREES_DATAFILE=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$RepoPath/test-results/unit/$Name.xml
-    cat $RepoPath/test-results/unit/$Name.xml
 
     if ($FullTests -eq $True) {
 
