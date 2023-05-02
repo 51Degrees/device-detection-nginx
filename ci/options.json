@@ -1,43 +1,50 @@
 [
   {
-    "NginxVersion": "1.23.2",
-    "Name": "ubuntu-20.04_Nginx1.23.2",
-    "Image": "ubuntu-20.04",
     "RunPerformance": true,
-    "FullTests": true
-  },
-  {
-    "NginxVersion": "1.23.2",
-    "MemCheck": true,
-    "Name": "ubuntu-20.04_Nginx1.23.2_MemCheck",
-    "Image": "ubuntu-20.04"
-  },
-  {
-    "NginxVersion": "1.23.2",
-    "MemCheck": true,
-    "Name": "ubuntu-20.04_Nginx1.23.2_MemCheck_Static",
+    "NginxVersion": "1.23.4",
     "Image": "ubuntu-20.04",
-    "BuildMethod": "static"
+    "FullTests": true,
+    "Name": "ubuntu-20.04_Nginx1.23.4"
   },
   {
+    "MemCheck": true,
+    "NginxVersion": "1.23.4",
+    "Image": "ubuntu-20.04",
+    "Name": "ubuntu-20.04_Nginx1.23.4_MemCheck"
+  },
+  {
+    "MemCheck": true,
+    "NginxVersion": "1.23.4",
+    "Image": "ubuntu-20.04",
+    "BuildMethod": "static",
+    "Name": "ubuntu-20.04_Nginx1.23.4_MemCheck_Static"
+  },
+  {
+    "RunPerformance": false,
+    "NginxVersion": "1.23.2",
+    "Image": "ubuntu-20.04",
+    "FullTests": false,
+    "Name": "ubuntu-20.04_Nginx1.23.2"
+  },
+  {
+    "RunPerformance": false,
     "NginxVersion": "1.21.6",
-    "Name": "ubuntu-20.04_Nginx1.21.6",
     "Image": "ubuntu-20.04",
-    "RunPerformance": false,
-    "FullTests": false
+    "FullTests": false,
+    "Name": "ubuntu-20.04_Nginx1.21.6"
   },
   {
+    "RunPerformance": false,
     "NginxVersion": "1.21.5",
-    "Name": "ubuntu-20.04_Nginx1.21.5",
     "Image": "ubuntu-20.04",
-    "RunPerformance": false,
-    "FullTests": false
+    "FullTests": false,
+    "Name": "ubuntu-20.04_Nginx1.21.5"
   },
   {
-    "NginxVersion": "1.21.3",
-    "Name": "ubuntu-20.04_Nginx1.21.3",
-    "Image": "ubuntu-20.04",
     "RunPerformance": false,
-    "FullTests": false
+    "NginxVersion": "1.21.3",
+    "Image": "ubuntu-20.04",
+    "FullTests": false,
+    "Name": "ubuntu-20.04_Nginx1.21.3"
   }
 ]
