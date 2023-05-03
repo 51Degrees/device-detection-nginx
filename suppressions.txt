@@ -1,1 +1,1 @@
-interceptor_via_lib:pcre2-8
+interceptor_via_lib:libpcre2-8.so
