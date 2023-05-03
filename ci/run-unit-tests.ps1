@@ -51,4 +51,9 @@ finally {
 
 }
 
-exit $Passed
+if ($Passed) {
+    exit 0
+}
+else {
+    exit 1
+}
