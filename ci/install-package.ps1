@@ -2,8 +2,8 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$RepoName,
-    [string]$Name,
-    [string]$NginxVersion
+    [string]$Name = $Null,
+    [string]$NginxVersion = $Null
 )
 
 # Combine the current working directory with the repository name
@@ -24,13 +24,21 @@ Push-Location $RepoPath
 
 try {
 
-    Write-Output "Install NGINX '$NginxVersion' without 51Degrees module"
-    make install-no-module FIFTYONEDEGREES_NGINX_VERSION=$NginxVersion
+    if ($Null -ne $Name) {
 
-    Write-Output "Copying the 51Degrees module from '$PackagePath' to '$InstallPath'"
-    mkdir $ModulesPath
-    Copy-Item -Path $PackagePath -Destination $InstallPath
+        Write-Output "Install NGINX '$NginxVersion' without 51Degrees module"
+        make install-no-module FIFTYONEDEGREES_NGINX_VERSION=$NginxVersion
 
+        Write-Output "Copying the 51Degrees module from '$PackagePath' to '$InstallPath'"
+        mkdir $ModulesPath
+        Copy-Item -Path $PackagePath -Destination $InstallPath
+
+    }
+    else {
+    
+        Write-Output "Not installing locally, as no NGINX version is specified."
+        
+    }
 }
 finally {
     
