@@ -1,1 +1,1 @@
-interceptor_via_lib:libpcre2-8.so
+leak:libpcre2-8.so
