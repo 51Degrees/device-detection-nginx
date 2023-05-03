@@ -15,4 +15,4 @@ jobs:
       build-platform: ubuntu-latest
     secrets: 
       token: ${{ secrets.ACCESS_TOKEN }}
-      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
+      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "DeviceDetectionUrl": "${{ secrets.DEVICE_DETECTION_URL }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
