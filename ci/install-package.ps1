@@ -2,8 +2,8 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$RepoName,
-    [string]$Name = $Null,
-    [string]$NginxVersion = $Null
+    [string]$Name = "",
+    [string]$NginxVersion = ""
 )
 
 # Combine the current working directory with the repository name
@@ -24,7 +24,7 @@ Push-Location $RepoPath
 
 try {
 
-    if ($Null -ne $Name) {
+    if ($Name -ne "") {
 
         Write-Output "Install NGINX '$NginxVersion' without 51Degrees module"
         make install-no-module FIFTYONEDEGREES_NGINX_VERSION=$NginxVersion
