@@ -91,6 +91,17 @@ configure: build
 	--conf-path="nginx.conf" \
 	--with-http_sub_module
 
+configure-no-module: clean
+	if [ ! -d "vendor/nginx-$(VERSION)" ]; then $(MAKE) get-source; fi
+	cd $(CURDIR)/vendor/nginx-$(VERSION) && \
+	./configure \
+	--prefix=$(CURDIR)/build \
+	--with-compat \
+	--with-debug \
+	--sbin-path=$(CURDIR) \
+	--conf-path="nginx.conf" \
+	--with-http_sub_module
+
 install: configure
 	cd $(CURDIR)/vendor/nginx-$(VERSION) && make install
 	sed "/\/\*\*/,/\*\//d" examples/$(API)/gettingStarted.conf > build/nginx.conf
@@ -100,7 +111,9 @@ install: configure
 	sed -i "s!%%TEST_GLOBALS%%!!g" build/nginx.conf
 	sed -i "s!%%TEST_GLOBALS_HTTP%%!!g" build/nginx.conf
 	echo > build/html/$(API)
-	
+
+install-no-module: configure-no-module	
+	cd $(CURDIR)/vendor/nginx-$(VERSION) && make install
 
 module: configure
 	cd $(CURDIR)/vendor/nginx-$(VERSION) && make modules
