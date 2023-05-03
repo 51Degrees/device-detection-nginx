@@ -21,6 +21,9 @@ try {
     if ($(Test-Path -Path "test-results/integration") -eq  $False) {
         mkdir test-results/integration
     }
+    
+    # Disable leak checks here, as they are for the unit tests.
+    $env:ASAN_OPTIONS="detect_odr_violation=0:detect_leaks=0"
 
     Write-Output "Setting up the CDN example"
     # Copy the example config

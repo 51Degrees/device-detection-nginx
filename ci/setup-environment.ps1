@@ -168,3 +168,7 @@ finally {
     Pop-Location
 
 }
+
+Write-Output "Installing NGINX dependencies"
+sudo apt-get install make zlib1g-dev libpcre3 libpcre3-dev
+

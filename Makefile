@@ -150,7 +150,7 @@ test-examples: test-prep
 ifeq (,$(wildcard $(FULLPATH)/nginx))
 	$(error Local binary must be built first (use "make install"))
 else
-	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_FILE_PATH="$(FILEPATH)" prove $(FIFTYONEDEGREES_FORMATTER) -v tests/examples :: $(DATAFILE))
+	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_FILE_PATH="$(FILEPATH)" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt TEST_NGINX_CATLOG=1 prove $(FIFTYONEDEGREES_FORMATTER) -v tests/examples :: $(DATAFILE))
 ifdef FIFTYONEDEGREES_TEST_OUTPUT
 	$(CMD) > $(FIFTYONEDEGREES_TEST_OUTPUT)
 else
@@ -162,7 +162,7 @@ test: test-prep
 ifeq (,$(wildcard $(FULLPATH)/nginx))
 	$(error Local binary must be built first (use "make install"))
 else
-	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_NGINX_GLOBALS="load_module $(MODULEPATH);" TEST_NGINX_GLOBALS_HTTP="51D_file_path $(FILEPATH);" prove $(FIFTYONEDEGREES_FORMATTER) -v $(TESTS) :: $(DATAFILE))
+	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_NGINX_GLOBALS="load_module $(MODULEPATH);" TEST_NGINX_GLOBALS_HTTP="51D_file_path $(FILEPATH);" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt TEST_NGINX_CATLOG=1 prove $(FIFTYONEDEGREES_FORMATTER) -v $(TESTS) :: $(DATAFILE))
 ifdef FIFTYONEDEGREES_TEST_OUTPUT
 	$(CMD) > $(FIFTYONEDEGREES_TEST_OUTPUT)
 else
