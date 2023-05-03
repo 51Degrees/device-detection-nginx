@@ -1,1 +1,1 @@
-interceptor_via_lib:libpcre
+leak:libpcre
