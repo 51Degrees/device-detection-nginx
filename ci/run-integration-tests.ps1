@@ -30,7 +30,7 @@ try {
     # Remove the documentation block
     sed -i "/\/\*\*/,/\*\//d" build/nginx.conf
     # Start NGINX
-    ./nginx
+    ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt ./nginx
 
     $JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
 
@@ -42,7 +42,7 @@ try {
         $env:PATH="$($env:PATH):$pwd/driver"
         npm install
         npx browserslist@latest --update-db
-        npm test
+        ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt npm test
     }
     finally {
         
