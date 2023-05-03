@@ -68,6 +68,7 @@ try {
                 NginxVersion = $SupportedVersion.OpenSourceVersion
                 RunPerformance = $IsLatest
                 FullTests = $IsLatest
+                PackageRequirement = $True
             }
             if ($IsLatest -eq $True) {
                 $Options += @{
