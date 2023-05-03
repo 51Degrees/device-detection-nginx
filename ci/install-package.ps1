@@ -10,7 +10,7 @@ param(
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 
 # Define the path for downloaded artifacts
-$PackagePath = [IO.Path]::Combine($RepoPath, "package", $NginxVersion)
+$PackagePath = [IO.Path]::Combine($RepoPath, "package", "package_$Name")
 
 # Get the local install path
 $InstallPath = [IO.Path]::Combine($RepoPath, "build", "modules")
