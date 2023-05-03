@@ -21,6 +21,10 @@ try {
     if ($(Test-Path -Path "test-results/integration") -eq  $False) {
         mkdir test-results/integration
     }
+    
+    # Set the leak detection options globally.
+    $env:ASAN_OPTIONS="detect_odr_violation=0"
+    $env:LSAN_OPTIONS="suppressions=suppressions.txt"
 
     Write-Output "Setting up the CDN example"
     # Copy the example config
@@ -30,7 +34,7 @@ try {
     # Remove the documentation block
     sed -i "/\/\*\*/,/\*\//d" build/nginx.conf
     # Start NGINX
-    ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt ./nginx
+    ./nginx
 
     $JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
 
@@ -42,7 +46,7 @@ try {
         $env:PATH="$($env:PATH):$pwd/driver"
         npm install
         npx browserslist@latest --update-db
-        ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt npm test
+        npm test
     }
     finally {
         
