@@ -15,7 +15,8 @@ $ModuleName = "ngx_http_51D_module.so"
 $PackagePath = [IO.Path]::Combine($RepoPath, "package", "package_$Name", $ModuleName)
 
 # Get the local install path
-$InstallPath = [IO.Path]::Combine($RepoPath, "build", "modules", $ModuleName)
+$ModulesPath = [IO.Path]::Combine($RepoPath, "build", "modules")
+$InstallPath = [IO.Path]::Combine($ModulesPath, $ModuleName)
 
 # Display the repository path and enter it
 Write-Output "Entering '$RepoPath'"
@@ -27,6 +28,7 @@ try {
     make install-no-module FIFTYONEDEGREES_NGINX_VERSION=$NginxVersion
 
     Write-Output "Copying the 51Degrees module from '$PackagePath' to '$InstallPath'"
+    mkdir $ModulesPath
     Copy-Item -Path $PackagePath -Destination $InstallPath
 
 }
