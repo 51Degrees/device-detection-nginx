@@ -16,3 +16,11 @@ The additional build options for this repo are:
 | `MemCheck` | bool | `false` | If true the binaries are built in Debug, with memory checks enabled. |
 | `BuildMethod` | string | `dynamic` | Can be either `static` or `dynamic` to determine how the nginx module is built |
 | `FullTests` | bool | `false` | If true, then the full NGINX test suite is run. This should be set to true for the latest NGINX Plus version. |
+
+## Prerequisites
+
+In addition to the [common prerequisites](https://github.com/51Degrees/common-ci#prerequisites), the following environment variables are required:
+- DEVICE_DETECTION_KEY - License key to download a data file for testing
+- DEVICE_DETECTION_URL - Url to download the data file from (optional)
+- NGINX_PLUS_KEY - Signing key used for installing NGINX Plus
+- NGINX_PLUT_CERT - NGINX Plus certificate
