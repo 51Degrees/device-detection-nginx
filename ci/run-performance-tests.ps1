@@ -43,15 +43,19 @@ try {
     Push-Location build
     try {
 
+        # Build the performance tests
         Write-Output "Building performance test"
         cmake ..
         cmake --build .
 
+        # When running the performance tests, set the data file name manually,
+        # then unset once we're done
         Write-Output "Running performance test"
         $env:DATA_FILE_NAME="TAC-HashV41.hash"
         ./runPerf.sh
         $env:DATA_FILE_NAME=$Null
 
+        # Write out the results for comparison
         Write-Output "Writing performance test results"
         $Results = Get-Content ./summary.json | ConvertFrom-Json
         Write-Output "{
@@ -85,6 +89,7 @@ Push-Location $RepoPath
 
 try {
 
+    # Run the stress test script. ApacheBench will already be built from the previous test
     Write-Output "Run stress tests using ApacheBench"
     if (Test-Path -Path "tests/performance/build/ApacheBench-prefix/src/ApacheBench-build/bin/ab") {
         $env:DATA_FILE_NAME="TAC-HashV41.hash"

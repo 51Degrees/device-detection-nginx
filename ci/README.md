@@ -5,6 +5,7 @@ For the general CI Approach, see [common-ci](https://github.com/51degrees/common
 ### Differences
 - There are no packages produced by this repository, so the only output from the `Nightly Publish Main` workflow is a new tag and release.
 - The package update step does not update dependencies from a package manager in the same way as other repos. Instead it checks the supported versions on the [NGINX Plus Releases](https://docs.nginx.com/nginx/releases/) page, and uses that to update `options.json` to ensure they are tested.
+- As Windows is not supported, the scripts here can be a little less strict with implementation. e.g. using `cp` rather than `Copy-Item` as we know we're in a Linux environment.
 
 ### Build Options
 

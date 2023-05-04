@@ -26,9 +26,11 @@ try {
 
     if ($Name -ne "") {
 
+        # Install NGINX without building the module.
         Write-Output "Install NGINX '$NginxVersion' without 51Degrees module"
         make install-no-module FIFTYONEDEGREES_NGINX_VERSION=$NginxVersion
 
+        # Now copy the module to the installs module directory
         Write-Output "Copying the 51Degrees module from '$PackagePath' to '$InstallPath'"
         mkdir $ModulesPath
         Copy-Item -Path $PackagePath -Destination $InstallPath
