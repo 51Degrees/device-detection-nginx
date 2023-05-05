@@ -11,15 +11,16 @@ $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $TestsPath = [IO.Path]::Combine($RepoPath, "tests")
 $JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
 
+# Install perl libraries
 Write-Output 'Install perl libraries for test output formatters'
-
 # cpan will ask for auto configuration first time it is run so answer 'yes'.
 Write-Output y | sudo cpan
 sudo cpan  App::cpanminus --notest
 sudo cpanm --force TAP::Formatter::JUnit --notest
 
+# Get the version of nginx-test to use. Where new tests have been introduced, previous versions
+# of NGINX do not always pass them
 $ParsedVersion = [System.Version]::Parse($NginxVersion)
-
 if ($ParsedVersion -le [System.Version]::Parse("1.19.5")) {
     $TestCommit = "6bf30e564c06b404876f0bd44ace8431b3541f24"
 }
@@ -31,16 +32,13 @@ else {
 }
 
 
+# Download the nginx-tests repository
 Write-Output "Moving into $TestsPath"
 Push-Location $TestsPath
-
 try {
-
     Write-Output "Clean any existing nginx-tests folder."
     if (Test-Path -Path nginx-tests) {
-
         Remove-Item nginx-tests -Recurse -Force
-
     }
 
     Write-Output "Clone the nginx-tests source."
@@ -50,28 +48,20 @@ try {
     Push-Location nginx-tests
 
     try {
-
         if ($Null -eq $TestCommit) {
-
             Write-Output "Checkout to before the breaking changes for this version."
             git reset --hard $TestCommit
-            
         }
-        
     }
     finally {
-
         Pop-Location
-
     }
-
 }
 finally {
-
     Pop-Location
-
 }
 
+# If full tests are requested, then we'll need to install NGINX Plus
 if ($FullTests -eq $True) {
     Write-Output "Uninstall existing Nginx"
     sudo apt-get purge nginx -y
@@ -125,9 +115,9 @@ if ($FullTests -eq $True) {
 
 }
 
+# Install the Microsoft Edge driver for Selenium tests
 Write-Output "Moving into $JsExamplePath"
 Push-Location $JsExamplePath
-
 try {
     Write-Output "Install Microsoft Edge"
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
@@ -169,6 +159,7 @@ finally {
 
 }
 
+# Install any extra requirements for the module
 Write-Output "Installing NGINX dependencies"
 sudo apt-get install make zlib1g-dev libpcre3 libpcre3-dev
 

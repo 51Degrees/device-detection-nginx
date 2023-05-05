@@ -35,8 +35,8 @@ try {
     # Start NGINX
     ./nginx
 
+    # Run the selenium tests
     $JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
-
     Write-Output "Entering '$JsExamplePath'"
     Push-Location $JsExamplePath
 
@@ -60,6 +60,7 @@ try {
 
     }
 
+    # Test the examples
     Write-Output "Testing examples"
     make test-examples FIFTYONEDEGREES_DATAFILE=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$RepoPath/test-results/integration/$($Name)_Examples.xml
 
