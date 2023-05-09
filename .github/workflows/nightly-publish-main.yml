@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # * is a special character in YAML so quote this string
-    - cron:  '0 1 * * *'
+    - cron:  '0 2 * * *'
     
 jobs:
   # Run the common workflow to test and publish the main branch
@@ -15,4 +15,4 @@ jobs:
       build-platform: ubuntu-latest
     secrets: 
       token: ${{ secrets.ACCESS_TOKEN }}
-      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
+      asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "DeviceDetectionUrl": "${{ secrets.DEVICE_DETECTION_URL }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'

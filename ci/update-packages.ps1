@@ -62,15 +62,19 @@ try {
     foreach ($SupportedVersion in $VersionsToSupport) {
     
         foreach ($Image in $Images) {
+            # All configurations have a configuration added
             $Options += @{
                 Image = $Image
                 Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)"
                 NginxVersion = $SupportedVersion.OpenSourceVersion
+                # Only run performance if this is the latest NGINX Plus version
                 RunPerformance = $IsLatest
+                # Only run the full NGINX test suite if this is the latest NGINX Plus version
                 FullTests = $True ## TODO change to $IsLatest once NGINX Plus can be installed.
                 PackageRequirement = $True
             }
             if ($IsLatest -eq $True) {
+                # Add memory check configurations if this is the latest NGINX Plus version
                 $Options += @{
                     Image = $Image
                     Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)_MemCheck"
