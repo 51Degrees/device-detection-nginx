@@ -84,7 +84,7 @@ if ($FullTests -eq $True) {
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
     
     Write-Output "Setting permissions for the certificates"
-    chown -R root:root /etc/ssl/nginx
+    sudo chown -R root:root /etc/ssl/nginx
     sudo chmod -R a+r /etc/ssl/nginx
 
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
