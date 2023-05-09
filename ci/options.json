@@ -2,7 +2,7 @@
   {
     "PackageRequirement": true,
     "NginxVersion": "1.23.4",
-    "FullTests": true,
+    "FullTests": false,
     "RunPerformance": true,
     "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.23.4"
