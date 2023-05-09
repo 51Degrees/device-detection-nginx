@@ -86,6 +86,8 @@ if ($FullTests -eq $True) {
     Write-Output "Setting permissions for the certificates"
     sudo chown -R root:root /etc/ssl/nginx
     sudo chmod -R a+r /etc/ssl/nginx
+    ls -l /etc/ssl
+    ls -l /etc/ssl/nginx
 
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
     curl -O https://nginx.org/keys/nginx_signing.key && sudo apt-key add ./nginx_signing.key
