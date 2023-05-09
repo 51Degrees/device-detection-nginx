@@ -67,7 +67,7 @@ try {
                 Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)"
                 NginxVersion = $SupportedVersion.OpenSourceVersion
                 RunPerformance = $IsLatest
-                FullTests = $IsLatest
+                FullTests = $True ## TODO change to $IsLatest once NGINX Plus can be installed.
                 PackageRequirement = $True
             }
             if ($IsLatest -eq $True) {
