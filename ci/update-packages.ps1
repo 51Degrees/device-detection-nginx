@@ -70,7 +70,7 @@ try {
                 # Only run performance if this is the latest NGINX Plus version
                 RunPerformance = $IsLatest
                 # Only run the full NGINX test suite if this is the latest NGINX Plus version
-                FullTests = $True ## TODO change to $IsLatest once NGINX Plus can be installed.
+                FullTests = $IsLatest
                 PackageRequirement = $True
             }
             if ($IsLatest -eq $True) {
