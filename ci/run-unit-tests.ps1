@@ -46,6 +46,11 @@ try {
         $env:TEST_NGINX_GLOBALS_HTTP="51D_file_path $RepoPath/device-detection-cxx/device-detection-data/TAC-HashV41.hash;"
         prove --formatter TAP::Formatter::JUnit -v tests/51degrees.t tests/nginx-tests :: TAC-HashV41.hash > $RepoPath/test-results/unit/$($Name)_Full_Plus.xml
         $Passed = $($Passed -and $LASTEXITCODE -eq 0)
+        # Unset the environment variables for future tests.
+        $env:TEST_NGINX_BINARY=""
+        $env:TEST_NGINX_GLOBALS=""
+        $env:TEST_NGINX_GLOBALS_HTTP=""
+
     }
 
 }

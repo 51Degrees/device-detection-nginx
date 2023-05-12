@@ -12,7 +12,7 @@ $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $ModuleName = "ngx_http_51D_module.so"
 
 # Define the path for downloaded artifacts
-$PackagePath = [IO.Path]::Combine($RepoPath, "package", "package_$Name", $ModuleName)
+$PackagePath = [IO.Path]::Combine($pwd, "package", "package_$Name", $ModuleName)
 
 # Get the local install path
 $ModulesPath = [IO.Path]::Combine($RepoPath, "build", "modules")

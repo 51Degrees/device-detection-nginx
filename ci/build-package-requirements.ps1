@@ -5,7 +5,10 @@ param(
     [string]$NginxVersion
 )
 
+$ModuleName = "ngx_http_51D_module.so"
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
+$OutputDir = [IO.Path]::Combine($pwd, "package-files")
+$OutputFile = [IO.Path]::Combine($OutputDir, $ModuleName)
 
 Write-Output "Entering '$RepoPath'"
 Push-Location $RepoPath
@@ -16,11 +19,9 @@ try {
         
     # Create a directory for binary files from which they will be uploaded
     # as artifacts.
-    New-Item -path "$RepoPath/package-files" -ItemType Directory -Force 
+    New-Item -Path $OutputDir -ItemType Directory -Force 
     
-    $ModuleName = "ngx_http_51D_module.so"
     $InputFile = [IO.Path]::Combine($RepoPath, "build", "modules", $ModuleName)
-    $OutputFile = [IO.Path]::Combine($RepoPath, "package-files", $ModuleName)
 
     # Copy module
     Copy-Item -Path $InputFile -Destination $OutputFile
