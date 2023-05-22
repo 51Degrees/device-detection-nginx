@@ -51,7 +51,7 @@ PROJECT_BRIEF          = "A device detection module for Nginx"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = ../../../docs/images/logo-51Degrees-Docs.png
+PROJECT_LOGO           = ../../documentation/docs/images/logo-51Degrees-Docs.png
 
 # The PROJECT_URL tag is used to specify the URL which is linked by the
 # PROJECT_LOGO.
@@ -899,7 +899,7 @@ EXCLUDE_SYMBOLS        =
 # command).
 
 EXAMPLE_PATH           = ../examples \
-                         ../../../src/snippets
+                         ../../documentation/src/snippets
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -1133,7 +1133,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = ../../../docs/header.html
+HTML_HEADER            = ../../documentation/docs/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1143,7 +1143,7 @@ HTML_HEADER            = ../../../docs/header.html
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = ../../../docs/footer.html
+HTML_FOOTER            = ../../documentation/docs/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1155,7 +1155,7 @@ HTML_FOOTER            = ../../../docs/footer.html
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_STYLESHEET        = ../../../docs/docs-main.min.css
+HTML_STYLESHEET        = ../../documentation/docs/docs-main.min.css
 
 # The HTML_EXTRA_STYLESHEET tag can be used to specify additional user-defined
 # cascading style sheets that are included after the standard style sheets
@@ -1178,13 +1178,13 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = ../../../docs/images/icon-arrow-left-black.svg \
-                         ../../../docs/images/icon-arrow-right-black.svg \
-                         ../../../docs/images/icon-arrow-solid-right-mute.svg \
-                         ../../../docs/images/icon-arrow-solid-right-orange.svg \
-                         ../../../docs/images/icon-search.svg \
-                         ../../../docs/examplegrabber.js \
-                         ../../../docs/search51.js
+HTML_EXTRA_FILES       = ../../documentation/docs/images/icon-arrow-left-black.svg \
+                         ../../documentation/docs/images/icon-arrow-right-black.svg \
+                         ../../documentation/docs/images/icon-arrow-solid-right-mute.svg \
+                         ../../documentation/docs/images/icon-arrow-solid-right-orange.svg \
+                         ../../documentation/docs/images/icon-search.svg \
+                         ../../documentation/docs/examplegrabber.js \
+                         ../../documentation/docs/search51.js
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to
