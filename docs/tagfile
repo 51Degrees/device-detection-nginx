@@ -1,0 +1,780 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<tagfile>
+  <compound kind="struct">
+    <name>ngx_http_51D_data_to_set_t</name>
+    <filename>structngx__http__51_d__data__to__set__t.html</filename>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>multi</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>af86c44cba7bd82207cc154659b7a0b76</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>propertyCount</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>af3bbe63075e6f627e5d7e72563305133</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t **</type>
+      <name>property</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>ac9c1ad8598a4e59936bb62d29f624a02</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t</type>
+      <name>headerName</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>a7ca9653ca8a2aaeeeb45f40696909d6a</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t</type>
+      <name>lowerHeaderName</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>a2316a443a90ac1221ced5e3754db5789</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t</type>
+      <name>variableName</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>a7d142accc19e26b53a8fed1da3fc0412</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_http_51D_data_to_set *</type>
+      <name>next</name>
+      <anchorfile>structngx__http__51_d__data__to__set__t.html</anchorfile>
+      <anchor>af8505e3a91ee4c263113627532f87082</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>ngx_http_51D_loc_conf_t</name>
+    <filename>structngx__http__51_d__loc__conf__t.html</filename>
+    <member kind="variable">
+      <type>ngx_http_51D_match_conf_t</type>
+      <name>matchConf</name>
+      <anchorfile>structngx__http__51_d__loc__conf__t.html</anchorfile>
+      <anchor>a872b0069c3413f1dfb3619ac872d440c</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>ngx_http_51D_main_conf_t</name>
+    <filename>structngx__http__51_d__main__conf__t.html</filename>
+    <member kind="variable">
+      <type>char</type>
+      <name>properties</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>af5518bed682b1066055f7becc796e1f5</anchor>
+      <arglist>[FIFTYONE_DEGREES_MAX_PROPS_STRING]</arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t</type>
+      <name>dataFile</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a949e662a59e272f696d2d6c6ed078fad</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ResultsHash *</type>
+      <name>results</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>af45db3415cb328057751163a9ac6bff2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>char</type>
+      <name>valueString</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a05e7efeba01ce181b5acb2654dd2492b</anchor>
+      <arglist>[FIFTYONE_DEGREES_MAX_STRING]</arglist>
+    </member>
+    <member kind="variable">
+      <type>ResourceManager *</type>
+      <name>resourceManager</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a7e257237cbf0f0859d0599541b4fa3e0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>setRespHeaderCount</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>aefb5864bedfa51d3f60f5748ef8a3279</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_http_51D_data_to_set *</type>
+      <name>setRespHeader</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a05a23c8dd05ddbe44b39a7abbfd783c7</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_str_t</type>
+      <name>valueSeparator</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a064b06936f25e4276cff774126b587b7</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>performanceProfile</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a064b2f5e5aee058ee089812de37723e4</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>drift</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a4271e70537f11b9944ff6f93f1979eb6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>difference</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>acff4b2dd56722966610e156adb7f3bb6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>maxConcurrency</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>aa8668e7b07904f7f9ae2468c3f01e513</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>allowUnmatched</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a970cba16c04e57e9c561675f8052f939</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>usePerformanceGraph</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a445d54439953149477edf70e99595958</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>usePredictiveGraph</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a0893d0a6c9d25d71cc163eb7ece242b2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_http_51D_match_conf_t</type>
+      <name>matchConf</name>
+      <anchorfile>structngx__http__51_d__main__conf__t.html</anchorfile>
+      <anchor>a7ee64987d047c51b205b2e931ad1af28</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>ngx_http_51D_match_conf_t</name>
+    <filename>structngx__http__51_d__match__conf__t.html</filename>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>hasMulti</name>
+      <anchorfile>structngx__http__51_d__match__conf__t.html</anchorfile>
+      <anchor>aaf270d5cb09b2386eceff7d9a9b1f175</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>setHeaders</name>
+      <anchorfile>structngx__http__51_d__match__conf__t.html</anchorfile>
+      <anchor>a7231e0f992d0c432f0bab0e6af13e2f6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_uint_t</type>
+      <name>headerCount</name>
+      <anchorfile>structngx__http__51_d__match__conf__t.html</anchorfile>
+      <anchor>a55495a9427baee041e74e1e9f5132a1e</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_http_51D_data_to_set *</type>
+      <name>header</name>
+      <anchorfile>structngx__http__51_d__match__conf__t.html</anchorfile>
+      <anchor>a203528bc8682bca1144663e521025461</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_http_51D_data_to_set *</type>
+      <name>body</name>
+      <anchorfile>structngx__http__51_d__match__conf__t.html</anchorfile>
+      <anchor>a4ebcd22cd38b846bc6b903e70824e1ac</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>ngx_http_51D_srv_conf_t</name>
+    <filename>structngx__http__51_d__srv__conf__t.html</filename>
+    <member kind="variable">
+      <type>ngx_http_51D_match_conf_t</type>
+      <name>matchConf</name>
+      <anchorfile>structngx__http__51_d__srv__conf__t.html</anchorfile>
+      <anchor>a685d3c0e858abac96ce7b441a4df2fc1</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="group">
+    <name>ngx_http_51D_module</name>
+    <title>51Degrees Nginx Module Internals</title>
+    <filename>group__ngx__http__51_d__module.html</filename>
+    <class kind="struct">ngx_http_51D_data_to_set_t</class>
+    <class kind="struct">ngx_http_51D_match_conf_t</class>
+    <class kind="struct">ngx_http_51D_loc_conf_t</class>
+    <class kind="struct">ngx_http_51D_main_conf_t</class>
+    <class kind="struct">ngx_http_51D_srv_conf_t</class>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_DEFAULTFILE</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga72334490bb6a8007b0af53a35ceb33d6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_PROPERTY_NOT_AVAILABLE</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga6ca2b0f8f57845ee3d4a8333be237750</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_JAVASCRIPT_NOT_AVAILABLE</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga9d068264ecdbe0b12c3cb356d589d728</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_VALUE_SEPARATOR</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga6ca82984dbbddb935d02acf01934d00f</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_MAX_STRING</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga053f5101ea0af342583946ad5ff03847</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_MAX_PROPS_STRING</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga2640c93454267a9036cf710f328b4a29</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_SET_HEADER_PREFIX</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gabdd870d9fe95827e051cfb53d315968b</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_MEMORY_ADJUSTMENT</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaa364c8e893822ebb6a095592d4646636</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_TRUE</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaa10908285947517c0da823d635aa49b2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_FALSE</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gad097104831b405ccf9f958f28d24ab30</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>FIFTYONE_DEGREES_CONFIG_LEVELS</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga1e85068236f96300b33e60c7cb27d7e2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="typedef">
+      <type>enum ngx_http_51D_performance_profile_e</type>
+      <name>ngx_http_51D_performance_profile</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga1f4626e412e4853f66a1261dc1be35a7</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="enumeration">
+      <type></type>
+      <name>ngx_http_51D_performance_profile_e</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga01b447abdb45568b428ac05a9f4c8a89</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void *</type>
+      <name>ngx_http_51D_create_main_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga840799dbe09bf709088a0818ba45adec</anchor>
+      <arglist>(ngx_conf_t *cf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void *</type>
+      <name>ngx_http_51D_create_srv_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga036cb41b9a4aae3732fc25cded383d4d</anchor>
+      <arglist>(ngx_conf_t *cf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void *</type>
+      <name>ngx_http_51D_create_loc_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga464383cf8639aef93b0779206b4613c5</anchor>
+      <arglist>(ngx_conf_t *cf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_merge_loc_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga7666f8a0491af240787820497e021590</anchor>
+      <arglist>(ngx_conf_t *cf, void *parent, void *child)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_merge_srv_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga28b0aabb174c73b72e80ad5f9cd7e118</anchor>
+      <arglist>(ngx_conf_t *cf, void *parent, void *child)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_loc_resp</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gae0cedbe727d187e473058733940e4c46</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_srv_resp</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga81b636f1bf032bd03a84a63101de706c</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_main_resp</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga2a0c98205c555e5c652d3b68cc811782</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_loc_cdn</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga2def886797fe6dad206752dfdd4bf964</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_loc</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaf38b9dcd7123bbd332ff16cc05b0cf8c</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_srv</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gab7a84e76ea2f8acced2f7caa9ba32d6f</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_main</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga29a95fe34c816b5a6d72938e5e6f4c49</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_handler</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga9058b4027772ec524a9b6ab793ba0230</anchor>
+      <arglist>(ngx_http_request_t *r)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_header_filter</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga65450ff9cb8408566ae316a66165e545</anchor>
+      <arglist>(ngx_http_request_t *r)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_body_filter</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga67fb7530aff465162dfba49c15b2e9ad</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_chain_t *in)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_init_shm_resource_manager</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gacfa5aa3bbc4b2c7bfcc0a1c081e40b3c</anchor>
+      <arglist>(ngx_shm_zone_t *shm_zone, void *data)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>report_status</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga910e687f93eee6bbebb5c31e98f27bc1</anchor>
+      <arglist>(ngx_log_t *log, StatusCode status, const char *fileName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>report_insufficient_memory_status</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gad84d1f4188e1ad716720f037c5e60082</anchor>
+      <arglist>(ngx_log_t *log)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ConfigHash</type>
+      <name>get_config_hash</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga1ac7b6d1b57a3019f0092095038ba282</anchor>
+      <arglist>(ngx_http_51D_main_conf_t *fdmcf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_post_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga8e9fa8338cada20952ccaafdcfa761f9</anchor>
+      <arglist>(ngx_conf_t *cf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void</type>
+      <name>ngx_http_51D_init_match_conf</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaaa8febdf539cee13f63e363e9e5541b4</anchor>
+      <arglist>(ngx_http_51D_match_conf_t *matchConf)</arglist>
+    </member>
+    <member kind="function">
+      <type>void *</type>
+      <name>ngx_http_51D_shm_alloc</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaefb0c7a9063c64284bdd8d95c8e3eaba</anchor>
+      <arglist>(size_t __size)</arglist>
+    </member>
+    <member kind="function">
+      <type>void *</type>
+      <name>ngx_http_51D_shm_alloc_aligned</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga41ad9fb09ce356e692f80b528ca7dc96</anchor>
+      <arglist>(int alignment, size_t __size)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>ngx_http_51D_shm_free</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga4c0b64a138e98d759d7171573a565c90</anchor>
+      <arglist>(void *__ptr)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_init_module</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga27b0da03ff7f25da84157213b7be5b4a</anchor>
+      <arglist>(ngx_cycle_t *cycle)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static const char *</type>
+      <name>skipComponentName</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gad5b1e785d8fcf07d426e5dd1cad59aab</anchor>
+      <arglist>(const char *headerName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>getRespHeaderIndex</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga7df52464082edf5cefcf27b20aa3a5b6</anchor>
+      <arglist>(ngx_str_t *headerNames, const char *headerName, ngx_uint_t respHeaderCount)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_http_51D_data_to_set *</type>
+      <name>getRespHeader</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga7aa35d068bbec56b8ea7daa19a02ed67</anchor>
+      <arglist>(ngx_http_51D_data_to_set *respHeader, const char *headerName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>initRespHeaders</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga8dda5cfd21adaca0339d19cded29525e</anchor>
+      <arglist>(ngx_cycle_t *cycle, ngx_http_51D_main_conf_t *fdmcf, DataSetHash *dataSet)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_int_t</type>
+      <name>ngx_http_51D_init_process</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga3021f696a2c0a4d5b8fedac03cda3104</anchor>
+      <arglist>(ngx_cycle_t *cycle)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>ngx_http_51D_exit_process</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga1c8812c50f754b7f48922770e26b2dd9</anchor>
+      <arglist>(ngx_cycle_t *cycle)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>ngx_http_51D_exit_master</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga69107d313bb076e916dde12ad606af57</anchor>
+      <arglist>(ngx_cycle_t *cycle)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_table_elt_t *</type>
+      <name>search_headers_in</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga903e7f7403eab4aadc17f4a441f6be78</anchor>
+      <arglist>(ngx_http_request_t *r, u_char *name, size_t len)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void</type>
+      <name>add_value</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga3f375617f71f4b74bf1f2bf50b74d485</anchor>
+      <arglist>(char *delimiter, char *val, char *dst, size_t length)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static bool</type>
+      <name>is_metadata</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga1dc21d37d5fa7b49e83b0965bef7051b</anchor>
+      <arglist>(char *val)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_str_t *</type>
+      <name>empty_string</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga61e9cd3a8f96cafd6225859d241ee638</anchor>
+      <arglist>(ngx_http_request_t *r)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_str_t *</type>
+      <name>get_evidence_from_query_string_base</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gab789b649c0b61f51da6008b9d8e28fa6</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_str_t *variableName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_str_t *</type>
+      <name>get_evidence_from_query_string</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gad8ed31d3e98a2a5c4f8fcf495c278b51</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_str_t *variableName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static bool</type>
+      <name>has_cookie_value</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga57dba59a7798fa0f913fac6faec9ede5</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_str_t *s, ngx_str_t *cookie)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void</type>
+      <name>add_override_evidence_from_cookie_and_query</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga4cd791442b54796b7f81775a6c1961aa</anchor>
+      <arglist>(ngx_http_request_t *r, ResultsHash *results, EvidenceKeyValuePairArray *evidence)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static EvidenceKeyValuePairArray *</type>
+      <name>get_evidence</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga49dffe9143141e0fd0920b4ba7e35257</anchor>
+      <arglist>(ResultsHash *results, ngx_http_request_t *r)</arglist>
+    </member>
+    <member kind="function">
+      <type>ngx_uint_t</type>
+      <name>ngx_http_51D_get_match</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga0380f289777e2b38522e5fac2ec5e30a</anchor>
+      <arglist>(ngx_http_51D_main_conf_t *fdmcf, ngx_http_request_t *r, int multi, ngx_str_t *userAgent)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static void</type>
+      <name>removeUnknown</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga83fc4e65082d26d0d3f28802bb9ec509</anchor>
+      <arglist>(char *dest, ngx_int_t *charsAdded)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>ngx_http_51D_get_value</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaac042bba2c56750586d9647c829c731c</anchor>
+      <arglist>(ngx_http_51D_main_conf_t *fdmcf, ngx_http_request_t *r, char *values_string, const char *requiredPropertyName, size_t length, ngx_uint_t includeNotAvailable, const char *customSeparator)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_str_t *</type>
+      <name>ngx_http_51D_get_user_agent</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gacd80a9f1d85ce377be365f675e8d1b8d</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_http_51D_data_to_set *data)</arglist>
+    </member>
+    <member kind="function">
+      <type>u_char *</type>
+      <name>getEscapedMatchedValueString</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga66c20025c6002ae34a3bbd3e289f699f</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_http_51D_main_conf_t *fdmcf, ngx_http_51D_data_to_set *header, int haveMatch, ngx_uint_t includeNotAvailable, ngx_str_t *userAgent, const char *customSeparator)</arglist>
+    </member>
+    <member kind="function">
+      <type>ngx_uint_t</type>
+      <name>process</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga45beef038b10eafb5d504f7bdcde1cf6</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_http_51D_main_conf_t *fdmcf, ngx_http_51D_data_to_set *header, ngx_table_elt_t *h[], int matchIndex, int haveMatch, ngx_str_t *userAgent)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static ngx_table_elt_t *</type>
+      <name>findResponseHeader</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga3a4fb5b5448d44f8a025da16ad145f04</anchor>
+      <arglist>(ngx_http_request_t *r, ngx_str_t headerName)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>set_data</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga3f3b2c4ed5c2e50db66f199c611690bc</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_http_51D_data_to_set *data, ngx_str_t *value, char *propertiesString, int propertiesCount, ngx_http_51D_main_conf_t *fdmcf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_header</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga8fd23b1289fca1c82167d42f2d5c7a69</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_http_51D_data_to_set *header, ngx_str_t *value, ngx_http_51D_main_conf_t *fdmcf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_body</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gae2f05d7881c842253e9e5f8aaab868b3</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_http_51D_data_to_set *body, ngx_str_t *value, ngx_http_51D_main_conf_t *fdmcf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_conf_header</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga00e65e78c119b8190b0d40df32f46218</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_conf_body</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaae8cff59c013eb91b7a3084c4bd36d11</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)</arglist>
+    </member>
+    <member kind="function" static="yes">
+      <type>static char *</type>
+      <name>ngx_http_51D_set_conf_resp</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gac4b56fc765c60461784a936024d57212</anchor>
+      <arglist>(ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)</arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_module_t</type>
+      <name>ngx_http_51D_module</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaf47a09e4928fb9f32a16e2c71386b859</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_http_output_header_filter_pt</type>
+      <name>ngx_http_next_header_filter</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gaaf3846021d7a45a3f55ae6d5c91be839</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_http_output_body_filter_pt</type>
+      <name>ngx_http_next_body_filter</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga196b35c64b228d29ade72e798d7bd371</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_shm_zone_t *</type>
+      <name>ngx_http_51D_shm_resource_manager</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gad95b917c284ce6badc967fb6f8466cc6</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_atomic_t</type>
+      <name>ngx_http_51D_shm_tag</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga21fd8f74902022ead7815f7341ef63dd</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>ngx_atomic_t *</type>
+      <name>ngx_http_51D_worker_count</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga97e3e0ca808bab4a3218a4a9d0a4a02d</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_conf_enum_t</type>
+      <name>ngx_http_51D_performance_profiles</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga15cf9137827a71b1b495b4bb366b73fe</anchor>
+      <arglist>[]</arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_command_t</type>
+      <name>ngx_http_51D_commands</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>ga29a22a2cd1f6899dce6c8575fed6354d</anchor>
+      <arglist>[]</arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static ngx_http_module_t</type>
+      <name>ngx_http_51D_module_ctx</name>
+      <anchorfile>group__ngx__http__51_d__module.html</anchorfile>
+      <anchor>gabc974c21ea286e4b9941425f71726278</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="page">
+    <name>md__home_runner_work_device-detection-nginx_device-detection-nginx_common_device-detection-nginx_README</name>
+    <title>51Degrees Device Detection Nginx Module</title>
+    <filename>md__home_runner_work_device-detection-nginx_device-detection-nginx_common_device-detection-nginx__r_e_a_d_m_e</filename>
+  </compound>
+</tagfile>
