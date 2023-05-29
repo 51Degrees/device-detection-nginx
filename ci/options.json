@@ -1,11 +1,11 @@
 [
   {
+    "Name": "ubuntu-latest_Nginx1.23.4",
     "RunPerformance": true,
     "PackageRequirement": true,
-    "Name": "ubuntu-latest_Nginx1.23.4",
-    "Image": "ubuntu-latest",
+    "FullTests": true,
     "NginxVersion": "1.23.4",
-    "FullTests": true
+    "Image": "ubuntu-latest"
   },
   {
     "Image": "ubuntu-latest",
@@ -15,41 +15,41 @@
   },
   {
     "Image": "ubuntu-latest",
+    "MemCheck": true,
     "NginxVersion": "1.23.4",
-    "BuildMethod": "static",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
-    "MemCheck": true
+    "BuildMethod": "static"
   },
   {
-    "RunPerformance": false,
-    "PackageRequirement": true,
     "Name": "ubuntu-latest_Nginx1.23.2",
-    "Image": "ubuntu-latest",
+    "RunPerformance": false,
+    "PackageRequirement": true,
+    "FullTests": false,
     "NginxVersion": "1.23.2",
-    "FullTests": false
+    "Image": "ubuntu-latest"
   },
   {
-    "RunPerformance": false,
-    "PackageRequirement": true,
     "Name": "ubuntu-latest_Nginx1.21.6",
-    "Image": "ubuntu-latest",
+    "RunPerformance": false,
+    "PackageRequirement": true,
+    "FullTests": false,
     "NginxVersion": "1.21.6",
-    "FullTests": false
+    "Image": "ubuntu-latest"
   },
   {
-    "RunPerformance": false,
-    "PackageRequirement": true,
     "Name": "ubuntu-latest_Nginx1.21.5",
-    "Image": "ubuntu-latest",
-    "NginxVersion": "1.21.5",
-    "FullTests": false
-  },
-  {
     "RunPerformance": false,
     "PackageRequirement": true,
+    "FullTests": false,
+    "NginxVersion": "1.21.5",
+    "Image": "ubuntu-latest"
+  },
+  {
     "Name": "ubuntu-latest_Nginx1.21.3",
-    "Image": "ubuntu-latest",
+    "RunPerformance": false,
+    "PackageRequirement": true,
+    "FullTests": false,
     "NginxVersion": "1.21.3",
-    "FullTests": false
+    "Image": "ubuntu-latest"
   }
 ]
