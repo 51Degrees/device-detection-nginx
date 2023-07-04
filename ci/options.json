@@ -1,55 +1,55 @@
 [
   {
+    "Image": "ubuntu-latest",
+    "FullTests": true,
+    "PackageRequirement": true,
     "NginxVersion": "1.23.4",
     "Name": "ubuntu-latest_Nginx1.23.4",
-    "FullTests": true,
-    "RunPerformance": true,
-    "PackageRequirement": true,
-    "Image": "ubuntu-latest"
+    "RunPerformance": true
   },
   {
-    "NginxVersion": "1.23.4",
+    "MemCheck": true,
+    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck",
-    "Image": "ubuntu-latest",
-    "MemCheck": true
+    "NginxVersion": "1.23.4"
   },
   {
-    "NginxVersion": "1.23.4",
+    "MemCheck": true,
     "BuildMethod": "static",
-    "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
     "Image": "ubuntu-latest",
-    "MemCheck": true
+    "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
+    "NginxVersion": "1.23.4"
   },
   {
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "PackageRequirement": true,
     "NginxVersion": "1.23.2",
     "Name": "ubuntu-latest_Nginx1.23.2",
-    "FullTests": false,
-    "RunPerformance": false,
-    "PackageRequirement": true,
-    "Image": "ubuntu-latest"
+    "RunPerformance": false
   },
   {
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "PackageRequirement": true,
     "NginxVersion": "1.21.6",
     "Name": "ubuntu-latest_Nginx1.21.6",
-    "FullTests": false,
-    "RunPerformance": false,
-    "PackageRequirement": true,
-    "Image": "ubuntu-latest"
+    "RunPerformance": false
   },
   {
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "PackageRequirement": true,
     "NginxVersion": "1.21.5",
     "Name": "ubuntu-latest_Nginx1.21.5",
-    "FullTests": false,
-    "RunPerformance": false,
-    "PackageRequirement": true,
-    "Image": "ubuntu-latest"
+    "RunPerformance": false
   },
   {
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "PackageRequirement": true,
     "NginxVersion": "1.21.3",
     "Name": "ubuntu-latest_Nginx1.21.3",
-    "FullTests": false,
-    "RunPerformance": false,
-    "PackageRequirement": true,
-    "Image": "ubuntu-latest"
+    "RunPerformance": false
   }
 ]
