@@ -1,55 +1,55 @@
 [
   {
-    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_Nginx1.23.4",
     "PackageRequirement": true,
-    "FullTests": true,
     "NginxVersion": "1.23.4",
-    "RunPerformance": true,
-    "Name": "ubuntu-latest_Nginx1.23.4"
+    "Image": "ubuntu-latest",
+    "FullTests": true,
+    "RunPerformance": true
   },
   {
-    "NginxVersion": "1.23.4",
     "Image": "ubuntu-latest",
+    "NginxVersion": "1.23.4",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck",
     "MemCheck": true
   },
   {
+    "BuildMethod": "static",
+    "Image": "ubuntu-latest",
     "NginxVersion": "1.23.4",
-    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
-    "MemCheck": true,
-    "BuildMethod": "static"
+    "MemCheck": true
   },
   {
-    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_Nginx1.23.2",
     "PackageRequirement": true,
-    "FullTests": false,
     "NginxVersion": "1.23.2",
-    "RunPerformance": false,
-    "Name": "ubuntu-latest_Nginx1.23.2"
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "RunPerformance": false
   },
   {
-    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_Nginx1.21.6",
     "PackageRequirement": true,
-    "FullTests": false,
     "NginxVersion": "1.21.6",
-    "RunPerformance": false,
-    "Name": "ubuntu-latest_Nginx1.21.6"
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "RunPerformance": false
   },
   {
-    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_Nginx1.21.5",
     "PackageRequirement": true,
-    "FullTests": false,
     "NginxVersion": "1.21.5",
-    "RunPerformance": false,
-    "Name": "ubuntu-latest_Nginx1.21.5"
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "RunPerformance": false
   },
   {
-    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_Nginx1.21.3",
     "PackageRequirement": true,
-    "FullTests": false,
     "NginxVersion": "1.21.3",
-    "RunPerformance": false,
-    "Name": "ubuntu-latest_Nginx1.21.3"
+    "Image": "ubuntu-latest",
+    "FullTests": false,
+    "RunPerformance": false
   }
 ]
