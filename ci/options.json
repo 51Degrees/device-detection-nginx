@@ -1,55 +1,55 @@
 [
   {
-    "NginxVersion": "1.23.4",
-    "FullTests": true,
+    "PackageRequirement": true,
     "RunPerformance": true,
-    "PackageRequirement": true,
+    "Image": "ubuntu-latest",
+    "FullTests": true,
     "Name": "ubuntu-latest_Nginx1.23.4",
-    "Image": "ubuntu-latest"
+    "NginxVersion": "1.23.4"
   },
   {
-    "MemCheck": true,
-    "NginxVersion": "1.23.4",
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.23.4_MemCheck"
+    "NginxVersion": "1.23.4",
+    "Name": "ubuntu-latest_Nginx1.23.4_MemCheck",
+    "MemCheck": true
   },
   {
-    "MemCheck": true,
-    "NginxVersion": "1.23.4",
     "Image": "ubuntu-latest",
+    "BuildMethod": "static",
+    "NginxVersion": "1.23.4",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
-    "BuildMethod": "static"
+    "MemCheck": true
   },
   {
-    "NginxVersion": "1.23.2",
-    "FullTests": false,
-    "RunPerformance": false,
     "PackageRequirement": true,
+    "RunPerformance": false,
+    "Image": "ubuntu-latest",
+    "FullTests": false,
     "Name": "ubuntu-latest_Nginx1.23.2",
-    "Image": "ubuntu-latest"
+    "NginxVersion": "1.23.2"
   },
   {
-    "NginxVersion": "1.21.6",
-    "FullTests": false,
-    "RunPerformance": false,
     "PackageRequirement": true,
+    "RunPerformance": false,
+    "Image": "ubuntu-latest",
+    "FullTests": false,
     "Name": "ubuntu-latest_Nginx1.21.6",
-    "Image": "ubuntu-latest"
+    "NginxVersion": "1.21.6"
   },
   {
-    "NginxVersion": "1.21.5",
-    "FullTests": false,
-    "RunPerformance": false,
     "PackageRequirement": true,
+    "RunPerformance": false,
+    "Image": "ubuntu-latest",
+    "FullTests": false,
     "Name": "ubuntu-latest_Nginx1.21.5",
-    "Image": "ubuntu-latest"
+    "NginxVersion": "1.21.5"
   },
   {
-    "NginxVersion": "1.21.3",
-    "FullTests": false,
-    "RunPerformance": false,
     "PackageRequirement": true,
+    "RunPerformance": false,
+    "Image": "ubuntu-latest",
+    "FullTests": false,
     "Name": "ubuntu-latest_Nginx1.21.3",
-    "Image": "ubuntu-latest"
+    "NginxVersion": "1.21.3"
   }
 ]
