@@ -11,8 +11,8 @@ The following secrets are required to run tests:
     * Example: `V3RYL0NGR4ND0M57R1NG`
 
 The following secrets are required to run the full set of tests agains NGINX Plus:
-* NGINX_PLUS_KEY - Signing key used for installing NGINX Plus
-* NGINX_PLUS_CERT - NGINX Plus certificate
+* `NGINX_PLUS_KEY` - Signing key used for installing NGINX Plus
+* `NGINX_PLUS_CERT` - NGINX Plus certificate
 
 ### Differences
 - There are no packages produced by this repository, so the only output from the `Nightly Publish Main` workflow is a new tag and release.
