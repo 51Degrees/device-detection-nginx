@@ -1,55 +1,55 @@
 [
   {
+    "Image": "ubuntu-latest",
     "NginxVersion": "1.23.4",
-    "FullTests": true,
-    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.23.4",
-    "RunPerformance": true,
-    "PackageRequirement": true
+    "FullTests": true,
+    "PackageRequirement": true,
+    "RunPerformance": true
   },
   {
     "Image": "ubuntu-latest",
-    "MemCheck": true,
+    "NginxVersion": "1.23.4",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck",
-    "NginxVersion": "1.23.4"
+    "MemCheck": true
   },
   {
-    "MemCheck": true,
     "Image": "ubuntu-latest",
-    "BuildMethod": "static",
+    "NginxVersion": "1.23.4",
     "Name": "ubuntu-latest_Nginx1.23.4_MemCheck_Static",
-    "NginxVersion": "1.23.4"
+    "MemCheck": true,
+    "BuildMethod": "static"
   },
   {
+    "Image": "ubuntu-latest",
     "NginxVersion": "1.23.2",
-    "FullTests": false,
-    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.23.2",
-    "RunPerformance": false,
-    "PackageRequirement": true
+    "FullTests": false,
+    "PackageRequirement": true,
+    "RunPerformance": false
   },
   {
+    "Image": "ubuntu-latest",
     "NginxVersion": "1.21.6",
-    "FullTests": false,
-    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.21.6",
-    "RunPerformance": false,
-    "PackageRequirement": true
+    "FullTests": false,
+    "PackageRequirement": true,
+    "RunPerformance": false
   },
   {
+    "Image": "ubuntu-latest",
     "NginxVersion": "1.21.5",
-    "FullTests": false,
-    "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_Nginx1.21.5",
-    "RunPerformance": false,
-    "PackageRequirement": true
+    "FullTests": false,
+    "PackageRequirement": true,
+    "RunPerformance": false
   },
   {
-    "NginxVersion": "1.21.3",
-    "FullTests": false,
     "Image": "ubuntu-latest",
+    "NginxVersion": "1.21.3",
     "Name": "ubuntu-latest_Nginx1.21.3",
-    "RunPerformance": false,
-    "PackageRequirement": true
+    "FullTests": false,
+    "PackageRequirement": true,
+    "RunPerformance": false
   }
 ]
