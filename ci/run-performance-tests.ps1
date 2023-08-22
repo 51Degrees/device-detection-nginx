@@ -60,7 +60,7 @@ try {
         $Results = Get-Content ./summary.json | ConvertFrom-Json
         Write-Output "{
             'HigherIsBetter': {
-                'DetectionsPerSecond': $(1/($Results.overhead_ms * 1000))
+                'DetectionsPerSecond': $(1/($Results.overhead_ms / 1000))
             },
             'LowerIsBetter': {
                 'MsPerDetection': $($Results.overhead_ms)

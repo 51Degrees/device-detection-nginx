@@ -63,7 +63,7 @@ try {
     
         foreach ($Image in $Images) {
             # All configurations have a configuration added
-            $Options += @{
+            $Options += [ordered]@{
                 Image = $Image
                 Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)"
                 NginxVersion = $SupportedVersion.OpenSourceVersion
@@ -75,13 +75,13 @@ try {
             }
             if ($IsLatest -eq $True) {
                 # Add memory check configurations if this is the latest NGINX Plus version
-                $Options += @{
+                $Options += [ordered]@{
                     Image = $Image
                     Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)_MemCheck"
                     NginxVersion = $SupportedVersion.OpenSourceVersion
                     MemCheck = $True
                 }
-                $Options += @{
+                $Options += [ordered]@{
                     Image = $Image
                     Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)_MemCheck_Static"
                     NginxVersion = $SupportedVersion.OpenSourceVersion

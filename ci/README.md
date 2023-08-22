@@ -2,6 +2,18 @@
 
 For the general CI Approach, see [common-ci](https://github.com/51degrees/common-ci).
 
+The following secrets are required:
+* `ACCESS_TOKEN` - GitHub [access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens) for cloning repos, creating PRs, etc.
+    * Example: `github_pat_l0ng_r4nd0m_s7r1ng`
+  
+The following secrets are required to run tests:
+* `DEVICE_DETECTION_KEY` - [license key](https://51degrees.com/pricing) for downloading assets (TAC hashes file and TAC CSV data file)
+    * Example: `V3RYL0NGR4ND0M57R1NG`
+
+The following secrets are required to run the full set of tests agains NGINX Plus:
+* `NGINX_PLUS_KEY` - Signing key used for installing NGINX Plus
+* `NGINX_PLUS_CERT` - NGINX Plus certificate
+
 ### Differences
 - There are no packages produced by this repository, so the only output from the `Nightly Publish Main` workflow is a new tag and release.
 - The package update step does not update dependencies from a package manager in the same way as other repos. Instead it checks the supported versions on the [NGINX Plus Releases](https://docs.nginx.com/nginx/releases/) page, and uses that to update `options.json` to ensure they are tested.

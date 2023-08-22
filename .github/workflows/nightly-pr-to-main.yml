@@ -5,61 +5,13 @@ on:
   schedule:
     # * is a special character in YAML so quote this string
     - cron:  '0 1 * * *'
-    
-jobs:
-  # Get all the pull requests that are going to main
-  Get_Pull_Requests:
-    outputs:
-      pull_request_ids: ${{ steps.get_pull_requests.outputs.pull_request_ids }}
-    runs-on: ubuntu-latest
-    steps:
 
-      # Checkout the common repo containing scripts
-      - name: Checkout Common
-        uses: actions/checkout@v2
-        with:
-          repository: 51degrees/common-ci
-          ref: gh-refact
-          path: common
-          
-      # Setup git to use the correct access token
-      - name: Configure Git
-        shell: pwsh
-        working-directory: ${{ github.workspace }}/common/
-        run: |
-          . ${{ github.workspace }}/common/steps/configure-git.ps1 -GitHubToken ${{ secrets.ACCESS_TOKEN }}
-          
-      # Clone this repository
-      - name: Clone Repo
-        shell: pwsh
-        working-directory: ${{ github.workspace }}/common/
-        run: |
-          . ${{ github.workspace }}/common/constants.ps1
-          . ${{ github.workspace }}/common/steps/clone-repo.ps1 -RepoName ${{ github.event.repository.name }} -Branch main
-        
-      # Get all the pull requests into main, and output the ids
-      - name: Get Pull Requests
-        id: get_pull_requests
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        shell: pwsh
-        working-directory: ${{ github.workspace }}/common/
-        run: |
-          . ${{ github.workspace }}/common/steps/get-pull-requests.ps1 -RepoName ${{ github.event.repository.name }} -VariableName PullRequestIds
-          Write-Output pull_request_ids="[$([string]::Join(",", $ValidIds))]" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-          
+jobs:
   # Run the common workflow on each pull request
   Nightly_PR_to_Main:
-    needs: Get_Pull_Requests
-    strategy:
-      fail-fast: false
-      matrix:
-        id: ${{ fromJSON(needs.Get_Pull_Requests.outputs.pull_request_ids) }}
-      
-    uses: 51Degrees/common-ci/.github/workflows/nightly-pr-to-main.yml@main
+    uses: 51Degrees/common-ci/.github/workflows/nightly-prs-to-main.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
-      pull-request-id: ${{ matrix.id }}
     secrets: 
       token: ${{ secrets.ACCESS_TOKEN }}
       asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "DeviceDetectionUrl": "${{ secrets.DEVICE_DETECTION_URL }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
