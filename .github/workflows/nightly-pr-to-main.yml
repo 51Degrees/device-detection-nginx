@@ -1,10 +1,10 @@
-name: Nigthly PR to Main
+name: Nightly PRs to Main
 
 on:
   workflow_dispatch:
-  schedule:
-    # * is a special character in YAML so quote this string
-    - cron:  '0 1 * * *'
+  workflow_run:
+    workflows: [Nightly Submodule Update]
+    types: [completed]
 
 jobs:
   # Run the common workflow on each pull request
@@ -12,6 +12,6 @@ jobs:
     uses: 51Degrees/common-ci/.github/workflows/nightly-prs-to-main.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
-    secrets: 
+    secrets:
       token: ${{ secrets.ACCESS_TOKEN }}
       asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "DeviceDetectionUrl": "${{ secrets.DEVICE_DETECTION_URL }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'

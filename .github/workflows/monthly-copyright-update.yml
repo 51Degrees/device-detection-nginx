@@ -12,5 +12,5 @@ jobs:
     uses: 51Degrees/common-ci/.github/workflows/monthly-copyright-update.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
-    secrets: 
+    secrets:
       token: ${{ secrets.ACCESS_TOKEN }}

@@ -1,11 +1,11 @@
-name: Nigthly Publish Main
+name: Nightly Publish Main
 
 on:
   workflow_dispatch:
-  schedule:
-    # * is a special character in YAML so quote this string
-    - cron:  '0 2 * * *'
-    
+  workflow_run:
+    workflows: [Nightly PRs to Main]
+    types: [completed]
+
 jobs:
   # Run the common workflow to test and publish the main branch
   Nightly_Publish_Main:
@@ -13,6 +13,6 @@ jobs:
     with:
       repo-name: ${{ github.event.repository.name }}
       build-platform: ubuntu-latest
-    secrets: 
+    secrets:
       token: ${{ secrets.ACCESS_TOKEN }}
       asset-keys: '{ "DeviceDetection": "${{ secrets.DEVICE_DETECTION_KEY }}", "DeviceDetectionUrl": "${{ secrets.DEVICE_DETECTION_URL }}", "NginxKey": "${{ secrets.NGINX_PLUS_KEY }}", "NginxCert": "${{ secrets.NGINX_PLUS_CERT }}" }'
