@@ -51,13 +51,5 @@
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true
-  },
-  {
-    "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.21.3",
-    "NginxVersion": "1.21.3",
-    "RunPerformance": false,
-    "FullTests": false,
-    "PackageRequirement": true
   }
 ]
