@@ -79,6 +79,9 @@ if ($FullTests -eq $True) {
     ls -l /etc/ssl
     ls -l /etc/ssl/nginx
 
+    Write-Output "Certificate expiration date:"
+    openssl x509 -enddate -noout -in /etc/ssl/nginx/nginx-repo.crt
+
     Write-Output "Download and add NGINX signing key and App-protect security updates signing key:"
     curl -O https://nginx.org/keys/nginx_signing.key && sudo apt-key add ./nginx_signing.key
 
