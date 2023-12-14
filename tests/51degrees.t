@@ -55,7 +55,7 @@ http {
 	51D_use_performance_graph on;
 	51D_use_predictive_graph on;
 
-	51D_match_single x-main-ismobile-single IsMobile;
+	51D_match_ua x-main-ismobile-single IsMobile;
 	51D_match_all x-main-ismobile-all IsMobile;
 
 	51D_set_resp_headers on;
@@ -78,7 +78,7 @@ http {
         listen       127.0.0.1:8080;
         server_name  localhost;
 		
-		51D_match_single x-server-ismobile-single IsMobile;
+		51D_match_ua x-server-ismobile-single IsMobile;
 		51D_match_all x-server-ismobile-all IsMobile;
 		51D_set_resp_headers off;
 
@@ -100,36 +100,36 @@ http {
 		}
 
 		location /metrics {
-			51D_match_single x-iterations Iterations;
-			51D_match_single x-drift Drift;
-			51D_match_single x-difference Difference;
-			51D_match_single x-method Method;
-			51D_match_single x-useragents UserAgents;
-			51D_match_single x-matchednodes MatchedNodes;
-			51D_match_single x-deviceid DeviceId;
+			51D_match_ua x-iterations Iterations;
+			51D_match_ua x-drift Drift;
+			51D_match_ua x-difference Difference;
+			51D_match_ua x-method Method;
+			51D_match_ua x-useragents UserAgents;
+			51D_match_ua x-matchednodes MatchedNodes;
+			51D_match_ua x-deviceid DeviceId;
 			add_header x-metrics $http_x_Iterations,$http_x_drift,$http_x_difference,$http_x_method,$http_x_matchedNodes,$http_x_deviceid;
 			add_header x-metrics-ua $http_x_useragents;
 		}
 
 		location /more-properties {
-			51D_match_single x-more-properties Ismobile,BrowserName;
+			51D_match_ua x-more-properties Ismobile,BrowserName;
 			add_header x-more-properties $http_x_more_properties;
 		}
 
 		location /non-property {
-			51D_match_single x-non-property thisisnotarealpropertyname;
+			51D_match_ua x-non-property thisisnotarealpropertyname;
 			add_header x-non-property $http_x_non_property;
 		}
 
         location /redirect {
-             51D_match_single x-ismobile IsMobile;
+             51D_match_ua x-ismobile IsMobile;
              if ($http_x_ismobile ~ "True") {
               return 301 https://mobilesite;
              }
         }
 
 		location /locations {
-			51D_match_single x-ismobile-single IsMobile;
+			51D_match_ua x-ismobile-single IsMobile;
 			51D_match_all x-ismobile-all IsMobile;
 			add_header x-location-ismobile $http_x_ismobile_single$http_x_ismobile_all;
 			add_header x-server-ismobile $http_x_server_ismobile_single$http_x_server_ismobile_all;
@@ -137,8 +137,8 @@ http {
 		}
 
 		location /variable {
-			51D_match_single x-ismobile-from-var IsMobile $arg_ua;
-			51D_match_single x-ismobile-from-wrong-var IsMobile $ua;
+			51D_match_ua x-ismobile-from-var IsMobile $arg_ua;
+			51D_match_ua x-ismobile-from-wrong-var IsMobile $ua;
 			add_header x-ismobile-from-var $http_x_ismobile_from_var;
 			add_header x-ismobile-from-wrong-var $http_x_ismobile_from_wrong_var;
 		}
