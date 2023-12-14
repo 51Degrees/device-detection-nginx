@@ -24,7 +24,7 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 24;
+my $n = 26;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
@@ -84,6 +84,11 @@ http {
 
         location /single {
 			51D_match_single x-ismobile IsMobile;
+            add_header x-ismobile $http_x_ismobile;
+        }
+
+        location /ua {
+			51D_match_ua x-ismobile IsMobile;
             add_header x-ismobile $http_x_ismobile;
         }
 
@@ -189,6 +194,7 @@ http {
 EOF
 
 $t->write_file('single', '');
+$t->write_file('ua', '');
 $t->write_file('all', '');
 $t->write_file('metrics', '');
 $t->write_file('more-properties', '');
@@ -268,11 +274,17 @@ my $chrome89UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 
 my $r;
 
-# Single User-Agent.
+# Single User-Agent (old)
 $r = get_with_ua('/single', $desktopUserAgent);
 like($r, qr/x-ismobile: False/, 'Desktop match (single User-Agent)');
 $r = get_with_ua('/single', $mobileUserAgent);
 like($r, qr/x-ismobile: True/, 'Mobile match (single User-Agent)');
+
+# Single User-Agent (new)
+$r = get_with_ua('/ua', $desktopUserAgent);
+like($r, qr/x-ismobile: False/, 'Desktop match (ua User-Agent)');
+$r = get_with_ua('/ua', $mobileUserAgent);
+like($r, qr/x-ismobile: True/, 'Mobile match (ua User-Agent)');
 
 # Multiple HTTP headers.
 $r = get_with_ua('/all', $desktopUserAgent);
