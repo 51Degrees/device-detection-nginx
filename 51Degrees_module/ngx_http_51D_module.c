@@ -921,6 +921,11 @@ static ngx_conf_enum_t ngx_http_51D_performance_profiles[] = {
  * to be set and a comma separated list of properties to be returned. The thrid
  * argument is optional to specify the query argument to be used over the
  * default User-Agent. Is called within main, server and location block.
+ * Enables User-Agent matching. Deprecated in favor of 51D_match_ua.
+ * --51D_match_ua takes two string arguments, the name of the header
+ * to be set and a comma separated list of properties to be returned. The thrid
+ * argument is optional to specify the query argument to be used over the
+ * default User-Agent. Is called within main, server and location block.
  * Enables User-Agent matching.
  * --51D_match_all takes two string arguments, the name of the header to
  * be set and a comma separated list of properties to be returned. Is
@@ -975,6 +980,27 @@ static ngx_command_t  ngx_http_51D_commands[] = {
 	NULL },
 
 	{ ngx_string("51D_match_single"),
+	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_main,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
+	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_loc,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
+	NGX_HTTP_SRV_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_srv,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
 	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
 	ngx_http_51D_set_main,
 	NGX_HTTP_LOC_CONF_OFFSET,
@@ -2093,7 +2119,7 @@ u_char *getEscapedMatchedValueString(
 	memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 	// Get a match. If there are multiple instances of
-	// 51D_match_single or 51D_match_all, then don't get the
+	// 51D_match_single, 51D_match_ua or 51D_match_all, then don't get the
 	// match if it has already been fetched.
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
@@ -2429,7 +2455,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 
 		if (lMatchConf->body->propertyCount > 0) {
 			// Get a match. If there are multiple instances of
-			// 51D_match_single or 51D_match_all, then don't get the
+			// 51D_match_single, 51D_match_ua or 51D_match_all, then don't get the
 			// match if it has already been fetched.
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
@@ -2556,7 +2582,7 @@ ngx_http_51D_body_filter(ngx_http_request_t *r, ngx_chain_t *in) {
 
 /**
  * Set data function. Initialises the data structure for a given occurrence
- * of "51D_match_single", "51D_match_all", "51D_get_javascript_single" or
+ * of "51D_match_single", "51D_match_ua", "51D_match_all", "51D_get_javascript_single" or
  * "51D_get_javascript_all" in the config file. Allocates space required and
  * sets the name and properties.
  *
@@ -2634,8 +2660,9 @@ set_data(
 
 	// Set the variable name or other header if they are specified.
 	// If data is for response body, there will be no header.
-	// For 51D_match_single and 51D_match_all, number of arguments is from 2
-	// to 3, while for 51D_get_javascript_single and 51D_get_javascript_all
+	// For 51D_match_single, 51D_match_ua and 51D_match_all, 
+	// number of arguments is from 2 to 3, while
+	// for 51D_get_javascript_single and 51D_get_javascript_all
 	// it is 1 to 2.
 	if ((data->headerName.len == 0 && (int)cf->args->nelts >= 3) ||
 		(data->headerName.len > 0 && (int)cf->args->nelts >= 4)) {
@@ -2773,7 +2800,7 @@ ngx_http_51D_set_body(
 }
 
 /**
- * Set function. Is called for each occurrence of "51D_match_single" or
+ * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua" or
  * "51D_match_all". Allocates space for the header structure and initialises
  * it with the set header function.
  * @param cf the nginx conf.
@@ -2831,7 +2858,8 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	header->next = NULL;
 
 	// Enable single User-Agent matching.
-	if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0) {
+	if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
+		|| ngx_strcmp(cmd->name.data, "51D_match_ua") == 0) {
 		header->multi = 0;
 	}
 	// Enable multiple HTTP header matching.
@@ -3019,7 +3047,7 @@ static char *ngx_http_51D_set_loc_cdn(ngx_conf_t* cf, ngx_command_t *cmd, void *
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
  * "51D_match_all" in a location config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3035,7 +3063,7 @@ static char *ngx_http_51D_set_loc(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
  * "51D_match_all" in a server config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3051,7 +3079,7 @@ static char *ngx_http_51D_set_srv(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
  * "51D_match_all" in a http config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
