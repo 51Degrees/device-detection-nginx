@@ -225,14 +225,28 @@ enum ngx_http_51D_performance_profile_e {
 };
 
 /**
+ * Multi-header detection mode
+ */
+typedef enum ngx_http_51D_multi_header_mode_e ngx_http_51D_multi_header_mode;
+
+/**
+ * Multi-header detection mode enumerator.
+ */
+enum ngx_http_51D_multi_header_mode_e {
+	ngx_http_51D_ua_only = 0,
+	ngx_http_51D_all,
+	ngx_http_51D_ua_uach,
+	ngx_http_51D_multi_header_mode_count,
+};
+
+/**
  * Structure containing details of a specific header to be set as per the
  * config file.
  */
 typedef struct ngx_http_51D_data_to_set_t ngx_http_51D_data_to_set;
 
 struct ngx_http_51D_data_to_set_t {
-    ngx_uint_t multi;                       /**< 0 for single User-Agent match, 1
-                                                 for multiple HTTP header match. */
+    ngx_uint_t multi;                       /**< see `ngx_http_51D_multi_header_mode` */
     ngx_uint_t propertyCount;               /**< The number of properties in the
                                                  property array. */
     ngx_str_t **property;                   /**< Array of properties to set. */
@@ -247,9 +261,11 @@ struct ngx_http_51D_data_to_set_t {
  * Match config structure set from the config file.
  */
 typedef struct {
-	ngx_uint_t hasMulti;                 /**< Indicated whether there is a
-	                                          multiple HTTP header match in this
-	                                          location. */
+	ngx_uint_t multiMask;                /**< Indicated whether there is a
+	                                       	  multiple HTTP header match in this
+	                                          location.
+											  Is a bit mask using shifts from
+											  `ngx_http_51D_multi_header_mode_e`. */
     ngx_uint_t setHeaders;				 /**< Indicates if response headers
 											  should be set. */
 	ngx_uint_t headerCount;              /**< The number of headers to set. */
@@ -570,7 +586,7 @@ ngx_http_51D_post_conf(ngx_conf_t *cf)
 static void
 ngx_http_51D_init_match_conf(ngx_http_51D_match_conf_t *matchConf)
 {
-    matchConf->hasMulti = 0;
+    matchConf->multiMask = 0;
 	matchConf->setHeaders = NGX_CONF_UNSET_UINT;
 	matchConf->headerCount = 0;
 	matchConf->header = NULL;
@@ -1007,6 +1023,27 @@ static ngx_command_t  ngx_http_51D_commands[] = {
     0,
 	NULL },
 
+	{ ngx_string("51D_match_ua_uach"),
+	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_loc,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua_uach"),
+	NGX_HTTP_SRV_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_srv,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua_uach"),
+	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_main,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
 	{ ngx_string("51D_match_all"),
 	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE2,
 	ngx_http_51D_set_loc,
@@ -1271,7 +1308,7 @@ initRespHeaders(
 			//  header has to be constructed
 			// with all evidence, not just a User-Agent. User-Agent
 			// might be deprecated in the future.
-			(*respHeaderPtr)->multi = 1;
+			(*respHeaderPtr)->multi = 1<<ngx_http_51D_all;
 	
 			// This doesn't need to be allocated in separate memmory
 			// as it won't be freed from available properties.
@@ -1746,11 +1783,13 @@ add_override_evidence_from_cookie_and_query(
  * might consider the override from cookies only.
  * @param results the results to hold the return value of the detection
  * @param r the http request that contains the evidence
+ * @param multiMode describes which headers to use for evidence.
  * @return an array of evidence
  */
 static EvidenceKeyValuePairArray *get_evidence(
 	ResultsHash *results,
-	ngx_http_request_t *r) {
+	ngx_http_request_t *r,
+	ngx_http_51D_multi_header_mode multiMode) {
 	DataSetHash *dataSet =
 		(DataSetHash *)results->b.b.dataSet;
 	ngx_table_elt_t *searchResult;
@@ -1767,9 +1806,19 @@ static EvidenceKeyValuePairArray *get_evidence(
 	if (evidence != NULL) {
 		// Create the evidence from the http headers
 		ngx_uint_t i;
+		FILE *f = fopen("_FILTERING.txt", "a");
+		fprintf(f, "Multi Mode: '%d'\n", (int)multiMode);
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
+			fprintf(f, "\n- Next header: '%s'", headerName);
+			if ((multiMode & (1<<ngx_http_51D_ua_uach)) 
+				&& !(strncmp(headerName, "Sec-CH-", 7) == 0
+					 || strncmp(headerName, "User-Agent", 10) == 0))
+			{
+				fprintf(f, " --- SKIPPED!");
+				continue;
+			}
 			searchResult =
 				search_headers_in(
 					r, (u_char *)headerName, ngx_strlen(headerName));
@@ -1801,6 +1850,8 @@ static EvidenceKeyValuePairArray *get_evidence(
 					(const char *)queryEvidence->data);	
 			}
 		}
+		fprintf(f, "\n----- ----- -----\n");
+		fclose(f);
 
 		add_override_evidence_from_cookie_and_query(
 			r, results, evidence);
@@ -1818,22 +1869,25 @@ static EvidenceKeyValuePairArray *get_evidence(
  *
  * @param fdmcf module main config.
  * @param r the current HTTP request.
- * @param multi 0 for a single User-Agent match, 1 for a multiple HTTP
- * header match.
+ * @param multi see `ngx_http_51D_multi_header_mode`
  * @param userAgent pointer to the user agent to perform the match on.
  * @return Nginx status code.
  */
-ngx_uint_t ngx_http_51D_get_match(
+static ngx_uint_t ngx_http_51D_get_match(
 	ngx_http_51D_main_conf_t *fdmcf,
 	ngx_http_request_t *r,
-	int multi,
+	ngx_http_51D_multi_header_mode multi,
 	ngx_str_t *userAgent)
 {
 	ResultsHash *results = fdmcf->results;
 	
+	FILE *f = fopen("_FILTERING.txt", "a");
+	fprintf(f, "multi: '%d'\n", (int)multi);
+	fclose(f);
+	
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
-	if (multi == 0)  {
+	if (multi & (1<<ngx_http_51D_ua_only))  {
 		ResultsHashFromUserAgent(
 			results,
 			(const char *)userAgent->data,
@@ -1846,13 +1900,16 @@ ngx_uint_t ngx_http_51D_get_match(
 				(const char *)fdmcf->dataFile.data);
 		}
 	}
-	else if (multi == 1) {
+	else if (multi 
+			 & ((1<<ngx_http_51D_multi_header_mode_count) - 1)
+			 & ~(1<<ngx_http_51D_ua_only))
+	{
 		// Reset overrides array as we want a free
 		// detection per request.
 		fiftyoneDegreesOverrideValuesReset(results->b.overrides);
 
 		EvidenceKeyValuePairArray *evidence =
-			get_evidence(results, r);
+			get_evidence(results, r, multi);
 		if (evidence != NULL) {
 			ResultsHashFromEvidence(
 				results,
@@ -2119,7 +2176,7 @@ u_char *getEscapedMatchedValueString(
 	memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 	// Get a match. If there are multiple instances of
-	// 51D_match_single, 51D_match_ua or 51D_match_all, then don't get the
+	// 51D_match_single, 51D_match_ua, 51D_match_ua_uach or 51D_match_all, then don't get the
 	// match if it has already been fetched.
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
@@ -2217,7 +2274,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	ngx_http_51D_srv_conf_t *fdscf;
 	ngx_http_51D_loc_conf_t *fdlcf;
 	ngx_http_51D_match_conf_t *matchConf[FIFTYONE_DEGREES_CONFIG_LEVELS];
-	ngx_uint_t matchIndex = 0, multi, haveMatch;
+	ngx_uint_t matchIndex = 0, rawMulti, haveMatch;
 	ngx_http_51D_data_to_set *currentHeader;
 	int totalHeaderCount, matchConfIndex;
 	ngx_str_t *userAgent, *nextUserAgent;
@@ -2257,9 +2314,9 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	// matches. Single and multi matches are done separately to reuse
 	// a match instead of retrieving it multiple times. Start with
 	// false (i.e. = 0) increase to true (i.e. = 1).
-	for (multi = FIFTYONE_DEGREES_FALSE;
-		multi <= FIFTYONE_DEGREES_TRUE;
-		multi++) {
+	for (rawMulti = ngx_http_51D_ua_only;
+		rawMulti < ngx_http_51D_multi_header_mode_count;
+		rawMulti++) {
 		haveMatch = 0;
 
 		// Go through the requested matches in location, server and
@@ -2272,7 +2329,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 			while (currentHeader != NULL) {
 				// Process the match if it is the type we are looking for on
 				// this pass.
-				if (currentHeader->multi == multi &&
+				if ((currentHeader->multi & (1<<rawMulti)) &&
 					(int)currentHeader->variableName.len <= 0 &&
 					userAgent != NULL) {
 					haveMatch = process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent);
@@ -2290,7 +2347,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
 		while (currentHeader != NULL) {
-			if (currentHeader->multi == 0 && (int)currentHeader->variableName.len > 0) {
+			if ((currentHeader->multi & (1<<ngx_http_51D_ua_only)) && (int)currentHeader->variableName.len > 0) {
 				nextUserAgent = ngx_http_51D_get_user_agent(r, currentHeader);
 				if (nextUserAgent != NULL) {
 					if (userAgent != NULL &&
@@ -2455,7 +2512,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 
 		if (lMatchConf->body->propertyCount > 0) {
 			// Get a match. If there are multiple instances of
-			// 51D_match_single, 51D_match_ua or 51D_match_all, then don't get the
+			// 51D_match_single, 51D_match_ua, 51D_match_ua_uach or 51D_match_all, then don't get the
 			// match if it has already been fetched.
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
@@ -2582,7 +2639,7 @@ ngx_http_51D_body_filter(ngx_http_request_t *r, ngx_chain_t *in) {
 
 /**
  * Set data function. Initialises the data structure for a given occurrence
- * of "51D_match_single", "51D_match_ua", "51D_match_all", "51D_get_javascript_single" or
+ * of "51D_match_single", "51D_match_ua", "51D_match_ua_uach", "51D_match_all", "51D_get_javascript_single" or
  * "51D_get_javascript_all" in the config file. Allocates space required and
  * sets the name and properties.
  *
@@ -2660,7 +2717,7 @@ set_data(
 
 	// Set the variable name or other header if they are specified.
 	// If data is for response body, there will be no header.
-	// For 51D_match_single, 51D_match_ua and 51D_match_all, 
+	// For 51D_match_single, 51D_match_ua, 51D_match_ua_uach and 51D_match_all, 
 	// number of arguments is from 2 to 3, while
 	// for 51D_get_javascript_single and 51D_get_javascript_all
 	// it is 1 to 2.
@@ -2800,7 +2857,7 @@ ngx_http_51D_set_body(
 }
 
 /**
- * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua" or
+ * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
  * "51D_match_all". Allocates space for the header structure and initialises
  * it with the set header function.
  * @param cf the nginx conf.
@@ -2857,16 +2914,28 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	// Set the next pointer to NULL to show it is the last in the list.
 	header->next = NULL;
 
+	FILE *f = fopen("_FILTERING.txt", "a");
+	fprintf(f, "command: '%s'\n", (const char *)cmd->name.data);
+
+	// Enable multiple HTTP header matching.
+	if (ngx_strcmp(cmd->name.data, "51D_match_ua_uach") == 0) {
+		header->multi = 1<<ngx_http_51D_ua_uach;
+		matchConf->multiMask |= 1<<ngx_http_51D_ua_uach;
+	}
 	// Enable single User-Agent matching.
-	if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
+	else if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
 		|| ngx_strcmp(cmd->name.data, "51D_match_ua") == 0) {
-		header->multi = 0;
+		header->multi = 1<<ngx_http_51D_ua_only;
+		matchConf->multiMask |= 1<<ngx_http_51D_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_all") == 0) {
-		header->multi = 1;
-		matchConf->hasMulti = 1;
+		header->multi = 1<<ngx_http_51D_all;
+		matchConf->multiMask |= 1<<ngx_http_51D_all;
 	}
+
+	fprintf(f, "header->multi: '%d'\n", (int)header->multi);
+	fclose(f);
 
 	// Set the properties for the selected location.
 	status = ngx_http_51D_set_header(cf, header, value, fdmcf);
@@ -2930,12 +2999,13 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	// Enable single User-Agent matching.
 	if (ngx_strcmp(cmd->name.data, "51D_get_javascript_single") == 0) {
-		body->multi = FIFTYONE_DEGREES_FALSE;
+		body->multi = 1<<ngx_http_51D_ua_only;
+		matchConf->multiMask |= 1<<ngx_http_51D_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_get_javascript_all") == 0) {
-		body->multi = FIFTYONE_DEGREES_TRUE;
-		matchConf->hasMulti = FIFTYONE_DEGREES_TRUE;
+		body->multi = 1<<ngx_http_51D_all;
+		matchConf->multiMask |= 1<<ngx_http_51D_all;
 	}
 
 	// Set the properties for the selected location.
@@ -3047,7 +3117,7 @@ static char *ngx_http_51D_set_loc_cdn(ngx_conf_t* cf, ngx_command_t *cmd, void *
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
  * "51D_match_all" in a location config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3063,7 +3133,7 @@ static char *ngx_http_51D_set_loc(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
  * "51D_match_all" in a server config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3079,7 +3149,7 @@ static char *ngx_http_51D_set_srv(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
  * "51D_match_all" in a http config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
