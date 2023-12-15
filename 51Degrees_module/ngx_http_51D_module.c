@@ -225,18 +225,21 @@ enum ngx_http_51D_performance_profile_e {
 };
 
 /**
- * Multi-header detection mode
+ * Multi-header detection mode.
+ * Is a bit mask, position meanings
+ *  provided by `ngx_http_51D_multi_header_mode_e` below.
  */
-typedef enum ngx_http_51D_multi_header_mode_e ngx_http_51D_multi_header_mode;
+typedef ngx_uint_t ngx_http_51D_multi_header_mode;
 
 /**
  * Multi-header detection mode enumerator.
+ * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
  */
 enum ngx_http_51D_multi_header_mode_e {
 	ngx_http_51D_ua_only = 0,
 	ngx_http_51D_all,
 	ngx_http_51D_client_hints,
-	ngx_http_51D_multi_header_mode_count,
+	ngx_http_51D_multi_header_mode_e_count,
 };
 
 /**
@@ -246,7 +249,7 @@ enum ngx_http_51D_multi_header_mode_e {
 typedef struct ngx_http_51D_data_to_set_t ngx_http_51D_data_to_set;
 
 struct ngx_http_51D_data_to_set_t {
-    ngx_uint_t multi;                       /**< see `ngx_http_51D_multi_header_mode` */
+    ngx_http_51D_multi_header_mode multi;   /**< Bit mask: what headers to use. */
     ngx_uint_t propertyCount;               /**< The number of properties in the
                                                  property array. */
     ngx_str_t **property;                   /**< Array of properties to set. */
@@ -261,17 +264,16 @@ struct ngx_http_51D_data_to_set_t {
  * Match config structure set from the config file.
  */
 typedef struct {
-	ngx_uint_t multiMask;                /**< Indicated whether there is a
-	                                       	  multiple HTTP header match in this
-	                                          location.
-											  Is a bit mask using shifts from
-											  `ngx_http_51D_multi_header_mode_e`. */
-    ngx_uint_t setHeaders;				 /**< Indicates if response headers
-											  should be set. */
-	ngx_uint_t headerCount;              /**< The number of headers to set. */
-    ngx_http_51D_data_to_set *header;    /**< List of headers to set. */
-	ngx_http_51D_data_to_set *body;      /**< Body to set. There can be only 
-											  one per config. */
+	ngx_http_51D_multi_header_mode multiMask;   /**< Bit mask. Indicates which
+	                                       	  		 multiple HTTP header match
+													 modes are in use for this
+	                                          		 location. */
+    ngx_uint_t setHeaders;				 		/**< Indicates if response headers
+											  		 should be set. */
+	ngx_uint_t headerCount;              		/**< The number of headers to set. */
+    ngx_http_51D_data_to_set *header;    		/**< List of headers to set. */
+	ngx_http_51D_data_to_set *body;      		/**< Body to set. There can be only 
+											  		 one per config. */
 } ngx_http_51D_match_conf_t;
 
 /**
@@ -1863,7 +1865,7 @@ static EvidenceKeyValuePairArray *get_evidence(
  *
  * @param fdmcf module main config.
  * @param r the current HTTP request.
- * @param multi see `ngx_http_51D_multi_header_mode`
+ * @param multi Bit mask: what headers to use.
  * @param userAgent pointer to the user agent to perform the match on.
  * @return Nginx status code.
  */
@@ -1891,7 +1893,7 @@ static ngx_uint_t ngx_http_51D_get_match(
 		}
 	}
 	else if (multi 
-			 & ((1<<ngx_http_51D_multi_header_mode_count) - 1)
+			 & ((1<<ngx_http_51D_multi_header_mode_e_count) - 1)
 			 & ~(1<<ngx_http_51D_ua_only))
 	{
 		// Reset overrides array as we want a free
@@ -2305,7 +2307,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	// a match instead of retrieving it multiple times. Start with
 	// false (i.e. = 0) increase to true (i.e. = 1).
 	for (rawMulti = ngx_http_51D_ua_only;
-		rawMulti < ngx_http_51D_multi_header_mode_count;
+		rawMulti < ngx_http_51D_multi_header_mode_e_count;
 		rawMulti++) {
 		haveMatch = 0;
 
