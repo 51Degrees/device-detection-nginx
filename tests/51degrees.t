@@ -24,7 +24,7 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 26;
+my $n = 28;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
@@ -89,6 +89,11 @@ http {
 
         location /ua {
 			51D_match_ua x-ismobile IsMobile;
+            add_header x-ismobile $http_x_ismobile;
+        }
+
+        location /ua_uach {
+			51D_match_client_hints x-ismobile IsMobile;
             add_header x-ismobile $http_x_ismobile;
         }
 
@@ -195,6 +200,7 @@ EOF
 
 $t->write_file('single', '');
 $t->write_file('ua', '');
+$t->write_file('ua_uach', '');
 $t->write_file('all', '');
 $t->write_file('metrics', '');
 $t->write_file('more-properties', '');
@@ -285,6 +291,12 @@ $r = get_with_ua('/ua', $desktopUserAgent);
 like($r, qr/x-ismobile: False/, 'Desktop match (ua User-Agent)');
 $r = get_with_ua('/ua', $mobileUserAgent);
 like($r, qr/x-ismobile: True/, 'Mobile match (ua User-Agent)');
+
+# User-Agent and Client-Hints
+$r = get_with_ua('/ua_uach', $desktopUserAgent);
+like($r, qr/x-ismobile: False/, 'Desktop match (ua_uach User-Agent)');
+$r = get_with_ua('/ua_uach', $mobileUserAgent);
+like($r, qr/x-ismobile: True/, 'Mobile match (ua_uach User-Agent)');
 
 # Multiple HTTP headers.
 $r = get_with_ua('/all', $desktopUserAgent);
