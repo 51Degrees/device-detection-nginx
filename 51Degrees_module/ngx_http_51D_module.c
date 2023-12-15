@@ -235,7 +235,7 @@ typedef enum ngx_http_51D_multi_header_mode_e ngx_http_51D_multi_header_mode;
 enum ngx_http_51D_multi_header_mode_e {
 	ngx_http_51D_ua_only = 0,
 	ngx_http_51D_all,
-	ngx_http_51D_ua_uach,
+	ngx_http_51D_client_hints,
 	ngx_http_51D_multi_header_mode_count,
 };
 
@@ -1023,21 +1023,21 @@ static ngx_command_t  ngx_http_51D_commands[] = {
     0,
 	NULL },
 
-	{ ngx_string("51D_match_ua_uach"),
+	{ ngx_string("51D_match_client_hints"),
 	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
 	ngx_http_51D_set_loc,
 	NGX_HTTP_LOC_CONF_OFFSET,
     0,
 	NULL },
 
-	{ ngx_string("51D_match_ua_uach"),
+	{ ngx_string("51D_match_client_hints"),
 	NGX_HTTP_SRV_CONF|NGX_CONF_TAKE23,
 	ngx_http_51D_set_srv,
 	NGX_HTTP_LOC_CONF_OFFSET,
     0,
 	NULL },
 
-	{ ngx_string("51D_match_ua_uach"),
+	{ ngx_string("51D_match_client_hints"),
 	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
 	ngx_http_51D_set_main,
 	NGX_HTTP_LOC_CONF_OFFSET,
@@ -1812,7 +1812,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
 			fprintf(f, "\n- Next header: '%s'", headerName);
-			if ((multiMode & (1<<ngx_http_51D_ua_uach)) 
+			if ((multiMode & (1<<ngx_http_51D_client_hints)) 
 				&& !(strncmp(headerName, "Sec-CH-", 7) == 0
 					 || strncmp(headerName, "User-Agent", 10) == 0))
 			{
@@ -2176,7 +2176,7 @@ u_char *getEscapedMatchedValueString(
 	memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 	// Get a match. If there are multiple instances of
-	// 51D_match_single, 51D_match_ua, 51D_match_ua_uach or 51D_match_all, then don't get the
+	// 51D_match_single, 51D_match_ua, 51D_match_client_hints or 51D_match_all, then don't get the
 	// match if it has already been fetched.
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
@@ -2512,7 +2512,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 
 		if (lMatchConf->body->propertyCount > 0) {
 			// Get a match. If there are multiple instances of
-			// 51D_match_single, 51D_match_ua, 51D_match_ua_uach or 51D_match_all, then don't get the
+			// 51D_match_single, 51D_match_ua, 51D_match_client_hints or 51D_match_all, then don't get the
 			// match if it has already been fetched.
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
@@ -2639,7 +2639,7 @@ ngx_http_51D_body_filter(ngx_http_request_t *r, ngx_chain_t *in) {
 
 /**
  * Set data function. Initialises the data structure for a given occurrence
- * of "51D_match_single", "51D_match_ua", "51D_match_ua_uach", "51D_match_all", "51D_get_javascript_single" or
+ * of "51D_match_single", "51D_match_ua", "51D_match_client_hints", "51D_match_all", "51D_get_javascript_single" or
  * "51D_get_javascript_all" in the config file. Allocates space required and
  * sets the name and properties.
  *
@@ -2717,7 +2717,7 @@ set_data(
 
 	// Set the variable name or other header if they are specified.
 	// If data is for response body, there will be no header.
-	// For 51D_match_single, 51D_match_ua, 51D_match_ua_uach and 51D_match_all, 
+	// For 51D_match_single, 51D_match_ua, 51D_match_client_hints and 51D_match_all, 
 	// number of arguments is from 2 to 3, while
 	// for 51D_get_javascript_single and 51D_get_javascript_all
 	// it is 1 to 2.
@@ -2857,7 +2857,7 @@ ngx_http_51D_set_body(
 }
 
 /**
- * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
+ * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua", "51D_match_client_hints" or
  * "51D_match_all". Allocates space for the header structure and initialises
  * it with the set header function.
  * @param cf the nginx conf.
@@ -2918,9 +2918,9 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	fprintf(f, "command: '%s'\n", (const char *)cmd->name.data);
 
 	// Enable multiple HTTP header matching.
-	if (ngx_strcmp(cmd->name.data, "51D_match_ua_uach") == 0) {
-		header->multi = 1<<ngx_http_51D_ua_uach;
-		matchConf->multiMask |= 1<<ngx_http_51D_ua_uach;
+	if (ngx_strcmp(cmd->name.data, "51D_match_client_hints") == 0) {
+		header->multi = 1<<ngx_http_51D_client_hints;
+		matchConf->multiMask |= 1<<ngx_http_51D_client_hints;
 	}
 	// Enable single User-Agent matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
@@ -3117,7 +3117,7 @@ static char *ngx_http_51D_set_loc_cdn(ngx_conf_t* cf, ngx_command_t *cmd, void *
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_client_hints" or
  * "51D_match_all" in a location config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3133,7 +3133,7 @@ static char *ngx_http_51D_set_loc(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_client_hints" or
  * "51D_match_all" in a server config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3149,7 +3149,7 @@ static char *ngx_http_51D_set_srv(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_uach" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_client_hints" or
  * "51D_match_all" in a http config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
