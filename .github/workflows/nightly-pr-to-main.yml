@@ -2,6 +2,11 @@ name: Nightly PRs to Main
 
 on:
   workflow_dispatch:
+    inputs:
+      dryrun:
+        default: false
+        type: boolean
+        description: Dry Run
   workflow_run:
     workflows: [Nightly Submodule Update]
     types: [completed]
@@ -12,6 +17,8 @@ jobs:
     uses: 51Degrees/common-ci/.github/workflows/nightly-prs-to-main.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
+      org-name: ${{ github.event.repository.owner.login }}
+      dryrun: ${{ inputs.dryrun || false }}
     secrets:
       token: ${{ secrets.ACCESS_TOKEN }}
       DeviceDetection: ${{ secrets.DEVICE_DETECTION_KEY }}
