@@ -336,6 +336,15 @@ typedef struct {
 	                                        server's locations. */
 } ngx_http_51D_srv_conf_t;
 
+
+#define LOG_FILTERING(...) \
+do { \
+	FILE * const f = fopen("_FILTERING.txt", "a"); \
+	fprintf(f, __VA_ARGS__); \
+	fclose(f); \
+} while(0);
+
+
 /**
  * Report the status code returned by one of the 51Degrees APIs.
  * @param log the log to write the error message to.
@@ -2170,10 +2179,12 @@ u_char *getEscapedMatchedValueString(
 	// Get a match. If there are multiple instances of
 	// 51D_match_single, 51D_match_ua, 51D_match_client_hints or 51D_match_all, then don't get the
 	// match if it has already been fetched.
+	LOG_FILTERING("haveMatch = %d\n", (int)haveMatch);
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
 			ngx_http_51D_get_match(fdmcf, r, header->multi, userAgent);
 		if (ngxCode != NGX_OK) {
+			LOG_FILTERING("ngxCode (ngx_http_51D_get_match) = %lld\n", (long long)haveMatch);
 			return NULL;
 		}	
 	}
@@ -2447,6 +2458,9 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 		setHeaders = lMatchConf->setHeaders;
 	}
 
+	LOG_FILTERING("----- ------ -----\n");
+	LOG_FILTERING("setHeaders = %d\n", (int)setHeaders);
+
 	// Setting the headers
 	if (setHeaders) {
 		ngx_table_elt_t *h;
@@ -2455,12 +2469,14 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 			u_char *escapedValueString = getEscapedMatchedValueString(
 				r, fdmcf, currentHeader, i, 0, NULL, ",");
 			if (escapedValueString == NULL) {
+				LOG_FILTERING("escapedValueString = NULL\n");
 				return NGX_ERROR;
 			}
 
 			ngx_table_elt_t *header = findResponseHeader(r, currentHeader->headerName);
 
 			if (header == NULL) {
+				LOG_FILTERING("header is NULL\n");
 				// For each property value pair, set a new header name and value.
 				h = ngx_list_push(&r->headers_out.headers);
 				h->key.data = (u_char *)currentHeader->headerName.data;
@@ -2471,6 +2487,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 				h->lowcase_key = (u_char *)currentHeader->lowerHeaderName.data;
 			}
 			else {
+				LOG_FILTERING("header is non-NULL\n");
 				size_t len = header->value.len + ngx_strlen(escapedValueString) + ngx_strlen(",") + 1;
 				u_char *newHeaderValue = (u_char *)ngx_palloc(r->pool, len);
 				if (newHeaderValue == NULL) {
@@ -2492,14 +2509,26 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 		}
 	}
 
+	
+	LOG_FILTERING("body = %s\n", lMatchConf->body ? "non-NULL" : "NULL");
 	// Handling 51D_set_javascript_* directives
 	if (lMatchConf->body != NULL) {
-		userAgent = (lMatchConf->body->multi == 0 &&
+		LOG_FILTERING("body->multi = %d\n", (int)lMatchConf->body->multi);
+
+		userAgent = ((lMatchConf->body->multi & (1<<ngx_http_51D_ua_only)) &&
 			(int)lMatchConf->body->variableName.len <= 0) ||
 			lMatchConf->body->multi == 1 ?
 			ngx_http_51D_get_user_agent(r, NULL) :
 			ngx_http_51D_get_user_agent(r, lMatchConf->body);
 		
+		if (!userAgent) {
+			LOG_FILTERING("userAgent = <NULL>\n");
+		} else if (!(userAgent->len && userAgent->data)) {
+			LOG_FILTERING("userAgent = <ZERO_LENGTH?>\n");
+		} else {
+			LOG_FILTERING("userAgent = '%s'\n", userAgent->data);
+		}
+
 		memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 		if (lMatchConf->body->propertyCount > 0) {
@@ -2509,13 +2538,16 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
 			// no need to perform detection again.
-			if (lMatchConf->body->multi == 0 ||
-				(lMatchConf->body->multi && 
+			if ((lMatchConf->body->multi & (1<<ngx_http_51D_ua_only)) ||
+				((lMatchConf->body->multi & (1<<ngx_http_51D_all)) && 
 					(setHeaders == 0 || fdmcf->setRespHeaderCount <= 0))) {
 				ngx_uint_t ngxCode = ngx_http_51D_get_match(fdmcf, r, lMatchConf->body->multi, userAgent);
 				if (ngxCode != NGX_OK) {
+					LOG_FILTERING("Failed to get match, code = %lld\n", (long long)ngxCode);
 					return ngxCode;
 				}
+			} else {
+				LOG_FILTERING("Not looking for a match\n");
 			}
 
 			// For each property, set the value in value_string_array.
@@ -2531,6 +2563,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 
 		// Send header
 		contentLength = ngx_strlen(fdmcf->valueString);
+		LOG_FILTERING("contentLength = %d\n", (int)contentLength);
 		r->headers_out.status = NGX_HTTP_OK;
 		if (contentLength > 0 &&
 			ngx_strcmp(
