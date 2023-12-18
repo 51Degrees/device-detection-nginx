@@ -1817,13 +1817,17 @@ static EvidenceKeyValuePairArray *get_evidence(
 	if (evidence != NULL) {
 		// Create the evidence from the http headers
 		ngx_uint_t i;
+		FILE *f = fopen("_FILTERING.txt", "a");
+		fprintf(f, "Multi Mode: '%d'\n", (int)multiMode);
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
+			fprintf(f, "\n- Next header: '%s'", headerName);
 			if ((multiMode & (1<<ngx_http_51D_client_hints)) 
 				&& !(strncmp(headerName, "Sec-CH-", 7) == 0
 					 || strncmp(headerName, "User-Agent", 10) == 0))
 			{
+				fprintf(f, " --- SKIPPED!");
 				continue;
 			}
 			searchResult =
@@ -1857,6 +1861,8 @@ static EvidenceKeyValuePairArray *get_evidence(
 					(const char *)queryEvidence->data);	
 			}
 		}
+		fprintf(f, "\n----- ----- -----\n");
+		fclose(f);
 
 		add_override_evidence_from_cookie_and_query(
 			r, results, evidence);
@@ -1885,6 +1891,10 @@ static ngx_uint_t ngx_http_51D_get_match(
 	ngx_str_t *userAgent)
 {
 	ResultsHash *results = fdmcf->results;
+	
+	FILE *f = fopen("_FILTERING.txt", "a");
+	fprintf(f, "multi: '%d'\n", (int)multi);
+	fclose(f);
 	
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
@@ -2939,6 +2949,9 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	// Set the next pointer to NULL to show it is the last in the list.
 	header->next = NULL;
 
+	FILE *f = fopen("_FILTERING.txt", "a");
+	fprintf(f, "command: '%s'\n", (const char *)cmd->name.data);
+
 	// Enable multiple HTTP header matching.
 	if (ngx_strcmp(cmd->name.data, "51D_match_client_hints") == 0) {
 		header->multi = 1<<ngx_http_51D_client_hints;
@@ -2955,6 +2968,9 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 		header->multi = 1<<ngx_http_51D_all;
 		matchConf->multiMask |= 1<<ngx_http_51D_all;
 	}
+
+	fprintf(f, "header->multi: '%d'\n", (int)header->multi);
+	fclose(f);
 
 	// Set the properties for the selected location.
 	status = ngx_http_51D_set_header(cf, header, value, fdmcf);
