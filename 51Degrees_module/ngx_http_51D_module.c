@@ -217,17 +217,17 @@ typedef enum ngx_http_51D_performance_profile_e ngx_http_51D_performance_profile
  * NOTE: Only in_memory is currently supported.
  */
 enum ngx_http_51D_performance_profile_e {
-	ngx_http_51D_in_memory = 1,
-	ngx_http_51D_high_performance,
-	ngx_http_51D_low_memory,
-	ngx_http_51D_balanced,
-	ngx_http_51D_balanced_temp
+	ngx_http_51D_profile_in_memory = 1,
+	ngx_http_51D_profile_high_performance,
+	ngx_http_51D_profile_low_memory,
+	ngx_http_51D_profile_balanced,
+	ngx_http_51D_profile_balanced_temp
 };
 
 /**
  * Multi-header detection mode.
  * Is a bit mask, position meanings
- *  provided by `ngx_http_51D_multi_header_mode_e` below.
+ *  provided by `ngx_http_51D_multi_mode_bits` below.
  */
 typedef ngx_uint_t ngx_http_51D_multi_header_mode;
 
@@ -235,11 +235,23 @@ typedef ngx_uint_t ngx_http_51D_multi_header_mode;
  * Multi-header detection mode enumerator.
  * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
  */
-enum ngx_http_51D_multi_header_mode_e {
-	ngx_http_51D_ua_only = 0,
-	ngx_http_51D_all,
-	ngx_http_51D_client_hints,
-	ngx_http_51D_multi_header_mode_e_count,
+enum ngx_http_51D_multi_mode_bits {
+	ngx_http_51D_multi_mode_bit_ua_only = 0,
+	ngx_http_51D_multi_mode_bit_client_hints,
+	ngx_http_51D_multi_mode_bit_all_evidence,
+	ngx_http_51D_multi_mode_bits_count,
+};
+
+/**
+ * Multi-header detection mode enumerator.
+ * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
+ */
+enum ngx_http_51D_multi_mode_masks {
+	ngx_http_51D_multi_mode_mask_ua_only 	  = 1 << ngx_http_51D_multi_mode_bit_ua_only,
+	ngx_http_51D_multi_mode_mask_client_hints = 1 << ngx_http_51D_multi_mode_bit_client_hints,
+	ngx_http_51D_multi_mode_mask_all_evidence = 1 << ngx_http_51D_multi_mode_bit_all_evidence,
+
+	ngx_http_51D_multi_mode_mask_non_ua_only  = ((1 << ngx_http_51D_multi_mode_bits_count) - 1) & ~ngx_http_51D_multi_mode_mask_ua_only,
 };
 
 /**
@@ -337,12 +349,14 @@ typedef struct {
 } ngx_http_51D_srv_conf_t;
 
 
-#define LOG_FILTERING(...) \
-do { \
-	FILE * const f = fopen("_FILTERING.txt", "a"); \
-	fprintf(f, __VA_ARGS__); \
-	fclose(f); \
-} while(0);
+static void log_filtering(const char* format, ...) {
+	FILE * const f = fopen("_FILTERING.txt", "a");
+    va_list argptr;
+    va_start(argptr, format);
+    vfprintf(f, format, argptr);
+    va_end(argptr);
+	fclose(f);
+}
 
 
 /**
@@ -412,23 +426,23 @@ get_config_hash(ngx_http_51D_main_conf_t *fdmcf) {
 	ConfigHash config;
 	// Determine performance profile
 	switch (fdmcf->performanceProfile) {
-		case ngx_http_51D_in_memory:
+		case ngx_http_51D_profile_in_memory:
 			config = HashInMemoryConfig;
 			break;
 		// Only support the in_memory performance profile
 		// as Nginx is meant to be used in a high performance
 		// environment.
 		//
-		// case ngx_http_51D_high_performance:
+		// case ngx_http_51D_profile_high_performance:
 		// 	config = HashHighPerformanceConfig;
 		// 	break;
-		// case ngx_http_51D_low_memory:
+		// case ngx_http_51D_profile_low_memory:
 		// 	config = HashLowMemoryConfig;
 		// 	break;
-		// case ngx_http_51D_balanced:
+		// case ngx_http_51D_profile_balanced:
 		// 	config = HashBalancedConfig;
 		// 	break;
-		// case ngx_http_51D_balanced_temp:
+		// case ngx_http_51D_profile_balanced_temp:
 		// 	config = HashBalancedTempConfig;
 		// 	break;
 		default:
@@ -933,12 +947,12 @@ ngx_http_51D_init_module(ngx_cycle_t *cycle)
  * profile.
  */
 static ngx_conf_enum_t ngx_http_51D_performance_profiles[] = {
-	{ ngx_string("IN_MEMORY"), ngx_http_51D_in_memory },
-	{ ngx_string("HIGH_PERFORMANCE"), ngx_http_51D_high_performance },
-	{ ngx_string("LOW_MEMORY"), ngx_http_51D_low_memory },
-	{ ngx_string("BALANCED"), ngx_http_51D_balanced },
-	{ ngx_string("BALANCED_TEMP"), ngx_http_51D_balanced_temp },
-	{ ngx_string("DEFAULT"), ngx_http_51D_balanced },
+	{ ngx_string("IN_MEMORY"), ngx_http_51D_profile_in_memory },
+	{ ngx_string("HIGH_PERFORMANCE"), ngx_http_51D_profile_high_performance },
+	{ ngx_string("LOW_MEMORY"), ngx_http_51D_profile_low_memory },
+	{ ngx_string("BALANCED"), ngx_http_51D_profile_balanced },
+	{ ngx_string("BALANCED_TEMP"), ngx_http_51D_profile_balanced_temp },
+	{ ngx_string("DEFAULT"), ngx_http_51D_profile_balanced },
 	{ ngx_null_string, 0 }
 };
 
@@ -1319,7 +1333,7 @@ initRespHeaders(
 			//  header has to be constructed
 			// with all evidence, not just a User-Agent. User-Agent
 			// might be deprecated in the future.
-			(*respHeaderPtr)->multi = 1<<ngx_http_51D_all;
+			(*respHeaderPtr)->multi = 0;
 	
 			// This doesn't need to be allocated in separate memmory
 			// as it won't be freed from available properties.
@@ -1649,8 +1663,10 @@ get_evidence_from_query_string_base(ngx_http_request_t *r, ngx_str_t *variableNa
 		ngx_unescape_uri(&dst, &src, variable->len, 0);
 		evidence->len = dst - evidence->data;
 		evidence->data[evidence->len] = '\0';
+		log_filtering("Evidence for '%s' --- '%s'\n", variableName->data, evidence->data);
 	}
 	else {
+		log_filtering("Evidence for '%s' --- NOT FOUND\n", variableName->data);
 		evidence = empty_string(r);
 	}
 	return evidence;
@@ -1817,19 +1833,18 @@ static EvidenceKeyValuePairArray *get_evidence(
 	if (evidence != NULL) {
 		// Create the evidence from the http headers
 		ngx_uint_t i;
-		FILE *f = fopen("_FILTERING.txt", "a");
-		fprintf(f, "Multi Mode: '%d'\n", (int)multiMode);
+		log_filtering("***** get_evidence *****\n");
+		log_filtering("Multi Mode: '%d'\n", (int)multiMode);
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
-			fprintf(f, "\n- Next header: '%s'", headerName);
-			if ((multiMode & (1<<ngx_http_51D_client_hints)) 
+			if ((multiMode & ngx_http_51D_multi_mode_mask_client_hints) 
 				&& !(strncmp(headerName, "Sec-CH-", 7) == 0
 					 || strncmp(headerName, "User-Agent", 10) == 0))
 			{
-				fprintf(f, " --- SKIPPED!");
 				continue;
 			}
+			log_filtering("- Next header: '%s'\n", headerName);
 			searchResult =
 				search_headers_in(
 					r, (u_char *)headerName, ngx_strlen(headerName));
@@ -1861,8 +1876,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 					(const char *)queryEvidence->data);	
 			}
 		}
-		fprintf(f, "\n----- ----- -----\n");
-		fclose(f);
+		log_filtering("\n+++++ ----- +++++\n");
 
 		add_override_evidence_from_cookie_and_query(
 			r, results, evidence);
@@ -1892,13 +1906,9 @@ static ngx_uint_t ngx_http_51D_get_match(
 {
 	ResultsHash *results = fdmcf->results;
 	
-	FILE *f = fopen("_FILTERING.txt", "a");
-	fprintf(f, "multi: '%d'\n", (int)multi);
-	fclose(f);
-	
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
-	if (multi & (1<<ngx_http_51D_ua_only))  {
+	if (multi & ngx_http_51D_multi_mode_mask_ua_only)  {
 		ResultsHashFromUserAgent(
 			results,
 			(const char *)userAgent->data,
@@ -1911,9 +1921,7 @@ static ngx_uint_t ngx_http_51D_get_match(
 				(const char *)fdmcf->dataFile.data);
 		}
 	}
-	else if (multi 
-			 & ((1<<ngx_http_51D_multi_header_mode_e_count) - 1)
-			 & ~(1<<ngx_http_51D_ua_only))
+	else if (multi & ngx_http_51D_multi_mode_mask_non_ua_only)
 	{
 		// Reset overrides array as we want a free
 		// detection per request.
@@ -2189,12 +2197,12 @@ u_char *getEscapedMatchedValueString(
 	// Get a match. If there are multiple instances of
 	// 51D_match_single, 51D_match_ua, 51D_match_client_hints or 51D_match_all, then don't get the
 	// match if it has already been fetched.
-	LOG_FILTERING("haveMatch = %d\n", (int)haveMatch);
+	log_filtering("haveMatch = %d\n", (int)haveMatch);
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
 			ngx_http_51D_get_match(fdmcf, r, header->multi, userAgent);
 		if (ngxCode != NGX_OK) {
-			LOG_FILTERING("ngxCode (ngx_http_51D_get_match) = %lld\n", (long long)haveMatch);
+			log_filtering("ngxCode (ngx_http_51D_get_match) = %lld\n", (long long)ngxCode);
 			return NULL;
 		}	
 	}
@@ -2327,8 +2335,8 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	// matches. Single and multi matches are done separately to reuse
 	// a match instead of retrieving it multiple times. Start with
 	// false (i.e. = 0) increase to true (i.e. = 1).
-	for (rawMulti = ngx_http_51D_ua_only;
-		rawMulti < ngx_http_51D_multi_header_mode_e_count;
+	for (rawMulti = ngx_http_51D_multi_mode_bit_ua_only;
+		rawMulti < ngx_http_51D_multi_mode_bits_count;
 		rawMulti++) {
 		haveMatch = 0;
 
@@ -2345,7 +2353,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 				if ((currentHeader->multi & (1<<rawMulti)) &&
 					(int)currentHeader->variableName.len <= 0 &&
 					userAgent != NULL) {
-					haveMatch = process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent);
+					haveMatch = (process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent) == NGX_OK);
 					matchIndex++;
 				}
 				// Look at the next header.
@@ -2360,18 +2368,20 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
 		while (currentHeader != NULL) {
-			if ((currentHeader->multi & (1<<ngx_http_51D_ua_only)) && (int)currentHeader->variableName.len > 0) {
+			if ((currentHeader->multi & ngx_http_51D_multi_mode_mask_ua_only) && (int)currentHeader->variableName.len > 0) {
 				nextUserAgent = ngx_http_51D_get_user_agent(r, currentHeader);
 				if (nextUserAgent != NULL) {
 					if (userAgent != NULL &&
 						strcmp(
 							(const char *)userAgent->data,
 							(const char *)nextUserAgent->data) == 0) {
-						process(r, fdmcf, currentHeader, h, matchIndex, 1, userAgent);
+						const int newHaveMatch = 1;
+						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
 					}
 					else {
 						userAgent = nextUserAgent;
-						process(r, fdmcf, currentHeader, h, matchIndex, 0, userAgent);
+						const int newHaveMatch = 0;
+						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
 					}
 					matchIndex++;
 				}
@@ -2468,8 +2478,8 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 		setHeaders = lMatchConf->setHeaders;
 	}
 
-	LOG_FILTERING("----- ------ -----\n");
-	LOG_FILTERING("setHeaders = %d\n", (int)setHeaders);
+	log_filtering("----- ------ -----\n");
+	log_filtering("setHeaders = %d\n", (int)setHeaders);
 
 	// Setting the headers
 	if (setHeaders) {
@@ -2479,14 +2489,14 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 			u_char *escapedValueString = getEscapedMatchedValueString(
 				r, fdmcf, currentHeader, i, 0, NULL, ",");
 			if (escapedValueString == NULL) {
-				LOG_FILTERING("escapedValueString = NULL\n");
+				log_filtering("escapedValueString = NULL\n");
 				return NGX_ERROR;
 			}
 
 			ngx_table_elt_t *header = findResponseHeader(r, currentHeader->headerName);
 
 			if (header == NULL) {
-				LOG_FILTERING("header is NULL\n");
+				log_filtering("header is NULL\n");
 				// For each property value pair, set a new header name and value.
 				h = ngx_list_push(&r->headers_out.headers);
 				h->key.data = (u_char *)currentHeader->headerName.data;
@@ -2497,7 +2507,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 				h->lowcase_key = (u_char *)currentHeader->lowerHeaderName.data;
 			}
 			else {
-				LOG_FILTERING("header is non-NULL\n");
+				log_filtering("header is non-NULL\n");
 				size_t len = header->value.len + ngx_strlen(escapedValueString) + ngx_strlen(",") + 1;
 				u_char *newHeaderValue = (u_char *)ngx_palloc(r->pool, len);
 				if (newHeaderValue == NULL) {
@@ -2520,23 +2530,23 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 	}
 
 	
-	LOG_FILTERING("body = %s\n", lMatchConf->body ? "non-NULL" : "NULL");
+	log_filtering("body = %s\n", lMatchConf->body ? "non-NULL" : "NULL");
 	// Handling 51D_set_javascript_* directives
 	if (lMatchConf->body != NULL) {
-		LOG_FILTERING("body->multi = %d\n", (int)lMatchConf->body->multi);
+		log_filtering("body->multi = %d\n", (int)lMatchConf->body->multi);
 
-		userAgent = ((lMatchConf->body->multi & (1<<ngx_http_51D_ua_only)) &&
+		userAgent = ((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_ua_only) &&
 			(int)lMatchConf->body->variableName.len <= 0) ||
-			lMatchConf->body->multi == 1 ?
+			(lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_non_ua_only) ?
 			ngx_http_51D_get_user_agent(r, NULL) :
 			ngx_http_51D_get_user_agent(r, lMatchConf->body);
 		
 		if (!userAgent) {
-			LOG_FILTERING("userAgent = <NULL>\n");
+			log_filtering("userAgent = <NULL>\n");
 		} else if (!(userAgent->len && userAgent->data)) {
-			LOG_FILTERING("userAgent = <ZERO_LENGTH?>\n");
+			log_filtering("userAgent = <ZERO_LENGTH?>\n");
 		} else {
-			LOG_FILTERING("userAgent = '%s'\n", userAgent->data);
+			log_filtering("userAgent = '%s'\n", userAgent->data);
 		}
 
 		memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
@@ -2548,18 +2558,19 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
 			// no need to perform detection again.
-			if ((lMatchConf->body->multi & (1<<ngx_http_51D_ua_only)) ||
-				((lMatchConf->body->multi & (1<<ngx_http_51D_all)) && 
+			if ((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_ua_only) ||
+				((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_non_ua_only) && 
 					(setHeaders == 0 || fdmcf->setRespHeaderCount <= 0))) {
 				ngx_uint_t ngxCode = ngx_http_51D_get_match(fdmcf, r, lMatchConf->body->multi, userAgent);
 				if (ngxCode != NGX_OK) {
-					LOG_FILTERING("Failed to get match, code = %lld\n", (long long)ngxCode);
+					log_filtering("Failed to get match, code = %lld\n", (long long)ngxCode);
 					return ngxCode;
 				}
 			} else {
-				LOG_FILTERING("Not looking for a match\n");
+				log_filtering("Not looking for a match\n");
 			}
 
+			log_filtering("fdmcf->valueString (before ngx_http_51D_get_value) = '%s'\n", fdmcf->valueString);
 			// For each property, set the value in value_string_array.
 			ngx_http_51D_get_value(
 				fdmcf,
@@ -2569,11 +2580,12 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 				FIFTYONE_DEGREES_MAX_STRING,
 				1,
 				NULL);
+			log_filtering("fdmcf->valueString (after ngx_http_51D_get_value) = '%s'\n", fdmcf->valueString);
 		}
 
 		// Send header
 		contentLength = ngx_strlen(fdmcf->valueString);
-		LOG_FILTERING("contentLength = %d\n", (int)contentLength);
+		log_filtering("contentLength = %d\n", (int)contentLength);
 		r->headers_out.status = NGX_HTTP_OK;
 		if (contentLength > 0 &&
 			ngx_strcmp(
@@ -2949,28 +2961,24 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	// Set the next pointer to NULL to show it is the last in the list.
 	header->next = NULL;
 
-	FILE *f = fopen("_FILTERING.txt", "a");
-	fprintf(f, "command: '%s'\n", (const char *)cmd->name.data);
-
 	// Enable multiple HTTP header matching.
 	if (ngx_strcmp(cmd->name.data, "51D_match_client_hints") == 0) {
-		header->multi = 1<<ngx_http_51D_client_hints;
-		matchConf->multiMask |= 1<<ngx_http_51D_client_hints;
+		header->multi = ngx_http_51D_multi_mode_mask_client_hints;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_client_hints;
 	}
 	// Enable single User-Agent matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
 		|| ngx_strcmp(cmd->name.data, "51D_match_ua") == 0) {
-		header->multi = 1<<ngx_http_51D_ua_only;
-		matchConf->multiMask |= 1<<ngx_http_51D_ua_only;
+		header->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_all") == 0) {
-		header->multi = 1<<ngx_http_51D_all;
-		matchConf->multiMask |= 1<<ngx_http_51D_all;
+		header->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
 
-	fprintf(f, "header->multi: '%d'\n", (int)header->multi);
-	fclose(f);
+	log_filtering("header->multi: '%d'\n", (int)header->multi);
 
 	// Set the properties for the selected location.
 	status = ngx_http_51D_set_header(cf, header, value, fdmcf);
@@ -3034,13 +3042,13 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	// Enable single User-Agent matching.
 	if (ngx_strcmp(cmd->name.data, "51D_get_javascript_single") == 0) {
-		body->multi = 1<<ngx_http_51D_ua_only;
-		matchConf->multiMask |= 1<<ngx_http_51D_ua_only;
+		body->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_get_javascript_all") == 0) {
-		body->multi = 1<<ngx_http_51D_all;
-		matchConf->multiMask |= 1<<ngx_http_51D_all;
+		body->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
 
 	// Set the properties for the selected location.
