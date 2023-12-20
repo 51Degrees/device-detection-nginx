@@ -48,7 +48,7 @@ try {
     Push-Location nginx-tests
 
     try {
-        if ($Null -eq $TestCommit) {
+        if ($Null -ne $TestCommit) {
             Write-Output "Checkout to before the breaking changes for this version."
             git reset --hard $TestCommit
         }
@@ -99,29 +99,8 @@ if ($FullTests -eq $True) {
     sudo apt-get update
     sudo apt-get install nginx-plus -y --allow-unauthenticated
 
-    Write-Output "Check if installation successfully"
-    if (Test-Path "/usr/sbin/nginx") {
-
-        /usr/sbin/nginx -v 2>&1 | grep -c $NginxVersion
-
-        if ($LASTEXITCODE -ne 0) {
-
-            Write-Error "Failed to install Nginx Plus $NginxVersion"
-            exit $LASTEXITCODE
-
-        }
-
-        Write-output 'Nginx plus verson'
-        /usr/sbin/nginx -v
-
-    }
-    else {
-        
-        Write-Error "Failed to install Nginx Plus $NginxVersion"
-        exit 1
-
-    }
-
+    Write-Output "Check if installation was successful"
+    /usr/sbin/nginx -v 2>&1 | grep -F $NginxVersion || $(throw "Failed to install Nginx Plus $NginxVersion")
 }
 
 # Install the Microsoft Edge driver for Selenium tests
