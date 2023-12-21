@@ -2950,19 +2950,19 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	// Enable multiple HTTP header matching.
 	if (ngx_strcmp(cmd->name.data, "51D_match_client_hints") == 0) {
-		header->multi |= ngx_http_51D_multi_mode_mask_client_hints;
-		matchConf->multiMask |= ngx_http_51D_multi_mode_mask_client_hints;
+		header->multi = ngx_http_51D_multi_mode_mask_client_hints;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_client_hints;
 	}
 	// Enable single User-Agent matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
 		|| ngx_strcmp(cmd->name.data, "51D_match_ua") == 0) {
-		header->multi |= ngx_http_51D_multi_mode_mask_ua_only;
-		matchConf->multiMask |= ngx_http_51D_multi_mode_mask_ua_only;
+		header->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_all") == 0) {
-		header->multi |= ngx_http_51D_multi_mode_mask_all_evidence;
-		matchConf->multiMask |= ngx_http_51D_multi_mode_mask_all_evidence;
+		header->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
 
 
@@ -3028,13 +3028,13 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	// Enable single User-Agent matching.
 	if (ngx_strcmp(cmd->name.data, "51D_get_javascript_single") == 0) {
-		body->multi |= ngx_http_51D_multi_mode_mask_ua_only;
-		matchConf->multiMask |= ngx_http_51D_multi_mode_mask_ua_only;
+		body->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_get_javascript_all") == 0) {
-		body->multi |= ngx_http_51D_multi_mode_mask_all_evidence;
-		matchConf->multiMask |= ngx_http_51D_multi_mode_mask_all_evidence;
+		body->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
 
 	// Set the properties for the selected location.
