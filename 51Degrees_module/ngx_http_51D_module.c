@@ -226,13 +226,13 @@ enum ngx_http_51D_performance_profile_e {
 
 /**
  * Multi-header detection mode.
- * Is a bit mask, position meanings
- *  provided by `ngx_http_51D_multi_mode_bits` below.
+ * See `ngx_http_51D_multi_mode_bits` 
+ * and `ngx_http_51D_multi_mode_masks` below.
  */
 typedef ngx_uint_t ngx_http_51D_multi_header_mode;
 
 /**
- * Multi-header detection mode enumerator.
+ * Multi-header detection mode bits enumerator.
  * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
  */
 enum ngx_http_51D_multi_mode_bits {
@@ -243,8 +243,8 @@ enum ngx_http_51D_multi_mode_bits {
 };
 
 /**
- * Multi-header detection mode enumerator.
- * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
+ * Multi-header detection mode masks enumerator.
+ * Describes bit flag combination meanings for `ngx_http_51D_multi_header_mode`.
  */
 enum ngx_http_51D_multi_mode_masks {
 	ngx_http_51D_multi_mode_mask_ua_only 	  = 1 << ngx_http_51D_multi_mode_bit_ua_only,
@@ -253,6 +253,9 @@ enum ngx_http_51D_multi_mode_masks {
 
 	ngx_http_51D_multi_mode_mask_non_ua_only  = ((1 << ngx_http_51D_multi_mode_bits_count) - 1) & ~ngx_http_51D_multi_mode_mask_ua_only,
 };
+
+static const char * const NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT = "Sec-CH-UA-";
+static const char * const NGX_HTTP_51D_HEADER_USER_AGENT = "User-Agent";
 
 /**
  * Structure containing details of a specific header to be set as per the
@@ -1320,9 +1323,11 @@ initRespHeaders(
 				return NGX_ERROR;
 			}
 
-			//  header has to be constructed
+			// header might have to be constructed
 			// with all evidence, not just a User-Agent. User-Agent
 			// might be deprecated in the future.
+			//
+			// Bits of this field will be populated later.
 			(*respHeaderPtr)->multi = 0;
 	
 			// This doesn't need to be allocated in separate memmory
@@ -1790,6 +1795,18 @@ add_override_evidence_from_cookie_and_query(
 	}
 }
 
+static int is_header_allowed_for_UA_UACH_mode(const char * const headerName) {
+	// strip '\0' at the end
+	static const size_t client_hint_prefix_length = sizeof(NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT) - 1;
+	static const size_t user_agent_length = sizeof(NGX_HTTP_51D_HEADER_USER_AGENT) - 1;
+
+	// Unike standard `strncasecmp` from `string.h`, `ngx_strncasecmp` requires non-const pointers.
+	// Therefore we must use explicit casts.
+	return (!ngx_strncasecmp((u_char *)headerName, (u_char *)NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT, client_hint_prefix_length)
+			|| !ngx_strncasecmp((u_char *)headerName, (u_char *)NGX_HTTP_51D_HEADER_USER_AGENT, user_agent_length)
+			) ? 1 : 0;
+}
+
 /**
  * Create an evidence array and added the evidence from the http request.
  * This should consider the evidence sent from cookies and query, since
@@ -1824,9 +1841,12 @@ static EvidenceKeyValuePairArray *get_evidence(
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
-			if ((multiMode & ngx_http_51D_multi_mode_mask_client_hints) 
-				&& !(strncmp(headerName, "Sec-CH-", 7) == 0
-					 || strncmp(headerName, "User-Agent", 10) == 0))
+
+			// Note:
+			// using strong mask EQUALITY check to ignore filter
+			// in case `all_evidence` bit is also present.
+			if ((multiMode == ngx_http_51D_multi_mode_mask_client_hints) 
+				&& is_header_allowed_for_UA_UACH_mode(headerName))
 			{
 				continue;
 			}
