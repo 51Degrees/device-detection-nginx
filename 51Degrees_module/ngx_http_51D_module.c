@@ -1846,7 +1846,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 			// using strong mask EQUALITY check to ignore filter
 			// in case `all_evidence` bit is also present.
 			if ((multiMode == ngx_http_51D_multi_mode_mask_client_hints) 
-				&& is_header_allowed_for_UA_UACH_mode(headerName))
+				&& !is_header_allowed_for_UA_UACH_mode(headerName))
 			{
 				continue;
 			}
