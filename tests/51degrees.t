@@ -93,7 +93,7 @@ http {
         }
 
         location /ua_uach {
-			51D_match_client_hints x-ismobile IsMobile;
+			51D_match_ua_client_hints x-ismobile IsMobile;
             add_header x-ismobile $http_x_ismobile;
         }
 
