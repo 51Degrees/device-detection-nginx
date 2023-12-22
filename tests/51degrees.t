@@ -371,15 +371,15 @@ if (!$t_lite) {
 
 	# User-Agent and Client-Hints
 	$r = get_with_client_hints('/ua_uach');
-	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints non-match (ua_uach, hardware-model)');
-	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints non-match (ua_uach, hardware-vendor)');
-	like($r, qr/x-platform-version: 13.0/, 'Client hints non-match (ua_uach, platform-version)');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints match (ua_uach, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints match (ua_uach, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints match (ua_uach, platform-version)');
 
 	# Multiple HTTP headers.
 	$r = get_with_client_hints('/all');
-	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints non-match (all, hardware-model)');
-	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints non-match (all, hardware-vendor)');
-	like($r, qr/x-platform-version: 13.0/, 'Client hints non-match (all, platform-version)');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints match (all, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints match (all, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints match (all, platform-version)');
 }
 
 ###############################################################################
