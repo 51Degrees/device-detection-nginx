@@ -24,14 +24,14 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 42;
+my $n = 30;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-	$n += 8;
+	$n += 20;
 	$t_lite = 0;
 }
 
@@ -355,29 +355,32 @@ like($r, qr/x-ismobile: (True|False)/, 'Handle missing User-Agent');
 # Test client hints handling
 ###############################################################################
 
-# Single User-Agent (old)
-$r = get_with_client_hints('/single');
-like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (single, hardware-model)');
-like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (single, hardware-vendor)');
-like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (single, platform-version)');
+# In order to test the client hints, we need non-lite data file.
+if (!$t_lite) {
+	# Single User-Agent (old)
+	$r = get_with_client_hints('/single');
+	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (single, hardware-model)');
+	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (single, hardware-vendor)');
+	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (single, platform-version)');
 
-# Single User-Agent (new)
-$r = get_with_client_hints('/ua');
-like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (ua, hardware-model)');
-like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (ua, hardware-vendor)');
-like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (ua, platform-version)');
+	# Single User-Agent (new)
+	$r = get_with_client_hints('/ua');
+	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (ua, hardware-model)');
+	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (ua, hardware-vendor)');
+	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (ua, platform-version)');
 
-# User-Agent and Client-Hints
-$r = get_with_client_hints('/ua_uach');
-like($r, qr/x-hardware-model: VNS-L31/, 'Client hints non-match (ua_uach, hardware-model)');
-like($r, qr/x-hardware-vendor: Huawei/, 'Client hints non-match (ua_uach, hardware-vendor)');
-like($r, qr/x-platform-version: Unknown/, 'Client hints non-match (ua_uach, platform-version)');
+	# User-Agent and Client-Hints
+	$r = get_with_client_hints('/ua_uach');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints non-match (ua_uach, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints non-match (ua_uach, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints non-match (ua_uach, platform-version)');
 
-# Multiple HTTP headers.
-$r = get_with_client_hints('/all');
-like($r, qr/x-hardware-model: VNS-L31/, 'Client hints non-match (all, hardware-model)');
-like($r, qr/x-hardware-vendor: Huawei/, 'Client hints non-match (all, hardware-vendor)');
-like($r, qr/x-platform-version: Unknown/, 'Client hints non-match (all, platform-version)');
+	# Multiple HTTP headers.
+	$r = get_with_client_hints('/all');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints non-match (all, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints non-match (all, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints non-match (all, platform-version)');
+}
 
 ###############################################################################
 # Test properties.
