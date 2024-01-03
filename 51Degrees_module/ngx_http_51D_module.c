@@ -2942,7 +2942,7 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	// Set the next pointer to NULL to show it is the last in the list.
 	header->next = NULL;
 
-	// Enable multiple HTTP header matching.
+	// Enable Sec-CH-UA-* HTTP header matching.
 	if (ngx_strcmp(cmd->name.data, "51D_match_ua_client_hints") == 0) {
 		header->multi = ngx_http_51D_multi_mode_mask_client_hints;
 		matchConf->multiMask = ngx_http_51D_multi_mode_mask_client_hints;
