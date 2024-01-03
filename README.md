@@ -142,7 +142,7 @@ giving three separate headers.
 All examples are located in the `examples` folder:
 |Example|Description|
 |-------|-----------|
-|gettingStarted.conf|Shows a simple instance of how to use 51D_match_ua and 51D_match_all in a configuration file.|
+|gettingStarted.conf|Shows a simple instance of how to use 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all in a configuration file.|
 |config.conf|Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, 51D_use_performance_graph and etc...|
 |matchQuery.conf|Shows how to perform detection using input from http request query argument|
 |matchMetrics.conf|Shows how to obtain other match metrics of the detection such as drift, difference, method and etc...|
@@ -204,7 +204,7 @@ make install STATIC_BUILD=1
 ```
 <br>
 
-The Nginx executable will be output to the project root directory. The prefix path of the Nginx will be set to `build` directory. A `nginx.conf` is also included with a simple example of `51D_match_ua` and `51D_match_all` directive, set in a static content location. The build process has created the static file in the `build/html` folder so you can start Nginx and start sending requests to that static content endpoint.
+The Nginx executable will be output to the project root directory. The prefix path of the Nginx will be set to `build` directory. A `nginx.conf` is also included with a simple example of `51D_match_ua`, `51D_match_ua_client_hints` and `51D_match_all` directives, set in a static content location. The build process has created the static file in the `build/html` folder so you can start Nginx and start sending requests to that static content endpoint.
 
 ## Test
 All tests are allocated in the `tests` folder.
