@@ -34,7 +34,7 @@ sub read_example($) {
 	return $content;
 }
 
-my $t = Test::Nginx->new()->has(qw/http/)->plan(2);
+my $t = Test::Nginx->new()->has(qw/http/)->plan(3);
 
 my $t_file = read_example('gettingStarted.conf');
 # Remove the documentation block
@@ -73,6 +73,7 @@ my $mobileUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1 like Mac OS X) App
 my $r = get_with_ua('/hash', $mobileUserAgent);
 like($r, qr/x-mobile: True/, 'Mobile match (single User-Agent)');
 like($r, qr/x-device: [a-zA-Z ]+,[a-zA-Z ]+/, 'Mobile match (single User-Agent)');
+like($r, qr/x-device-hinted: [a-zA-Z ]+,[a-zA-Z ]+/, 'Mobile match (single User-Agent)');
 
 ###############################################################################
 
