@@ -2535,11 +2535,6 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 			(lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_non_ua_only) ?
 			ngx_http_51D_get_user_agent(r, NULL) :
 			ngx_http_51D_get_user_agent(r, lMatchConf->body);
-		
-		if (!userAgent) {
-		} else if (!(userAgent->len && userAgent->data)) {
-		} else {
-		}
 
 		memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
@@ -2557,7 +2552,6 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 				if (ngxCode != NGX_OK) {
 					return ngxCode;
 				}
-			} else {
 			}
 
 			// For each property, set the value in value_string_array.
