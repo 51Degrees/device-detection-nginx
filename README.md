@@ -113,7 +113,7 @@ Below is the list of directives that can be used with 51Degrees Device Detection
 |Syntax: `51D_set_resp_headers` *on \| off*;<br>Default: 51D_set_resp_headers  off<br>Context: main, server, location<br>Allow Client Hints to be set in response headers where it is applicable to the user agent (e.g. Chrome 89 or above) so that more evidence can be returned in subsequent requests, allowing more accurate detection. Value set in a block overwrites values set in precedent blocks (e.g. value set in `location` block will overwrite value set in `server` and `main` blocks). This will only be available from the 4.3.0 version onwards.|
 
 ## Proxy Passing
-When using the `proxy_pass` directive in a location block where a match directive is used, the properties selected are passed as additional HTTP headers with the name specified in the first argument of `51D_match_ua`/`51D_match_all`.
+When using the `proxy_pass` directive in a location block where a match directive is used, the properties selected are passed as additional HTTP headers with the name specified in the first argument of `51D_match_ua`/`51D_match_ua_client_hints`/`51D_match_all`.
 
 ## Fast-CGI
 Using `include fastcgi_params;` makes these additional headers available via the `$_SERVER` variable.
