@@ -217,12 +217,45 @@ typedef enum ngx_http_51D_performance_profile_e ngx_http_51D_performance_profile
  * NOTE: Only in_memory is currently supported.
  */
 enum ngx_http_51D_performance_profile_e {
-	ngx_http_51D_in_memory = 1,
-	ngx_http_51D_high_performance,
-	ngx_http_51D_low_memory,
-	ngx_http_51D_balanced,
-	ngx_http_51D_balanced_temp
+	ngx_http_51D_profile_in_memory = 1,
+	ngx_http_51D_profile_high_performance,
+	ngx_http_51D_profile_low_memory,
+	ngx_http_51D_profile_balanced,
+	ngx_http_51D_profile_balanced_temp
 };
+
+/**
+ * Multi-header detection mode.
+ * See `ngx_http_51D_multi_mode_bits` 
+ * and `ngx_http_51D_multi_mode_masks` below.
+ */
+typedef ngx_uint_t ngx_http_51D_multi_header_mode;
+
+/**
+ * Multi-header detection mode bits enumerator.
+ * Describes bit flag meanings for `ngx_http_51D_multi_header_mode`.
+ */
+enum ngx_http_51D_multi_mode_bits {
+	ngx_http_51D_multi_mode_bit_ua_only = 0,
+	ngx_http_51D_multi_mode_bit_client_hints,
+	ngx_http_51D_multi_mode_bit_all_evidence,
+	ngx_http_51D_multi_mode_bits_count,
+};
+
+/**
+ * Multi-header detection mode masks enumerator.
+ * Describes bit flag combination meanings for `ngx_http_51D_multi_header_mode`.
+ */
+enum ngx_http_51D_multi_mode_masks {
+	ngx_http_51D_multi_mode_mask_ua_only 	  = 1 << ngx_http_51D_multi_mode_bit_ua_only,
+	ngx_http_51D_multi_mode_mask_client_hints = 1 << ngx_http_51D_multi_mode_bit_client_hints,
+	ngx_http_51D_multi_mode_mask_all_evidence = 1 << ngx_http_51D_multi_mode_bit_all_evidence,
+
+	ngx_http_51D_multi_mode_mask_non_ua_only  = ((1 << ngx_http_51D_multi_mode_bits_count) - 1) & ~ngx_http_51D_multi_mode_mask_ua_only,
+};
+
+static const char * const NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT = "Sec-CH-UA-";
+static const char * const NGX_HTTP_51D_HEADER_USER_AGENT = "User-Agent";
 
 /**
  * Structure containing details of a specific header to be set as per the
@@ -231,8 +264,7 @@ enum ngx_http_51D_performance_profile_e {
 typedef struct ngx_http_51D_data_to_set_t ngx_http_51D_data_to_set;
 
 struct ngx_http_51D_data_to_set_t {
-    ngx_uint_t multi;                       /**< 0 for single User-Agent match, 1
-                                                 for multiple HTTP header match. */
+    ngx_http_51D_multi_header_mode multi;   /**< Bit mask: what headers to use. */
     ngx_uint_t propertyCount;               /**< The number of properties in the
                                                  property array. */
     ngx_str_t **property;                   /**< Array of properties to set. */
@@ -247,15 +279,16 @@ struct ngx_http_51D_data_to_set_t {
  * Match config structure set from the config file.
  */
 typedef struct {
-	ngx_uint_t hasMulti;                 /**< Indicated whether there is a
-	                                          multiple HTTP header match in this
-	                                          location. */
-    ngx_uint_t setHeaders;				 /**< Indicates if response headers
-											  should be set. */
-	ngx_uint_t headerCount;              /**< The number of headers to set. */
-    ngx_http_51D_data_to_set *header;    /**< List of headers to set. */
-	ngx_http_51D_data_to_set *body;      /**< Body to set. There can be only 
-											  one per config. */
+	ngx_http_51D_multi_header_mode multiMask;   /**< Bit mask. Indicates which
+	                                       	  		 multiple HTTP header match
+													 modes are in use for this
+	                                          		 location. */
+    ngx_uint_t setHeaders;				 		/**< Indicates if response headers
+											  		 should be set. */
+	ngx_uint_t headerCount;              		/**< The number of headers to set. */
+    ngx_http_51D_data_to_set *header;    		/**< List of headers to set. */
+	ngx_http_51D_data_to_set *body;      		/**< Body to set. There can be only 
+											  		 one per config. */
 } ngx_http_51D_match_conf_t;
 
 /**
@@ -317,6 +350,7 @@ typedef struct {
 	ngx_http_51D_match_conf_t matchConf; /**< The match to carry out in this
 	                                        server's locations. */
 } ngx_http_51D_srv_conf_t;
+
 
 /**
  * Report the status code returned by one of the 51Degrees APIs.
@@ -385,23 +419,23 @@ get_config_hash(ngx_http_51D_main_conf_t *fdmcf) {
 	ConfigHash config;
 	// Determine performance profile
 	switch (fdmcf->performanceProfile) {
-		case ngx_http_51D_in_memory:
+		case ngx_http_51D_profile_in_memory:
 			config = HashInMemoryConfig;
 			break;
 		// Only support the in_memory performance profile
 		// as Nginx is meant to be used in a high performance
 		// environment.
 		//
-		// case ngx_http_51D_high_performance:
+		// case ngx_http_51D_profile_high_performance:
 		// 	config = HashHighPerformanceConfig;
 		// 	break;
-		// case ngx_http_51D_low_memory:
+		// case ngx_http_51D_profile_low_memory:
 		// 	config = HashLowMemoryConfig;
 		// 	break;
-		// case ngx_http_51D_balanced:
+		// case ngx_http_51D_profile_balanced:
 		// 	config = HashBalancedConfig;
 		// 	break;
-		// case ngx_http_51D_balanced_temp:
+		// case ngx_http_51D_profile_balanced_temp:
 		// 	config = HashBalancedTempConfig;
 		// 	break;
 		default:
@@ -570,7 +604,7 @@ ngx_http_51D_post_conf(ngx_conf_t *cf)
 static void
 ngx_http_51D_init_match_conf(ngx_http_51D_match_conf_t *matchConf)
 {
-    matchConf->hasMulti = 0;
+    matchConf->multiMask = 0;
 	matchConf->setHeaders = NGX_CONF_UNSET_UINT;
 	matchConf->headerCount = 0;
 	matchConf->header = NULL;
@@ -906,18 +940,23 @@ ngx_http_51D_init_module(ngx_cycle_t *cycle)
  * profile.
  */
 static ngx_conf_enum_t ngx_http_51D_performance_profiles[] = {
-	{ ngx_string("IN_MEMORY"), ngx_http_51D_in_memory },
-	{ ngx_string("HIGH_PERFORMANCE"), ngx_http_51D_high_performance },
-	{ ngx_string("LOW_MEMORY"), ngx_http_51D_low_memory },
-	{ ngx_string("BALANCED"), ngx_http_51D_balanced },
-	{ ngx_string("BALANCED_TEMP"), ngx_http_51D_balanced_temp },
-	{ ngx_string("DEFAULT"), ngx_http_51D_balanced },
+	{ ngx_string("IN_MEMORY"), ngx_http_51D_profile_in_memory },
+	{ ngx_string("HIGH_PERFORMANCE"), ngx_http_51D_profile_high_performance },
+	{ ngx_string("LOW_MEMORY"), ngx_http_51D_profile_low_memory },
+	{ ngx_string("BALANCED"), ngx_http_51D_profile_balanced },
+	{ ngx_string("BALANCED_TEMP"), ngx_http_51D_profile_balanced_temp },
+	{ ngx_string("DEFAULT"), ngx_http_51D_profile_balanced },
 	{ ngx_null_string, 0 }
 };
 
 /**
  * Definitions of functions which can be called from the config file.
  * --51D_match_single takes two string arguments, the name of the header
+ * to be set and a comma separated list of properties to be returned. The thrid
+ * argument is optional to specify the query argument to be used over the
+ * default User-Agent. Is called within main, server and location block.
+ * Enables User-Agent matching. Deprecated in favor of 51D_match_ua.
+ * --51D_match_ua takes two string arguments, the name of the header
  * to be set and a comma separated list of properties to be returned. The thrid
  * argument is optional to specify the query argument to be used over the
  * default User-Agent. Is called within main, server and location block.
@@ -975,6 +1014,48 @@ static ngx_command_t  ngx_http_51D_commands[] = {
 	NULL },
 
 	{ ngx_string("51D_match_single"),
+	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_main,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
+	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_loc,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
+	NGX_HTTP_SRV_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_srv,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua"),
+	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_main,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua_client_hints"),
+	NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_loc,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua_client_hints"),
+	NGX_HTTP_SRV_CONF|NGX_CONF_TAKE23,
+	ngx_http_51D_set_srv,
+	NGX_HTTP_LOC_CONF_OFFSET,
+    0,
+	NULL },
+
+	{ ngx_string("51D_match_ua_client_hints"),
 	NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE23,
 	ngx_http_51D_set_main,
 	NGX_HTTP_LOC_CONF_OFFSET,
@@ -1242,10 +1323,12 @@ initRespHeaders(
 				return NGX_ERROR;
 			}
 
-			//  header has to be constructed
+			// header might have to be constructed
 			// with all evidence, not just a User-Agent. User-Agent
 			// might be deprecated in the future.
-			(*respHeaderPtr)->multi = 1;
+			//
+			// Bits of this field will be populated later.
+			(*respHeaderPtr)->multi = 0;
 	
 			// This doesn't need to be allocated in separate memmory
 			// as it won't be freed from available properties.
@@ -1712,6 +1795,18 @@ add_override_evidence_from_cookie_and_query(
 	}
 }
 
+static int is_header_allowed_for_UA_UACH_mode(const char * const headerName) {
+	// strip '\0' at the end
+	static const size_t client_hint_prefix_length = sizeof(NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT) - 1;
+	static const size_t user_agent_length = sizeof(NGX_HTTP_51D_HEADER_USER_AGENT) - 1;
+
+	// Unike standard `strncasecmp` from `string.h`, `ngx_strncasecmp` requires non-const pointers.
+	// Therefore we must use explicit casts.
+	return (!ngx_strncasecmp((u_char *)headerName, (u_char *)NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT, client_hint_prefix_length)
+			|| !ngx_strncasecmp((u_char *)headerName, (u_char *)NGX_HTTP_51D_HEADER_USER_AGENT, user_agent_length)
+			) ? 1 : 0;
+}
+
 /**
  * Create an evidence array and added the evidence from the http request.
  * This should consider the evidence sent from cookies and query, since
@@ -1720,11 +1815,13 @@ add_override_evidence_from_cookie_and_query(
  * might consider the override from cookies only.
  * @param results the results to hold the return value of the detection
  * @param r the http request that contains the evidence
+ * @param multiMode describes which headers to use for evidence.
  * @return an array of evidence
  */
 static EvidenceKeyValuePairArray *get_evidence(
 	ResultsHash *results,
-	ngx_http_request_t *r) {
+	ngx_http_request_t *r,
+	ngx_http_51D_multi_header_mode multiMode) {
 	DataSetHash *dataSet =
 		(DataSetHash *)results->b.b.dataSet;
 	ngx_table_elt_t *searchResult;
@@ -1744,6 +1841,15 @@ static EvidenceKeyValuePairArray *get_evidence(
 		for (i = 0; i < dataSet->b.b.uniqueHeaders->count; i++) {
 			const char *headerName =
 				dataSet->b.b.uniqueHeaders->items[i].name;
+
+			// Note:
+			// using strong mask EQUALITY check to ignore filter
+			// in case `all_evidence` bit is also present.
+			if ((multiMode == ngx_http_51D_multi_mode_mask_client_hints) 
+				&& !is_header_allowed_for_UA_UACH_mode(headerName))
+			{
+				continue;
+			}
 			searchResult =
 				search_headers_in(
 					r, (u_char *)headerName, ngx_strlen(headerName));
@@ -1792,22 +1898,21 @@ static EvidenceKeyValuePairArray *get_evidence(
  *
  * @param fdmcf module main config.
  * @param r the current HTTP request.
- * @param multi 0 for a single User-Agent match, 1 for a multiple HTTP
- * header match.
+ * @param multi Bit mask: what headers to use.
  * @param userAgent pointer to the user agent to perform the match on.
  * @return Nginx status code.
  */
-ngx_uint_t ngx_http_51D_get_match(
+static ngx_uint_t ngx_http_51D_get_match(
 	ngx_http_51D_main_conf_t *fdmcf,
 	ngx_http_request_t *r,
-	int multi,
+	ngx_http_51D_multi_header_mode multi,
 	ngx_str_t *userAgent)
 {
 	ResultsHash *results = fdmcf->results;
 	
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
-	if (multi == 0)  {
+	if (multi & ngx_http_51D_multi_mode_mask_ua_only)  {
 		ResultsHashFromUserAgent(
 			results,
 			(const char *)userAgent->data,
@@ -1820,13 +1925,14 @@ ngx_uint_t ngx_http_51D_get_match(
 				(const char *)fdmcf->dataFile.data);
 		}
 	}
-	else if (multi == 1) {
+	else if (multi & ngx_http_51D_multi_mode_mask_non_ua_only)
+	{
 		// Reset overrides array as we want a free
 		// detection per request.
 		fiftyoneDegreesOverrideValuesReset(results->b.overrides);
 
 		EvidenceKeyValuePairArray *evidence =
-			get_evidence(results, r);
+			get_evidence(results, r, multi);
 		if (evidence != NULL) {
 			ResultsHashFromEvidence(
 				results,
@@ -2093,7 +2199,7 @@ u_char *getEscapedMatchedValueString(
 	memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 	// Get a match. If there are multiple instances of
-	// 51D_match_single or 51D_match_all, then don't get the
+	// 51D_match_single, 51D_match_ua, 51D_match_ua_client_hints or 51D_match_all, then don't get the
 	// match if it has already been fetched.
 	if (haveMatch == 0) {
 		ngx_uint_t ngxCode = 
@@ -2191,7 +2297,7 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	ngx_http_51D_srv_conf_t *fdscf;
 	ngx_http_51D_loc_conf_t *fdlcf;
 	ngx_http_51D_match_conf_t *matchConf[FIFTYONE_DEGREES_CONFIG_LEVELS];
-	ngx_uint_t matchIndex = 0, multi, haveMatch;
+	ngx_uint_t matchIndex = 0, rawMulti, haveMatch;
 	ngx_http_51D_data_to_set *currentHeader;
 	int totalHeaderCount, matchConfIndex;
 	ngx_str_t *userAgent, *nextUserAgent;
@@ -2231,9 +2337,9 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	// matches. Single and multi matches are done separately to reuse
 	// a match instead of retrieving it multiple times. Start with
 	// false (i.e. = 0) increase to true (i.e. = 1).
-	for (multi = FIFTYONE_DEGREES_FALSE;
-		multi <= FIFTYONE_DEGREES_TRUE;
-		multi++) {
+	for (rawMulti = ngx_http_51D_multi_mode_bit_ua_only;
+		rawMulti < ngx_http_51D_multi_mode_bits_count;
+		rawMulti++) {
 		haveMatch = 0;
 
 		// Go through the requested matches in location, server and
@@ -2246,10 +2352,10 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 			while (currentHeader != NULL) {
 				// Process the match if it is the type we are looking for on
 				// this pass.
-				if (currentHeader->multi == multi &&
+				if ((currentHeader->multi & (1<<rawMulti)) &&
 					(int)currentHeader->variableName.len <= 0 &&
 					userAgent != NULL) {
-					haveMatch = process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent);
+					haveMatch = (process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent) == NGX_OK);
 					matchIndex++;
 				}
 				// Look at the next header.
@@ -2264,18 +2370,20 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
 		while (currentHeader != NULL) {
-			if (currentHeader->multi == 0 && (int)currentHeader->variableName.len > 0) {
+			if ((currentHeader->multi & ngx_http_51D_multi_mode_mask_ua_only) && (int)currentHeader->variableName.len > 0) {
 				nextUserAgent = ngx_http_51D_get_user_agent(r, currentHeader);
 				if (nextUserAgent != NULL) {
 					if (userAgent != NULL &&
 						strcmp(
 							(const char *)userAgent->data,
 							(const char *)nextUserAgent->data) == 0) {
-						process(r, fdmcf, currentHeader, h, matchIndex, 1, userAgent);
+						const int newHaveMatch = 1;
+						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
 					}
 					else {
 						userAgent = nextUserAgent;
-						process(r, fdmcf, currentHeader, h, matchIndex, 0, userAgent);
+						const int newHaveMatch = 0;
+						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
 					}
 					matchIndex++;
 				}
@@ -2372,6 +2480,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 		setHeaders = lMatchConf->setHeaders;
 	}
 
+
 	// Setting the headers
 	if (setHeaders) {
 		ngx_table_elt_t *h;
@@ -2417,25 +2526,27 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 		}
 	}
 
+	
 	// Handling 51D_set_javascript_* directives
 	if (lMatchConf->body != NULL) {
-		userAgent = (lMatchConf->body->multi == 0 &&
+
+		userAgent = ((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_ua_only) &&
 			(int)lMatchConf->body->variableName.len <= 0) ||
-			lMatchConf->body->multi == 1 ?
+			(lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_non_ua_only) ?
 			ngx_http_51D_get_user_agent(r, NULL) :
 			ngx_http_51D_get_user_agent(r, lMatchConf->body);
-		
+
 		memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 		if (lMatchConf->body->propertyCount > 0) {
 			// Get a match. If there are multiple instances of
-			// 51D_match_single or 51D_match_all, then don't get the
+			// 51D_match_single, 51D_match_ua, 51D_match_ua_client_hints or 51D_match_all, then don't get the
 			// match if it has already been fetched.
 			// If Response Headers was performed and
 			// a '51D_get_javascript_all' is used then
 			// no need to perform detection again.
-			if (lMatchConf->body->multi == 0 ||
-				(lMatchConf->body->multi && 
+			if ((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_ua_only) ||
+				((lMatchConf->body->multi & ngx_http_51D_multi_mode_mask_non_ua_only) && 
 					(setHeaders == 0 || fdmcf->setRespHeaderCount <= 0))) {
 				ngx_uint_t ngxCode = ngx_http_51D_get_match(fdmcf, r, lMatchConf->body->multi, userAgent);
 				if (ngxCode != NGX_OK) {
@@ -2556,7 +2667,7 @@ ngx_http_51D_body_filter(ngx_http_request_t *r, ngx_chain_t *in) {
 
 /**
  * Set data function. Initialises the data structure for a given occurrence
- * of "51D_match_single", "51D_match_all", "51D_get_javascript_single" or
+ * of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints", "51D_match_all", "51D_get_javascript_single" or
  * "51D_get_javascript_all" in the config file. Allocates space required and
  * sets the name and properties.
  *
@@ -2634,8 +2745,9 @@ set_data(
 
 	// Set the variable name or other header if they are specified.
 	// If data is for response body, there will be no header.
-	// For 51D_match_single and 51D_match_all, number of arguments is from 2
-	// to 3, while for 51D_get_javascript_single and 51D_get_javascript_all
+	// For 51D_match_single, 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all, 
+	// number of arguments is from 2 to 3, while
+	// for 51D_get_javascript_single and 51D_get_javascript_all
 	// it is 1 to 2.
 	if ((data->headerName.len == 0 && (int)cf->args->nelts >= 3) ||
 		(data->headerName.len > 0 && (int)cf->args->nelts >= 4)) {
@@ -2773,7 +2885,7 @@ ngx_http_51D_set_body(
 }
 
 /**
- * Set function. Is called for each occurrence of "51D_match_single" or
+ * Set function. Is called for each occurrence of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or
  * "51D_match_all". Allocates space for the header structure and initialises
  * it with the set header function.
  * @param cf the nginx conf.
@@ -2830,15 +2942,23 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 	// Set the next pointer to NULL to show it is the last in the list.
 	header->next = NULL;
 
+	// Enable Sec-CH-UA-* HTTP header matching.
+	if (ngx_strcmp(cmd->name.data, "51D_match_ua_client_hints") == 0) {
+		header->multi = ngx_http_51D_multi_mode_mask_client_hints;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_client_hints;
+	}
 	// Enable single User-Agent matching.
-	if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0) {
-		header->multi = 0;
+	else if (ngx_strcmp(cmd->name.data, "51D_match_single") == 0
+		|| ngx_strcmp(cmd->name.data, "51D_match_ua") == 0) {
+		header->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_match_all") == 0) {
-		header->multi = 1;
-		matchConf->hasMulti = 1;
+		header->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
+
 
 	// Set the properties for the selected location.
 	status = ngx_http_51D_set_header(cf, header, value, fdmcf);
@@ -2902,12 +3022,13 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	// Enable single User-Agent matching.
 	if (ngx_strcmp(cmd->name.data, "51D_get_javascript_single") == 0) {
-		body->multi = FIFTYONE_DEGREES_FALSE;
+		body->multi = ngx_http_51D_multi_mode_mask_ua_only;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_ua_only;
 	}
 	// Enable multiple HTTP header matching.
 	else if (ngx_strcmp(cmd->name.data, "51D_get_javascript_all") == 0) {
-		body->multi = FIFTYONE_DEGREES_TRUE;
-		matchConf->hasMulti = FIFTYONE_DEGREES_TRUE;
+		body->multi = ngx_http_51D_multi_mode_mask_all_evidence;
+		matchConf->multiMask = ngx_http_51D_multi_mode_mask_all_evidence;
 	}
 
 	// Set the properties for the selected location.
@@ -3019,7 +3140,7 @@ static char *ngx_http_51D_set_loc_cdn(ngx_conf_t* cf, ngx_command_t *cmd, void *
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or
  * "51D_match_all" in a location config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3035,7 +3156,7 @@ static char *ngx_http_51D_set_loc(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or
  * "51D_match_all" in a server config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.
@@ -3051,7 +3172,7 @@ static char *ngx_http_51D_set_srv(ngx_conf_t* cf, ngx_command_t *cmd, void *conf
 }
 
 /**
- * Set function. Is called for occurrences of "51D_match_single" or
+ * Set function. Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or
  * "51D_match_all" in a http config block. Allocates space for the
  * header structure and initialises it with the set header function.
  * @param cf the nginx conf.

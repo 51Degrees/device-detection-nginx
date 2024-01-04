@@ -24,14 +24,14 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 24;
+my $n = 30;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-	$n += 8;
+	$n += 20;
 	$t_lite = 0;
 }
 
@@ -52,10 +52,10 @@ http {
 	51D_drift 1;
 	51D_difference 1;
 	51D_allow_unmatched on;
-	51D_use_performance_graph on;
+	51D_use_performance_graph off;
 	51D_use_predictive_graph on;
 
-	51D_match_single x-main-ismobile-single IsMobile;
+	51D_match_ua x-main-ismobile-single IsMobile;
 	51D_match_all x-main-ismobile-all IsMobile;
 
 	51D_set_resp_headers on;
@@ -78,53 +78,89 @@ http {
         listen       127.0.0.1:8080;
         server_name  localhost;
 		
-		51D_match_single x-server-ismobile-single IsMobile;
+		51D_match_ua x-server-ismobile-single IsMobile;
 		51D_match_all x-server-ismobile-all IsMobile;
 		51D_set_resp_headers off;
 
         location /single {
 			51D_match_single x-ismobile IsMobile;
+			51D_match_single x-hardware-model HardwareModel;
+			51D_match_single x-hardware-vendor HardwareVendor;
+			51D_match_single x-platform-version PlatformVersion;
             add_header x-ismobile $http_x_ismobile;
+			add_header x-hardware-model $http_x_hardware_model;
+			add_header x-hardware-vendor $http_x_hardware_vendor;
+			add_header x-platform-version $http_x_platform_version;
+        }
+
+        location /ua {
+			51D_match_ua x-ismobile IsMobile;
+			51D_match_ua x-hardware-model HardwareModel;
+			51D_match_ua x-hardware-vendor HardwareVendor;
+			51D_match_ua x-platform-version PlatformVersion;
+            add_header x-ismobile $http_x_ismobile;
+			add_header x-hardware-model $http_x_hardware_model;
+			add_header x-hardware-vendor $http_x_hardware_vendor;
+			add_header x-platform-version $http_x_platform_version;
+        }
+
+        location /ua_uach {
+			51D_match_ua_client_hints x-ismobile IsMobile;
+			51D_match_ua_client_hints x-browsername BrowserName;
+			51D_match_ua_client_hints x-hardware-model HardwareModel;
+			51D_match_ua_client_hints x-hardware-vendor HardwareVendor;
+			51D_match_ua_client_hints x-platform-version PlatformVersion;
+            add_header x-ismobile $http_x_ismobile;
+			add_header x-browsername $http_x_browsername;
+			add_header x-hardware-model $http_x_hardware_model;
+			add_header x-hardware-vendor $http_x_hardware_vendor;
+			add_header x-platform-version $http_x_platform_version;
         }
 
 		location /all {
 			51D_match_all x-ismobile IsMobile;
 			51D_match_all x-browsername BrowserName;
+			51D_match_all x-hardware-model HardwareModel;
+			51D_match_all x-hardware-vendor HardwareVendor;
+			51D_match_all x-platform-version PlatformVersion;
 			add_header x-ismobile $http_x_ismobile;
 			add_header x-browsername $http_x_browsername;
+			add_header x-hardware-model $http_x_hardware_model;
+			add_header x-hardware-vendor $http_x_hardware_vendor;
+			add_header x-platform-version $http_x_platform_version;
 		}
 
 		location /metrics {
-			51D_match_single x-iterations Iterations;
-			51D_match_single x-drift Drift;
-			51D_match_single x-difference Difference;
-			51D_match_single x-method Method;
-			51D_match_single x-useragents UserAgents;
-			51D_match_single x-matchednodes MatchedNodes;
-			51D_match_single x-deviceid DeviceId;
+			51D_match_ua x-iterations Iterations;
+			51D_match_ua x-drift Drift;
+			51D_match_ua x-difference Difference;
+			51D_match_ua x-method Method;
+			51D_match_ua x-useragents UserAgents;
+			51D_match_ua x-matchednodes MatchedNodes;
+			51D_match_ua x-deviceid DeviceId;
 			add_header x-metrics $http_x_Iterations,$http_x_drift,$http_x_difference,$http_x_method,$http_x_matchedNodes,$http_x_deviceid;
 			add_header x-metrics-ua $http_x_useragents;
 		}
 
 		location /more-properties {
-			51D_match_single x-more-properties Ismobile,BrowserName;
+			51D_match_ua x-more-properties Ismobile,BrowserName;
 			add_header x-more-properties $http_x_more_properties;
 		}
 
 		location /non-property {
-			51D_match_single x-non-property thisisnotarealpropertyname;
+			51D_match_ua x-non-property thisisnotarealpropertyname;
 			add_header x-non-property $http_x_non_property;
 		}
 
         location /redirect {
-             51D_match_single x-ismobile IsMobile;
+             51D_match_ua x-ismobile IsMobile;
              if ($http_x_ismobile ~ "True") {
               return 301 https://mobilesite;
              }
         }
 
 		location /locations {
-			51D_match_single x-ismobile-single IsMobile;
+			51D_match_ua x-ismobile-single IsMobile;
 			51D_match_all x-ismobile-all IsMobile;
 			add_header x-location-ismobile $http_x_ismobile_single$http_x_ismobile_all;
 			add_header x-server-ismobile $http_x_server_ismobile_single$http_x_server_ismobile_all;
@@ -132,8 +168,8 @@ http {
 		}
 
 		location /variable {
-			51D_match_single x-ismobile-from-var IsMobile $arg_ua;
-			51D_match_single x-ismobile-from-wrong-var IsMobile $ua;
+			51D_match_ua x-ismobile-from-var IsMobile $arg_ua;
+			51D_match_ua x-ismobile-from-wrong-var IsMobile $ua;
 			add_header x-ismobile-from-var $http_x_ismobile_from_var;
 			add_header x-ismobile-from-wrong-var $http_x_ismobile_from_wrong_var;
 		}
@@ -189,6 +225,8 @@ http {
 EOF
 
 $t->write_file('single', '');
+$t->write_file('ua', '');
+$t->write_file('ua_uach', '');
 $t->write_file('all', '');
 $t->write_file('metrics', '');
 $t->write_file('more-properties', '');
@@ -254,6 +292,23 @@ X-OperaMini-Phone-UA: $ua
 EOF
 }
 
+sub get_with_client_hints {
+	my ($uri) = @_;
+	return http(<<EOF);
+HEAD $uri HTTP/1.1
+Host: localhost
+Connection: close
+user-agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36
+sec-ch-ua-platform: '"Android"'
+sec-ch-ua-model: '"SM-S918B"'
+sec-ch-ua-mobile: ?1
+sec-ch-ua-platform-version: '"13.0.0"'
+sec-ch-ua-full-version-list: '"Google Chrome";v="117.0.5938.60", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.60"'
+sec-ch-ua: '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"'
+
+EOF
+}
+
 ###############################################################################
 # Constants.
 ###############################################################################
@@ -268,11 +323,23 @@ my $chrome89UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 
 my $r;
 
-# Single User-Agent.
+# Single User-Agent (old)
 $r = get_with_ua('/single', $desktopUserAgent);
 like($r, qr/x-ismobile: False/, 'Desktop match (single User-Agent)');
 $r = get_with_ua('/single', $mobileUserAgent);
 like($r, qr/x-ismobile: True/, 'Mobile match (single User-Agent)');
+
+# Single User-Agent (new)
+$r = get_with_ua('/ua', $desktopUserAgent);
+like($r, qr/x-ismobile: False/, 'Desktop match (ua User-Agent)');
+$r = get_with_ua('/ua', $mobileUserAgent);
+like($r, qr/x-ismobile: True/, 'Mobile match (ua User-Agent)');
+
+# User-Agent and Client-Hints
+$r = get_with_ua('/ua_uach', $desktopUserAgent);
+like($r, qr/x-ismobile: False/, 'Desktop match (ua_uach User-Agent)');
+$r = get_with_ua('/ua_uach', $mobileUserAgent);
+like($r, qr/x-ismobile: True/, 'Mobile match (ua_uach User-Agent)');
 
 # Multiple HTTP headers.
 $r = get_with_ua('/all', $desktopUserAgent);
@@ -283,6 +350,37 @@ like($r, qr/x-ismobile: True/, 'Mobile match (all HTTP headers)');
 # No User-Agent.
 $r = http_get('/single');
 like($r, qr/x-ismobile: (True|False)/, 'Handle missing User-Agent');
+
+###############################################################################
+# Test client hints handling
+###############################################################################
+
+# In order to test the client hints, we need non-lite data file.
+if (!$t_lite) {
+	# Single User-Agent (old)
+	$r = get_with_client_hints('/single');
+	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (single, hardware-model)');
+	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (single, hardware-vendor)');
+	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (single, platform-version)');
+
+	# Single User-Agent (new)
+	$r = get_with_client_hints('/ua');
+	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (ua, hardware-model)');
+	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (ua, hardware-vendor)');
+	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (ua, platform-version)');
+
+	# User-Agent and Client-Hints
+	$r = get_with_client_hints('/ua_uach');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints match (ua_uach, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints match (ua_uach, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints match (ua_uach, platform-version)');
+
+	# Multiple HTTP headers.
+	$r = get_with_client_hints('/all');
+	like($r, qr/x-hardware-model: SM-S918B/, 'Client hints match (all, hardware-model)');
+	like($r, qr/x-hardware-vendor: Samsung/, 'Client hints match (all, hardware-vendor)');
+	like($r, qr/x-platform-version: 13.0/, 'Client hints match (all, platform-version)');
+}
 
 ###############################################################################
 # Test properties.
@@ -335,6 +433,18 @@ like($r, qr/x-ismobile: True/, 'Opera mobile header');
 # Match desktop User-Agent in Opera header.
 $r = get_with_opera_header('/all', $desktopUserAgent);
 like($r, qr/x-ismobile: False/, 'Opera desktop header');
+
+###############################################################################
+# Test multiple HTTP header functionality (should fail for `ua_uach` mode)
+###############################################################################
+
+# Match mobile User-Agent in Opera header.
+$r = get_with_opera_header('/ua_uach', $mobileUserAgent);
+like($r, qr/x-ismobile: NoMatch/, 'Opera mobile header (unrecognized by ua_uach)');
+
+# Match desktop User-Agent in Opera header.
+$r = get_with_opera_header('/ua_uach', $desktopUserAgent);
+like($r, qr/x-ismobile: NoMatch/, 'Opera desktop header (unrecognized by ua_uach)');
 
 ###############################################################################
 # Test extended matching from query String.
