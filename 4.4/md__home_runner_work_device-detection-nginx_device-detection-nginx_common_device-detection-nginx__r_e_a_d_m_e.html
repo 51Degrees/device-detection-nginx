@@ -87,7 +87,7 @@ $(document).ready(function(){initNavTree('md__home_runner_work_device-detection-
 <li>Choose the binary for the version of Nginx that you want to use.</li>
 <li>Create a folder which we will use for this quick start.</li>
 <li>In the folder:<ul>
-<li>Create a Nginx configuration file and paste the following content, replacing the path in <code>load_module</code> and <code>51D_file_path</code> with the actual path to the downloaded module and the downloaded data file. <div class="c-code__block c-code__block--outline"><div class="c-code__line"># Specify the module to load. </div><div class="c-code__line">load_module [path to 51Degrees module];</div><div class="c-code__line"></div><div class="c-code__line">events {</div><div class="c-code__line">}</div><div class="c-code__line"></div><div class="c-code__line">http {</div><div class="c-code__line">    # Specify the data file to use</div><div class="c-code__line">    51D_file_path [path to 51Degrees data file];</div><div class="c-code__line">    server {</div><div class="c-code__line">        listen 8888;</div><div class="c-code__line"></div><div class="c-code__line">        location /test {</div><div class="c-code__line">            # Perform a detection using a single User-Agent header.</div><div class="c-code__line">            # Set the request header &#39;x-mobile&#39; to returned value for property &#39;IsMobile&#39;.</div><div class="c-code__line">            51D_match_single x-mobile IsMobile;</div><div class="c-code__line"></div><div class="c-code__line">            # Set the response header &#39;x-mobile&#39; using the request header &#39;x-mobile&#39;.</div><div class="c-code__line">            add_header x-mobile $http_x_mobile;</div><div class="c-code__line">        }</div><div class="c-code__line">    }</div><div class="c-code__line">}</div></div></li>
+<li>Create a Nginx configuration file and paste the following content, replacing the path in <code>load_module</code> and <code>51D_file_path</code> with the actual path to the downloaded module and the downloaded data file. <div class="c-code__block c-code__block--outline"><div class="c-code__line"># Specify the module to load. </div><div class="c-code__line">load_module [path to 51Degrees module];</div><div class="c-code__line"></div><div class="c-code__line">events {</div><div class="c-code__line">}</div><div class="c-code__line"></div><div class="c-code__line">http {</div><div class="c-code__line">    # Specify the data file to use</div><div class="c-code__line">    51D_file_path [path to 51Degrees data file];</div><div class="c-code__line">    server {</div><div class="c-code__line">        listen 8888;</div><div class="c-code__line"></div><div class="c-code__line">        location /test {</div><div class="c-code__line">            # Perform a detection using a single User-Agent header.</div><div class="c-code__line">            # Set the request header &#39;x-mobile&#39; to returned value for property &#39;IsMobile&#39;.</div><div class="c-code__line">            51D_match_ua x-mobile IsMobile;</div><div class="c-code__line"></div><div class="c-code__line">            # Set the response header &#39;x-mobile&#39; using the request header &#39;x-mobile&#39;.</div><div class="c-code__line">            add_header x-mobile $http_x_mobile;</div><div class="c-code__line">        }</div><div class="c-code__line">    }</div><div class="c-code__line">}</div></div></li>
 <li>Create a folder named <code>html</code> and an empty file <code>test</code> in that folder. This is because we are serving static content in the above config file and the root directory to serve requests is defaulted at <code>html</code>.</li>
 <li>Create a folder named <code>logs</code> for nginx to write its log messages to.</li>
 </ul>
@@ -152,10 +152,17 @@ Default: 51D_value_separator ',';<br />
 Context: main<br />
 Specify the separator to be used in the value string returned from a detection. Each value in the returned result string is correspond to a requested property.   </td></tr>
 <tr class="c-table__row">
-<td class="c-table__cell">Syntax: <code>51D_match_single</code> <em>header</em> <em>properties</em> [<em>argument</em>];<br />
+<td class="c-table__cell">Syntax: <code>51D_match_ua</code> <em>header</em> <em>properties</em> [<em>argument</em>];<br />
 Default: &mdash;<br />
 Context: main, server, <code>location</code> (<b>NOTE</b>: This directive can be used in main, server and location blocks. Specified properties are aggregated and eventually queried in the location. <em>header</em> value is set after the query is performed and is only available within <code>location</code> block)<br />
 Perform a detection using a single request header <code>User-Agent</code>. <em>header</em> specifies which request header the returned <em>properties</em> values should be stored at. <em>properties</em> is a comma separated list string. <em>argument</em> specifies if a <code>User-Agent</code> is supplied as a query argument. This will override the value in the <code>User-Agent</code> header. The <em>argument</em> is optional.<br />
+If a property is not available for any reason, the value being returned for that property will be <code>NA</code><br />
+This directive was previously known as <code>51D_match_single</code> (name deprecated)   </td></tr>
+<tr class="c-table__row">
+<td class="c-table__cell">Syntax: <code>51D_match_ua_client_hints</code> <em>header</em> <em>properties</em> [<em>argument</em>];<br />
+Default: &mdash;<br />
+Context: main, server, <code>location</code> (<b>NOTE</b>: This directive can be used in main, server and location blocks. Specified properties are aggregated and eventually queried in the location. <em>header</em> value is set after the query is performed and is only available within <code>location</code> block)<br />
+Perform a detection using request headers <code>User-Agent</code> and <code>Sec-CH-UA-*</code>. <em>header</em> specifies which request header the returned <em>properties</em> values should be stored at. <em>properties</em> is a comma separated list string. <em>argument</em> specifies if a <code>User-Agent</code> is supplied as a query argument. This will override the value in the <code>User-Agent</code> header. The <em>argument</em> is optional.<br />
 If a property is not available for any reason, the value being returned for that property will be <code>NA</code>   </td></tr>
 <tr class="c-table__row">
 <td class="c-table__cell">Syntax: <code>51D_match_all</code> <em>header</em> <em>properties</em>;<br />
@@ -184,7 +191,7 @@ Context: main, server, location<br />
 Allow Client Hints to be set in response headers where it is applicable to the user agent (e.g. Chrome 89 or above) so that more evidence can be returned in subsequent requests, allowing more accurate detection. Value set in a block overwrites values set in precedent blocks (e.g. value set in <code>location</code> block will overwrite value set in <code>server</code> and <code>main</code> blocks). This will only be available from the 4.3.0 version onwards.   </td></tr>
 </table>
 </div><h2>Proxy Passing</h2>
-<p>When using the <code>proxy_pass</code> directive in a location block where a match directive is used, the properties selected are passed as additional HTTP headers with the name specified in the first argument of <code>51D_match_single</code>/<code>51D_match_all</code>.</p>
+<p>When using the <code>proxy_pass</code> directive in a location block where a match directive is used, the properties selected are passed as additional HTTP headers with the name specified in the first argument of <code>51D_match_ua</code>/<code>51D_match_ua_client_hints</code>/<code>51D_match_all</code>.</p>
 <h2>Fast-CGI</h2>
 <p>Using <code>include fastcgi_params;</code> makes these additional headers available via the <code>$_SERVER</code> variable.</p>
 <h2>Match Metrics</h2>
@@ -195,7 +202,7 @@ Allow Client Hints to be set in response headers where it is applicable to the u
 <tr class="c-table__row--heading">
 <td class="c-table__cell">Example  </td><td class="c-table__cell">Description   </td></tr>
 <tr class="c-table__row">
-<td class="c-table__cell">gettingStarted.conf  </td><td class="c-table__cell">Shows a simple instance of how to use 51D_match_single and 51D_match_all in a configuration file.   </td></tr>
+<td class="c-table__cell">gettingStarted.conf  </td><td class="c-table__cell">Shows a simple instance of how to use 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all in a configuration file.   </td></tr>
 <tr class="c-table__row">
 <td class="c-table__cell">config.conf  </td><td class="c-table__cell">Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, 51D_use_performance_graph and etc...   </td></tr>
 <tr class="c-table__row">
@@ -231,7 +238,7 @@ Allow Client Hints to be set in response headers where it is applicable to the u
 </p>
 <p>To build and link the module statically with Nginx, use <code>STATIC_BUILD</code> variable. e.g. </p><div class="c-code__block c-code__block--outline"><div class="c-code__line">make install STATIC_BUILD=1</div></div><p> <br />
 </p>
-<p>The Nginx executable will be output to the project root directory. The prefix path of the Nginx will be set to <code>build</code> directory. A <code>nginx.conf</code> is also included with a simple example of <code>51D_match_single</code> and <code>51D_match_all</code> directive, set in a static content location. The build process has created the static file in the <code>build/html</code> folder so you can start Nginx and start sending requests to that static content endpoint.</p>
+<p>The Nginx executable will be output to the project root directory. The prefix path of the Nginx will be set to <code>build</code> directory. A <code>nginx.conf</code> is also included with a simple example of <code>51D_match_ua</code>, <code>51D_match_ua_client_hints</code> and <code>51D_match_all</code> directives, set in a static content location. The build process has created the static file in the <code>build/html</code> folder so you can start Nginx and start sending requests to that static content endpoint.</p>
 <h2>Test</h2>
 <p>All tests are allocated in the <code>tests</code> folder.</p>
 <p>To be able to test the 51Degrees module the following libraries are required.</p><ul>

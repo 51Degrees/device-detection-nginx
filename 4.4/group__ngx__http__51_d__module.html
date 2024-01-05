@@ -235,6 +235,13 @@ typedef&#160;enum&#160;<a class="el" href="group__ngx__http__51_d__module.html#g
 <!-- startMemberDescription -->
 <div class="c-table__desc memdesc:ga1f4626e412e4853f66a1261dc1be35a7">Performance profiles. <!-- endMemberDescription -->
 </div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
+<tr class="c-table__row memitem:ga8ee5036f5e853c3c5228e335884c1a2f"><td class="c-table__cell">typedef&#160;ngx_uint_t<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a>
+<!-- startMemberDescription -->
+<div class="c-table__desc memdesc:ga8ee5036f5e853c3c5228e335884c1a2f">Multi-header detection mode.  <a href="#ga8ee5036f5e853c3c5228e335884c1a2f">More...</a><!-- endMemberDescription -->
+</div></td></tr>
 <!-- endMemberList -->
 <!-- end member list -->
 </tbody></table></div>
@@ -254,16 +261,38 @@ Enumerations</h2>
 <!-- startMemberItem() -->
 <tr class="c-table__row memitem:ga01b447abdb45568b428ac05a9f4c8a89"><td class="c-table__cell">enum <!-- insertMemberAlign -->
 &#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga01b447abdb45568b428ac05a9f4c8a89">ngx_http_51D_performance_profile_e</a> { <br />
-&#160;&#160;<b>ngx_http_51D_in_memory</b> = 1, 
-<b>ngx_http_51D_high_performance</b>, 
-<b>ngx_http_51D_low_memory</b>, 
-<b>ngx_http_51D_balanced</b>, 
+&#160;&#160;<b>ngx_http_51D_profile_in_memory</b> = 1, 
+<b>ngx_http_51D_profile_high_performance</b>, 
+<b>ngx_http_51D_profile_low_memory</b>, 
+<b>ngx_http_51D_profile_balanced</b>, 
 <br />
-&#160;&#160;<b>ngx_http_51D_balanced_temp</b>
+&#160;&#160;<b>ngx_http_51D_profile_balanced_temp</b>
 <br />
  }
 <!-- startMemberDescription -->
 <div class="c-table__desc memdesc:ga01b447abdb45568b428ac05a9f4c8a89">Performance profiles enumerator.  <a href="group__ngx__http__51_d__module.html#ga01b447abdb45568b428ac05a9f4c8a89">More...</a><!-- endMemberDescription -->
+</div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
+<tr class="c-table__row memitem:gaf9160b6ee51f49446989c426e2476d0b"><td class="c-table__cell">enum <!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#gaf9160b6ee51f49446989c426e2476d0b">ngx_http_51D_multi_mode_bits</a> { <b>ngx_http_51D_multi_mode_bit_ua_only</b> = 0, 
+<b>ngx_http_51D_multi_mode_bit_client_hints</b>, 
+<b>ngx_http_51D_multi_mode_bit_all_evidence</b>, 
+<b>ngx_http_51D_multi_mode_bits_count</b>
+ }
+<!-- startMemberDescription -->
+<div class="c-table__desc memdesc:gaf9160b6ee51f49446989c426e2476d0b">Multi-header detection mode bits enumerator.  <a href="group__ngx__http__51_d__module.html#gaf9160b6ee51f49446989c426e2476d0b">More...</a><!-- endMemberDescription -->
+</div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
+<tr class="c-table__row memitem:ga9b5f39b5ea06337b6fa44f67db0b9e05"><td class="c-table__cell">enum <!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga9b5f39b5ea06337b6fa44f67db0b9e05">ngx_http_51D_multi_mode_masks</a> { <b>ngx_http_51D_multi_mode_mask_ua_only</b> = 1 &lt;&lt; ngx_http_51D_multi_mode_bit_ua_only, 
+<b>ngx_http_51D_multi_mode_mask_client_hints</b> = 1 &lt;&lt; ngx_http_51D_multi_mode_bit_client_hints, 
+<b>ngx_http_51D_multi_mode_mask_all_evidence</b> = 1 &lt;&lt; ngx_http_51D_multi_mode_bit_all_evidence, 
+<b>ngx_http_51D_multi_mode_mask_non_ua_only</b> = ((1 &lt;&lt; ngx_http_51D_multi_mode_bits_count) - 1) &amp; ~ngx_http_51D_multi_mode_mask_ua_only
+ }
+<!-- startMemberDescription -->
+<div class="c-table__desc memdesc:ga9b5f39b5ea06337b6fa44f67db0b9e05">Multi-header detection mode masks enumerator.  <a href="group__ngx__http__51_d__module.html#ga9b5f39b5ea06337b6fa44f67db0b9e05">More...</a><!-- endMemberDescription -->
 </div></td></tr>
 <!-- endMemberList -->
 <!-- end member list -->
@@ -564,17 +593,23 @@ Functions</h2>
 </div></td></tr>
 <!-- member dec start -->
 <!-- startMemberItem() -->
-<tr class="c-table__row memitem:ga49dffe9143141e0fd0920b4ba7e35257"><td class="c-table__cell">static&#160;EvidenceKeyValuePairArray&#160;*<!-- insertMemberAlign -->
-&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga49dffe9143141e0fd0920b4ba7e35257">get_evidence</a> (ResultsHash *results, ngx_http_request_t *r)
-<!-- startMemberDescription -->
-<div class="c-table__desc memdesc:ga49dffe9143141e0fd0920b4ba7e35257">Create an evidence array and added the evidence from the http request.  <a href="#ga49dffe9143141e0fd0920b4ba7e35257">More...</a><!-- endMemberDescription -->
+<tr class="c-table__row memitem:ga7cb06cfcd6125e9d381679eb832553f4"><td class="c-table__cell"><a id="ga7cb06cfcd6125e9d381679eb832553f4"></a>
+static&#160;int<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><b>is_header_allowed_for_UA_UACH_mode</b> (const char *const headerName)
 </div></td></tr>
 <!-- member dec start -->
 <!-- startMemberItem() -->
-<tr class="c-table__row memitem:ga0380f289777e2b38522e5fac2ec5e30a"><td class="c-table__cell">ngx_uint_t<!-- insertMemberAlign -->
-&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga0380f289777e2b38522e5fac2ec5e30a">ngx_http_51D_get_match</a> (<a class="el" href="structngx__http__51_d__main__conf__t.html">ngx_http_51D_main_conf_t</a> *fdmcf, ngx_http_request_t *r, int multi, ngx_str_t *userAgent)
+<tr class="c-table__row memitem:ga4c7cfb239b1468a177c7ddc683eddb5a"><td class="c-table__cell">static&#160;EvidenceKeyValuePairArray&#160;*<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga4c7cfb239b1468a177c7ddc683eddb5a">get_evidence</a> (ResultsHash *results, ngx_http_request_t *r, <a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a> multiMode)
 <!-- startMemberDescription -->
-<div class="c-table__desc memdesc:ga0380f289777e2b38522e5fac2ec5e30a">Get match function.  <a href="#ga0380f289777e2b38522e5fac2ec5e30a">More...</a><!-- endMemberDescription -->
+<div class="c-table__desc memdesc:ga4c7cfb239b1468a177c7ddc683eddb5a">Create an evidence array and added the evidence from the http request.  <a href="#ga4c7cfb239b1468a177c7ddc683eddb5a">More...</a><!-- endMemberDescription -->
+</div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
+<tr class="c-table__row memitem:ga56b5d22075c2df2d225d9a663d3cfca9"><td class="c-table__cell">static&#160;ngx_uint_t<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga56b5d22075c2df2d225d9a663d3cfca9">ngx_http_51D_get_match</a> (<a class="el" href="structngx__http__51_d__main__conf__t.html">ngx_http_51D_main_conf_t</a> *fdmcf, ngx_http_request_t *r, <a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a> multi, ngx_str_t *userAgent)
+<!-- startMemberDescription -->
+<div class="c-table__desc memdesc:ga56b5d22075c2df2d225d9a663d3cfca9">Get match function.  <a href="#ga56b5d22075c2df2d225d9a663d3cfca9">More...</a><!-- endMemberDescription -->
 </div></td></tr>
 <!-- member dec start -->
 <!-- startMemberItem() -->
@@ -724,6 +759,18 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div></td></tr>
 <!-- member dec start -->
 <!-- startMemberItem() -->
+<tr class="c-table__row memitem:ga3372c1b729128d52f988b7ec472844f2"><td class="c-table__cell"><a id="ga3372c1b729128d52f988b7ec472844f2"></a>
+static&#160;const&#160;char&#160;*const<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><b>NGX_HTTP_51D_HEADER_PREFIX_CLIENT_HINT</b> = &quot;Sec-CH-UA-&quot;
+</div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
+<tr class="c-table__row memitem:gad4fdeae7a8cb327f759bd42151ccf7ce"><td class="c-table__cell"><a id="gad4fdeae7a8cb327f759bd42151ccf7ce"></a>
+static&#160;const&#160;char&#160;*const<!-- insertMemberAlign -->
+&#160;</td><td class="c-table__cell"><b>NGX_HTTP_51D_HEADER_USER_AGENT</b> = &quot;User-Agent&quot;
+</div></td></tr>
+<!-- member dec start -->
+<!-- startMemberItem() -->
 <tr class="c-table__row memitem:ga15cf9137827a71b1b495b4bb366b73fe"><td class="c-table__cell">static&#160;ngx_conf_enum_t<!-- insertMemberAlign -->
 &#160;</td><td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga15cf9137827a71b1b495b4bb366b73fe">ngx_http_51D_performance_profiles</a> []
 <!-- startMemberDescription -->
@@ -823,8 +870,98 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div>
 </article>
 <!-- endMemberDocList -->
+<h2 class="g-docs__section-heading">Typedef Documentation</h2>
+<!-- startMemberDocList -->
+<article class="c-member">
+<a id="ga8ee5036f5e853c3c5228e335884c1a2f"></a><!-- startMemberDoc -->
+
+<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga8ee5036f5e853c3c5228e335884c1a2f">&#9670;&nbsp;</a></span>ngx_http_51D_multi_header_mode</h2>
+
+<div class="c-member__main">
+<div class="c-member__head">
+<!-- startMemberDocName -->
+      <div class="c-member__split">
+        <div class="g-table g-table--overflow">
+          <table class="c-table c-table--article">
+            <tr class="c-table__row">
+              <td class="c-table__cell">typedef ngx_uint_t <a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a><!-- endMemberDocName -->
+</td>
+<!-- endMemberDoc -->
+            </tr>
+          </table>
+        </div>
+      </div>
+</div><!-- startIndent -->
+<div class="c-member__body">
+
+<p>Multi-header detection mode. </p>
+<p>See <code>ngx_http_51D_multi_mode_bits</code> and <code>ngx_http_51D_multi_mode_masks</code> below. </p>
+<!-- endIndent -->
+
+</div>
+</div>
+</article>
+<!-- endMemberDocList -->
 <h2 class="g-docs__section-heading">Enumeration Type Documentation</h2>
 <!-- startMemberDocList -->
+<article class="c-member">
+<a id="gaf9160b6ee51f49446989c426e2476d0b"></a><!-- startMemberDoc -->
+
+<h2 class="c-member__title"><span class="c-member__anchor"><a href="#gaf9160b6ee51f49446989c426e2476d0b">&#9670;&nbsp;</a></span>ngx_http_51D_multi_mode_bits</h2>
+
+<div class="c-member__main">
+<div class="c-member__head">
+<!-- startMemberDocName -->
+      <div class="c-member__split">
+        <div class="g-table g-table--overflow">
+          <table class="c-table c-table--article">
+            <tr class="c-table__row">
+              <td class="c-table__cell">enum <a class="el" href="group__ngx__http__51_d__module.html#gaf9160b6ee51f49446989c426e2476d0b">ngx_http_51D_multi_mode_bits</a><!-- endMemberDocName -->
+</td>
+<!-- endMemberDoc -->
+            </tr>
+          </table>
+        </div>
+      </div>
+</div><!-- startIndent -->
+<div class="c-member__body">
+
+<p>Multi-header detection mode bits enumerator. </p>
+<p>Describes bit flag meanings for <code>ngx_http_51D_multi_header_mode</code>. </p>
+<!-- endIndent -->
+
+</div>
+</div>
+</article>
+<article class="c-member">
+<a id="ga9b5f39b5ea06337b6fa44f67db0b9e05"></a><!-- startMemberDoc -->
+
+<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga9b5f39b5ea06337b6fa44f67db0b9e05">&#9670;&nbsp;</a></span>ngx_http_51D_multi_mode_masks</h2>
+
+<div class="c-member__main">
+<div class="c-member__head">
+<!-- startMemberDocName -->
+      <div class="c-member__split">
+        <div class="g-table g-table--overflow">
+          <table class="c-table c-table--article">
+            <tr class="c-table__row">
+              <td class="c-table__cell">enum <a class="el" href="group__ngx__http__51_d__module.html#ga9b5f39b5ea06337b6fa44f67db0b9e05">ngx_http_51D_multi_mode_masks</a><!-- endMemberDocName -->
+</td>
+<!-- endMemberDoc -->
+            </tr>
+          </table>
+        </div>
+      </div>
+</div><!-- startIndent -->
+<div class="c-member__body">
+
+<p>Multi-header detection mode masks enumerator. </p>
+<p>Describes bit flag combination meanings for <code>ngx_http_51D_multi_header_mode</code>. </p>
+<!-- endIndent -->
+
+</div>
+</div>
+</article>
 <article class="c-member">
 <a id="ga01b447abdb45568b428ac05a9f4c8a89"></a><!-- startMemberDoc -->
 
@@ -1175,9 +1312,9 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div>
 </article>
 <article class="c-member">
-<a id="ga49dffe9143141e0fd0920b4ba7e35257"></a><!-- startMemberDoc -->
+<a id="ga4c7cfb239b1468a177c7ddc683eddb5a"></a><!-- startMemberDoc -->
 
-<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga49dffe9143141e0fd0920b4ba7e35257">&#9670;&nbsp;</a></span>get_evidence()</h2>
+<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga4c7cfb239b1468a177c7ddc683eddb5a">&#9670;&nbsp;</a></span>get_evidence()</h2>
 
 <div class="c-member__main">
 <div class="c-member__head">
@@ -1204,7 +1341,17 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
           <td class="c-table__cell">ngx_http_request_t *<!-- endParameterType -->
 &#160;</td>
 <!-- startParameterName -->
-          <td class="c-table__cell"><em>r</em><!-- endParameterName -->
+          <td class="c-table__cell"><em>r</em>, <!-- endParameterName -->
+</td>
+        </tr>
+<!-- startParameterType -->
+        <tr>
+          <td class="c-table__cell"></td>
+          <td></td>
+          <td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a><!-- endParameterType -->
+&#160;</td>
+<!-- startParameterName -->
+          <td class="c-table__cell"><em>multiMode</em><!-- endParameterName -->
 &#160;</td>
         </tr>
         <tr>
@@ -1229,6 +1376,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 <p>This should consider the evidence sent from cookies and query, since overrides are required by customer. This requires parsing the query string for the override values. For MVP might consider the override from cookies only. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">results</span> - the results to hold the return value of the detection </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">r</span> - the http request that contains the evidence </dd>
+    <tr><dd class="c-list-definition__desc"><span class="b-text--red">multiMode</span> - describes which headers to use for evidence. </dd>
   </dd>
 </dl>
 <dl class="c-list-definition return"><dt class="c-list-definition__title">Returns</dt><dd class="c-list-definition__desc">an array of evidence </dd></dl>
@@ -2103,9 +2251,9 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div>
 </article>
 <article class="c-member">
-<a id="ga0380f289777e2b38522e5fac2ec5e30a"></a><!-- startMemberDoc -->
+<a id="ga56b5d22075c2df2d225d9a663d3cfca9"></a><!-- startMemberDoc -->
 
-<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga0380f289777e2b38522e5fac2ec5e30a">&#9670;&nbsp;</a></span>ngx_http_51D_get_match()</h2>
+<h2 class="c-member__title"><span class="c-member__anchor"><a href="#ga56b5d22075c2df2d225d9a663d3cfca9">&#9670;&nbsp;</a></span>ngx_http_51D_get_match()</h2>
 
 <div class="c-member__main">
 <div class="c-member__head">
@@ -2114,7 +2262,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
         <div class="g-table g-table--overflow">
           <table class="c-table c-table--article">
             <tr class="c-table__row">
-              <td class="c-table__cell">ngx_uint_t ngx_http_51D_get_match <!-- endMemberDocName -->
+              <td class="c-table__cell">static ngx_uint_t ngx_http_51D_get_match <!-- endMemberDocName -->
 </td>
 <!-- startParameterList -->
           <td>(</td>
@@ -2139,7 +2287,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
         <tr>
           <td class="c-table__cell"></td>
           <td></td>
-          <td class="c-table__cell">int<!-- endParameterType -->
+          <td class="c-table__cell"><a class="el" href="group__ngx__http__51_d__module.html#ga8ee5036f5e853c3c5228e335884c1a2f">ngx_http_51D_multi_header_mode</a><!-- endParameterType -->
 &#160;</td>
 <!-- startParameterName -->
           <td class="c-table__cell"><em>multi</em>, <!-- endParameterName -->
@@ -2165,6 +2313,11 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
           </table>
         </div>
       </div>
+<!-- startLabels -->
+<div class="c-member__labels">
+<!-- writeLabel(static) -->
+<span class="c-label">static</span><!-- endLabels -->
+</div>
 </div><!-- startIndent -->
 <div class="c-member__body">
 
@@ -2173,7 +2326,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 <dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">fdmcf</span> - module main config. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">r</span> - the current HTTP request. </dd>
-    <tr><dd class="c-list-definition__desc"><span class="b-text--red">multi</span> - 0 for a single User-Agent match, 1 for a multiple HTTP header match. </dd>
+    <tr><dd class="c-list-definition__desc"><span class="b-text--red">multi</span> - Bit mask: what headers to use. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">userAgent</span> - pointer to the user agent to perform the match on. </dd>
   </dd>
 </dl>
@@ -3068,7 +3221,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 <div class="c-member__body">
 
 <p>Set function. </p>
-<p>Is called for each occurrence of "51D_match_single" or "51D_match_all". Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
+<p>Is called for each occurrence of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or "51D_match_all". Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cf</span> - the nginx conf. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cmd</span> - the name of the command called from the config file. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">matchConf</span> - the match config. </dd>
@@ -3302,7 +3455,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 
 <p>Forward declaration of <a class="el" href="group__ngx__http__51_d__module.html#gaf38b9dcd7123bbd332ff16cc05b0cf8c" title="Forward declaration of ngx_http_51D_set_loc.">ngx_http_51D_set_loc</a>. </p>
 <p>Set function.</p>
-<p>Is called for occurrences of "51D_match_single" or "51D_match_all" in a location config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
+<p>Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or "51D_match_all" in a location config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cf</span> - the nginx conf. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cmd</span> - the name of the command called from the config file. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">conf</span> - A pointer to the context for configuration object </dd>
@@ -3527,7 +3680,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 
 <p>Forward declaration of <a class="el" href="group__ngx__http__51_d__module.html#ga29a95fe34c816b5a6d72938e5e6f4c49" title="Forward declaration of ngx_http_51D_set_main.">ngx_http_51D_set_main</a>. </p>
 <p>Set function.</p>
-<p>Is called for occurrences of "51D_match_single" or "51D_match_all" in a http config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
+<p>Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or "51D_match_all" in a http config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cf</span> - the nginx conf. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cmd</span> - the name of the command called from the config file. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">conf</span> - A pointer to the context for configuration object </dd>
@@ -3677,7 +3830,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 
 <p>Forward declaration of <a class="el" href="group__ngx__http__51_d__module.html#gab7a84e76ea2f8acced2f7caa9ba32d6f" title="Forward declaration of ngx_http_51D_set_srv.">ngx_http_51D_set_srv</a>. </p>
 <p>Set function.</p>
-<p>Is called for occurrences of "51D_match_single" or "51D_match_all" in a server config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
+<p>Is called for occurrences of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints" or "51D_match_all" in a server config block. Allocates space for the header structure and initialises it with the set header function. </p><dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cf</span> - the nginx conf. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cmd</span> - the name of the command called from the config file. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">conf</span> - A pointer to the context for configuration object </dd>
@@ -4369,7 +4522,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 <div class="c-member__body">
 
 <p>Set data function. </p>
-<p>Initialises the data structure for a given occurrence of "51D_match_single", "51D_match_all", "51D_get_javascript_single" or "51D_get_javascript_all" in the config file. Allocates space required and sets the name and properties.</p>
+<p>Initialises the data structure for a given occurrence of "51D_match_single", "51D_match_ua", "51D_match_ua_client_hints", "51D_match_all", "51D_get_javascript_single" or "51D_get_javascript_all" in the config file. Allocates space required and sets the name and properties.</p>
 <dl class="c-list-definition"><dt class="c-list-definition__title">Parameters</dt><dd class="c-list-definition__desc">
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">cf</span> - the nginx config. </dd>
     <tr><dd class="c-list-definition__desc"><span class="b-text--red">data</span> - data to be set. </dd>
@@ -4464,7 +4617,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 <div class="c-member__body">
 
 <p>Definitions of functions which can be called from the config file. </p>
-<p>&ndash;51D_match_single takes two string arguments, the name of the header to be set and a comma separated list of properties to be returned. The thrid argument is optional to specify the query argument to be used over the default User-Agent. Is called within main, server and location block. Enables User-Agent matching. &ndash;51D_match_all takes two string arguments, the name of the header to be set and a comma separated list of properties to be returned. Is called within main, server and location block. Enables multiple http header matching. &ndash;51D_get_javascript_single takes one string argument, the Javascript property to be returned. The second argument is optional to specify the query argument to be used over the User-Agent header. Is only called within the location block. This enables User-Agent matching to obtain the required Javascript property. &ndash;51D_get_javascript_all takes one string argument, the Javascript property to be returned. Is only called within the location block. This enables multiple http header matching. &ndash;51D_performance_profile takes one enum argument, the performance profile to set. Values can be "IN_MEMORY", "HIGH_PERFORMANCE", "LOW_MEMORY", "BALANCED", "BALANCED_TEMP", "DEFAULT". Currently only "IN_MEMORY" is supported. &ndash;51D_drift takes one integer argument, the drift value to set &ndash;51D_difference takes one integer argument, the difference value to set &ndash;51D_max_concurrency takes one integer argument, the maximum number of concurrency that the engine can be run with. In this case, it will be the number of worker processes. &ndash;51D_allow_unmatched takes one enum argument, which specifies whether unmatched result is allowed or not. This enum represents a boolean value. This is to be consistent with other integration such as Varnish. The values can be "on" or "off". &ndash;51D_use_performance_graph takes one enum argument, which specifies whether performance graph should be used. This enum represents a boolean value. &ndash;51D_use_predictive_graph takes one enum argument, which specifies whether predictive graph should be used. This enum represents a boolean value. &ndash;51D_file_path takes one string argument, the path to a 51Degrees data file. Is called within server block. &ndash;51D_value_separator takes one string argument, the separator of the values being returned. </p>
+<p>&ndash;51D_match_single takes two string arguments, the name of the header to be set and a comma separated list of properties to be returned. The thrid argument is optional to specify the query argument to be used over the default User-Agent. Is called within main, server and location block. Enables User-Agent matching. Deprecated in favor of 51D_match_ua. &ndash;51D_match_ua takes two string arguments, the name of the header to be set and a comma separated list of properties to be returned. The thrid argument is optional to specify the query argument to be used over the default User-Agent. Is called within main, server and location block. Enables User-Agent matching. &ndash;51D_match_all takes two string arguments, the name of the header to be set and a comma separated list of properties to be returned. Is called within main, server and location block. Enables multiple http header matching. &ndash;51D_get_javascript_single takes one string argument, the Javascript property to be returned. The second argument is optional to specify the query argument to be used over the User-Agent header. Is only called within the location block. This enables User-Agent matching to obtain the required Javascript property. &ndash;51D_get_javascript_all takes one string argument, the Javascript property to be returned. Is only called within the location block. This enables multiple http header matching. &ndash;51D_performance_profile takes one enum argument, the performance profile to set. Values can be "IN_MEMORY", "HIGH_PERFORMANCE", "LOW_MEMORY", "BALANCED", "BALANCED_TEMP", "DEFAULT". Currently only "IN_MEMORY" is supported. &ndash;51D_drift takes one integer argument, the drift value to set &ndash;51D_difference takes one integer argument, the difference value to set &ndash;51D_max_concurrency takes one integer argument, the maximum number of concurrency that the engine can be run with. In this case, it will be the number of worker processes. &ndash;51D_allow_unmatched takes one enum argument, which specifies whether unmatched result is allowed or not. This enum represents a boolean value. This is to be consistent with other integration such as Varnish. The values can be "on" or "off". &ndash;51D_use_performance_graph takes one enum argument, which specifies whether performance graph should be used. This enum represents a boolean value. &ndash;51D_use_predictive_graph takes one enum argument, which specifies whether predictive graph should be used. This enum represents a boolean value. &ndash;51D_file_path takes one string argument, the path to a 51Degrees data file. Is called within server block. &ndash;51D_value_separator takes one string argument, the separator of the values being returned. </p>
 <!-- endIndent -->
 
 </div>
@@ -4491,12 +4644,12 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
       </div>
 </div><!-- startIndent -->
 <div class="c-member__body">
-<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    NGX_MODULE_V1,</div><div class="c-code__line">    &amp;<a class="code" href="group__ngx__http__51_d__module.html#gabc974c21ea286e4b9941425f71726278">ngx_http_51D_module_ctx</a>,      </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga29a22a2cd1f6899dce6c8575fed6354d">ngx_http_51D_commands</a>,         </div><div class="c-code__line">    NGX_HTTP_MODULE,               </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga27b0da03ff7f25da84157213b7be5b4a">ngx_http_51D_init_module</a>,      </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga3021f696a2c0a4d5b8fedac03cda3104">ngx_http_51D_init_process</a>,     </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga1c8812c50f754b7f48922770e26b2dd9">ngx_http_51D_exit_process</a>,     </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga69107d313bb076e916dde12ad606af57">ngx_http_51D_exit_master</a>,      </div><div class="c-code__line">    NGX_MODULE_V1_PADDING</div><div class="c-code__line">}</div><div class="ttc" id="group__ngx__http__51_d__module_html_gabc974c21ea286e4b9941425f71726278"><div class="ttname"><a href="group__ngx__http__51_d__module.html#gabc974c21ea286e4b9941425f71726278">ngx_http_51D_module_ctx</a></div><div class="ttdeci">static ngx_http_module_t ngx_http_51D_module_ctx</div><div class="ttdoc">Module context.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1102</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga27b0da03ff7f25da84157213b7be5b4a"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga27b0da03ff7f25da84157213b7be5b4a">ngx_http_51D_init_module</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_init_module(ngx_cycle_t *cycle)</div><div class="ttdoc">Init module function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:845</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga69107d313bb076e916dde12ad606af57"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga69107d313bb076e916dde12ad606af57">ngx_http_51D_exit_master</a></div><div class="ttdeci">void ngx_http_51D_exit_master(ngx_cycle_t *cycle)</div><div class="ttdoc">Exit master process.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1395</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga29a22a2cd1f6899dce6c8575fed6354d"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga29a22a2cd1f6899dce6c8575fed6354d">ngx_http_51D_commands</a></div><div class="ttdeci">static ngx_command_t ngx_http_51D_commands[]</div><div class="ttdoc">Definitions of functions which can be called from the config file.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:961</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga1c8812c50f754b7f48922770e26b2dd9"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga1c8812c50f754b7f48922770e26b2dd9">ngx_http_51D_exit_process</a></div><div class="ttdeci">void ngx_http_51D_exit_process(ngx_cycle_t *cycle)</div><div class="ttdoc">Exit process function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1370</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga3021f696a2c0a4d5b8fedac03cda3104"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga3021f696a2c0a4d5b8fedac03cda3104">ngx_http_51D_init_process</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_init_process(ngx_cycle_t *cycle)</div><div class="ttdoc">Init process function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1327</div></div>
+<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    NGX_MODULE_V1,</div><div class="c-code__line">    &amp;<a class="code" href="group__ngx__http__51_d__module.html#gabc974c21ea286e4b9941425f71726278">ngx_http_51D_module_ctx</a>,      </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga29a22a2cd1f6899dce6c8575fed6354d">ngx_http_51D_commands</a>,         </div><div class="c-code__line">    NGX_HTTP_MODULE,               </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga27b0da03ff7f25da84157213b7be5b4a">ngx_http_51D_init_module</a>,      </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga3021f696a2c0a4d5b8fedac03cda3104">ngx_http_51D_init_process</a>,     </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga1c8812c50f754b7f48922770e26b2dd9">ngx_http_51D_exit_process</a>,     </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga69107d313bb076e916dde12ad606af57">ngx_http_51D_exit_master</a>,      </div><div class="c-code__line">    NGX_MODULE_V1_PADDING</div><div class="c-code__line">}</div><div class="ttc" id="group__ngx__http__51_d__module_html_gabc974c21ea286e4b9941425f71726278"><div class="ttname"><a href="group__ngx__http__51_d__module.html#gabc974c21ea286e4b9941425f71726278">ngx_http_51D_module_ctx</a></div><div class="ttdeci">static ngx_http_module_t ngx_http_51D_module_ctx</div><div class="ttdoc">Module context.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1183</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga27b0da03ff7f25da84157213b7be5b4a"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga27b0da03ff7f25da84157213b7be5b4a">ngx_http_51D_init_module</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_init_module(ngx_cycle_t *cycle)</div><div class="ttdoc">Init module function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:879</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga69107d313bb076e916dde12ad606af57"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga69107d313bb076e916dde12ad606af57">ngx_http_51D_exit_master</a></div><div class="ttdeci">void ngx_http_51D_exit_master(ngx_cycle_t *cycle)</div><div class="ttdoc">Exit master process.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1478</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga29a22a2cd1f6899dce6c8575fed6354d"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga29a22a2cd1f6899dce6c8575fed6354d">ngx_http_51D_commands</a></div><div class="ttdeci">static ngx_command_t ngx_http_51D_commands[]</div><div class="ttdoc">Definitions of functions which can be called from the config file.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1000</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga1c8812c50f754b7f48922770e26b2dd9"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga1c8812c50f754b7f48922770e26b2dd9">ngx_http_51D_exit_process</a></div><div class="ttdeci">void ngx_http_51D_exit_process(ngx_cycle_t *cycle)</div><div class="ttdoc">Exit process function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1453</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga3021f696a2c0a4d5b8fedac03cda3104"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga3021f696a2c0a4d5b8fedac03cda3104">ngx_http_51D_init_process</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_init_process(ngx_cycle_t *cycle)</div><div class="ttdoc">Init process function.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:1410</div></div>
 </div>
 <p>Global module declaration. </p>
 <p>Module definition.</p>
@@ -4534,12 +4687,12 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div>
 </div><!-- startIndent -->
 <div class="c-member__body">
-<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga8e9fa8338cada20952ccaafdcfa761f9">ngx_http_51D_post_conf</a>,        </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga840799dbe09bf709088a0818ba45adec">ngx_http_51D_create_main_conf</a>, </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga036cb41b9a4aae3732fc25cded383d4d">ngx_http_51D_create_srv_conf</a>,  </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga28b0aabb174c73b72e80ad5f9cd7e118">ngx_http_51D_merge_srv_conf</a>,   </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga464383cf8639aef93b0779206b4613c5">ngx_http_51D_create_loc_conf</a>,  </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga7666f8a0491af240787820497e021590">ngx_http_51D_merge_loc_conf</a>,   </div><div class="c-code__line">}</div><div class="ttc" id="group__ngx__http__51_d__module_html_ga8e9fa8338cada20952ccaafdcfa761f9"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga8e9fa8338cada20952ccaafdcfa761f9">ngx_http_51D_post_conf</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_post_conf(ngx_conf_t *cf)</div><div class="ttdoc">Module post config.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:469</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga464383cf8639aef93b0779206b4613c5"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga464383cf8639aef93b0779206b4613c5">ngx_http_51D_create_loc_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_loc_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_loc_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:628</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga840799dbe09bf709088a0818ba45adec"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga840799dbe09bf709088a0818ba45adec">ngx_http_51D_create_main_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_main_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_main_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:587</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga28b0aabb174c73b72e80ad5f9cd7e118"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga28b0aabb174c73b72e80ad5f9cd7e118">ngx_http_51D_merge_srv_conf</a></div><div class="ttdeci">static char * ngx_http_51D_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)</div><div class="ttdoc">Forward declaration of ngx_http_51D_merge_srv_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:682</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga036cb41b9a4aae3732fc25cded383d4d"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga036cb41b9a4aae3732fc25cded383d4d">ngx_http_51D_create_srv_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_srv_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_srv_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:646</div></div>
-<div class="ttc" id="group__ngx__http__51_d__module_html_ga7666f8a0491af240787820497e021590"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga7666f8a0491af240787820497e021590">ngx_http_51D_merge_loc_conf</a></div><div class="ttdeci">static char * ngx_http_51D_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)</div><div class="ttdoc">Forward declaration of ngx_http_51D_merge_loc_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:663</div></div>
+<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    NULL,                          </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga8e9fa8338cada20952ccaafdcfa761f9">ngx_http_51D_post_conf</a>,        </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga840799dbe09bf709088a0818ba45adec">ngx_http_51D_create_main_conf</a>, </div><div class="c-code__line">    NULL,                          </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga036cb41b9a4aae3732fc25cded383d4d">ngx_http_51D_create_srv_conf</a>,  </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga28b0aabb174c73b72e80ad5f9cd7e118">ngx_http_51D_merge_srv_conf</a>,   </div><div class="c-code__line"></div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga464383cf8639aef93b0779206b4613c5">ngx_http_51D_create_loc_conf</a>,  </div><div class="c-code__line">    <a class="code" href="group__ngx__http__51_d__module.html#ga7666f8a0491af240787820497e021590">ngx_http_51D_merge_loc_conf</a>,   </div><div class="c-code__line">}</div><div class="ttc" id="group__ngx__http__51_d__module_html_ga8e9fa8338cada20952ccaafdcfa761f9"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga8e9fa8338cada20952ccaafdcfa761f9">ngx_http_51D_post_conf</a></div><div class="ttdeci">static ngx_int_t ngx_http_51D_post_conf(ngx_conf_t *cf)</div><div class="ttdoc">Module post config.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:503</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga464383cf8639aef93b0779206b4613c5"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga464383cf8639aef93b0779206b4613c5">ngx_http_51D_create_loc_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_loc_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_loc_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:662</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga840799dbe09bf709088a0818ba45adec"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga840799dbe09bf709088a0818ba45adec">ngx_http_51D_create_main_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_main_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_main_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:621</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga28b0aabb174c73b72e80ad5f9cd7e118"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga28b0aabb174c73b72e80ad5f9cd7e118">ngx_http_51D_merge_srv_conf</a></div><div class="ttdeci">static char * ngx_http_51D_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)</div><div class="ttdoc">Forward declaration of ngx_http_51D_merge_srv_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:716</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga036cb41b9a4aae3732fc25cded383d4d"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga036cb41b9a4aae3732fc25cded383d4d">ngx_http_51D_create_srv_conf</a></div><div class="ttdeci">static void * ngx_http_51D_create_srv_conf(ngx_conf_t *cf)</div><div class="ttdoc">Forward declaration of ngx_http_51D_create_srv_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:680</div></div>
+<div class="ttc" id="group__ngx__http__51_d__module_html_ga7666f8a0491af240787820497e021590"><div class="ttname"><a href="group__ngx__http__51_d__module.html#ga7666f8a0491af240787820497e021590">ngx_http_51D_merge_loc_conf</a></div><div class="ttdeci">static char * ngx_http_51D_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)</div><div class="ttdoc">Forward declaration of ngx_http_51D_merge_loc_conf.</div><div class="ttdef"><b>Definition:</b> ngx_http_51D_module.c:697</div></div>
 </div>
 <p>Module context. </p>
 <p>Sets the configuration functions. </p>
@@ -4574,7 +4727,7 @@ ngx_atomic_t&#160;*<!-- insertMemberAlign -->
 </div>
 </div><!-- startIndent -->
 <div class="c-member__body">
-<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;IN_MEMORY&quot;</span>), ngx_http_51D_in_memory },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;HIGH_PERFORMANCE&quot;</span>), ngx_http_51D_high_performance },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;LOW_MEMORY&quot;</span>), ngx_http_51D_low_memory },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;BALANCED&quot;</span>), ngx_http_51D_balanced },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;BALANCED_TEMP&quot;</span>), ngx_http_51D_balanced_temp },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;DEFAULT&quot;</span>), ngx_http_51D_balanced },</div><div class="c-code__line">    { ngx_null_string, 0 }</div><div class="c-code__line">}</div></div>
+<b>Initial value:</b><div class="c-code__block c-code__block--outline"><div class="c-code__line">= {</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;IN_MEMORY&quot;</span>), ngx_http_51D_profile_in_memory },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;HIGH_PERFORMANCE&quot;</span>), ngx_http_51D_profile_high_performance },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;LOW_MEMORY&quot;</span>), ngx_http_51D_profile_low_memory },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;BALANCED&quot;</span>), ngx_http_51D_profile_balanced },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;BALANCED_TEMP&quot;</span>), ngx_http_51D_profile_balanced_temp },</div><div class="c-code__line">    { ngx_string(<span class="c-code__stringliteral">&quot;DEFAULT&quot;</span>), ngx_http_51D_profile_balanced },</div><div class="c-code__line">    { ngx_null_string, 0 }</div><div class="c-code__line">}</div></div>
 <p>Performance profile map, to map user specified string with corresponding profile. </p>
 <!-- endIndent -->
 
