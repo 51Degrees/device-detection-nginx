@@ -1,22 +1,22 @@
 [
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.3",
-    "NginxVersion": "1.25.3",
+    "Name": "ubuntu-latest_Nginx1.25.4",
+    "NginxVersion": "1.25.4",
     "RunPerformance": true,
     "FullTests": true,
     "PackageRequirement": true
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.3_MemCheck",
-    "NginxVersion": "1.25.3",
+    "Name": "ubuntu-latest_Nginx1.25.4_MemCheck",
+    "NginxVersion": "1.25.4",
     "MemCheck": true
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.3_MemCheck_Static",
-    "NginxVersion": "1.25.3",
+    "Name": "ubuntu-latest_Nginx1.25.4_MemCheck_Static",
+    "NginxVersion": "1.25.4",
     "BuildMethod": "static",
     "MemCheck": true
   },
