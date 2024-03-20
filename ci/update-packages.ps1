@@ -4,7 +4,7 @@ param(
     [string]$RepoName
 )
 
-$Images = @("ubuntu-latest")
+$Images = @("ubuntu-20.04")
 
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $OptionsPath = [IO.Path]::Combine($RepoPath, "ci", "options.json")
