@@ -302,7 +302,7 @@ user-agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like G
 sec-ch-ua-platform: '"Android"'
 sec-ch-ua-model: '"SM-S918B"'
 sec-ch-ua-mobile: ?1
-sec-ch-ua-platform-version: '"13.0.0"'
+sec-ch-ua-platform-version: '"13.0"'
 sec-ch-ua-full-version-list: '"Google Chrome";v="117.0.5938.60", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.60"'
 sec-ch-ua: '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"'
 
