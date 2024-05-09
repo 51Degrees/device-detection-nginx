@@ -52,8 +52,6 @@ http {
 	51D_drift 1;
 	51D_difference 1;
 	51D_allow_unmatched on;
-	51D_use_performance_graph off;
-	51D_use_predictive_graph on;
 
 	51D_match_ua x-main-ismobile-single IsMobile;
 	51D_match_all x-main-ismobile-all IsMobile;

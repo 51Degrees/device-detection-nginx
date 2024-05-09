@@ -143,7 +143,7 @@ All examples are located in the `examples` folder:
 |Example|Description|
 |-------|-----------|
 |gettingStarted.conf|Shows a simple instance of how to use 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all in a configuration file.|
-|config.conf|Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, 51D_use_performance_graph and etc...|
+|config.conf|Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, etc...|
 |matchQuery.conf|Shows how to perform detection using input from http request query argument|
 |matchMetrics.conf|Shows how to obtain other match metrics of the detection such as drift, difference, method and etc...|
 |responseHeaders|Shows how to enable Client Hints support to request further evidence from user agent to provide more accurate detection. This will only be available from the 4.3.0 version onwards.|
