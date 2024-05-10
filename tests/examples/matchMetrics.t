@@ -71,7 +71,7 @@ my $mobileUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1 like Mac OS X) App
 ###############################################################################
 
 my $r = get_with_ua('/metrics', $mobileUserAgent);
-like($r, qr/x-metrics: \d+,\d+,PERFORMANCE,\d+/, 'Match metrics');
+like($r, qr/x-metrics: \d+,\d+,PREDICTIVE,\d+/, 'Match metrics');
 like($r, qr/x-user-agents: (?!NA$).*/, 'Matched user agents string');
 like($r, qr/x-device-id: \d+-\d+-\d+-\d+/, 'Device ID');
 
