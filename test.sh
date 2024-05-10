@@ -45,8 +45,6 @@ echo "" >> build/nginx.conf
 echo "http {" >> build/nginx.conf
 echo "	## set the datafile ##" >> build/nginx.conf
 echo "	51D_file_path ./device-detection-cxx/device-detection-data/${DATA_FILE_NAME};" >> build/nginx.conf
-echo "  51D_use_performance_graph on;" >> build/nginx.conf
-echo "  51D_use_predictive_graph off;" >> build/nginx.conf
 echo "" >> build/nginx.conf
 echo "	server {" >> build/nginx.conf
 echo "		listen 8888;" >> build/nginx.conf

@@ -988,10 +988,10 @@ static ngx_conf_enum_t ngx_http_51D_performance_profiles[] = {
  * The values can be "on" or "off".
  * --51D_use_performance_graph takes one enum argument, which specifies
  * whether performance graph should be used. This enum represents a boolean
- * value.
+ * value.  DEPRECATED: has no effect and will be removed in future versions.
  * --51D_use_predictive_graph takes one enum argument, which specifies
  * whether predictive graph should be used. This enum represents a boolean
- * value. 
+ * value. DEPRECATED: has no effect and will be removed in the future versions.
  * --51D_file_path takes one string argument, the path to a
  * 51Degrees data file. Is called within server block.
  * --51D_value_separator takes one string argument, the separator of the
