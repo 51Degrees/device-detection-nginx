@@ -137,15 +137,15 @@ Default: 51D_allow_unmatched off;<br />
 Context: main<br />
 Specify if unmatched should be allowed.   </td></tr>
 <tr class="c-table__row">
-<td class="c-table__cell">Syntax: <code>51D_use_performance_graph</code> <em>on | off</em>;<br />
+<td class="c-table__cell"><b>DEPRECATED</b> Syntax: <code>51D_use_performance_graph</code> <em>on | off</em>;<br />
 Default: 51D_use_performance_graph off;<br />
 Context: main<br />
-Specify if performance graph should be used in detection.   </td></tr>
+Specify if performance graph should be used in detection. <b>DEPRECATED</b>: Has no effect on configuration, the data file has a single (predictive) graph that is always used.   </td></tr>
 <tr class="c-table__row">
-<td class="c-table__cell">Syntax: <code>51D_use_predictive_graph</code> <em>on | off</em>;<br />
+<td class="c-table__cell"><b>DEPRECATED</b> Syntax: <code>51D_use_predictive_graph</code> <em>on | off</em>;<br />
 Default: 51D_use_predictive_graph on;<br />
 Context: main<br />
-Specify if predictive graph should be used in detection.   </td></tr>
+Specify if predictive graph should be used in detection. <b>DEPRECATED</b>: Has no effect on configuration, the data file has a single graph that is always used.   </td></tr>
 <tr class="c-table__row">
 <td class="c-table__cell">Syntax: <code>51D_value_separator</code> <em>separator</em>;<br />
 Default: 51D_value_separator ',';<br />
@@ -204,7 +204,7 @@ Allow Client Hints to be set in response headers where it is applicable to the u
 <tr class="c-table__row">
 <td class="c-table__cell">gettingStarted.conf  </td><td class="c-table__cell">Shows a simple instance of how to use 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all in a configuration file.   </td></tr>
 <tr class="c-table__row">
-<td class="c-table__cell">config.conf  </td><td class="c-table__cell">Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, 51D_use_performance_graph and etc...   </td></tr>
+<td class="c-table__cell">config.conf  </td><td class="c-table__cell">Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, etc...   </td></tr>
 <tr class="c-table__row">
 <td class="c-table__cell">matchQuery.conf  </td><td class="c-table__cell">Shows how to perform detection using input from http request query argument   </td></tr>
 <tr class="c-table__row">
