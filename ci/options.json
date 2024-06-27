@@ -51,13 +51,5 @@
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true
-  },
-  {
-    "Image": "ubuntu-20.04",
-    "Name": "ubuntu-20.04_Nginx1.21.6",
-    "NginxVersion": "1.21.6",
-    "RunPerformance": false,
-    "FullTests": false,
-    "PackageRequirement": true
   }
 ]
