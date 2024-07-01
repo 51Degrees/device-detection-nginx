@@ -29,7 +29,8 @@ try {
     # are based on. It also contains the date each will be supported until.
     # The format is consistent, so we can parse versions from there.
     Write-Output "Getting versions from '$VersionsUrl'"
-    $Html = ConvertFrom-Html -URI $VersionsUrl
+    $VersionsRequest = Invoke-WebRequest -Uri $VersionsUrl
+    $Html = ConvertFrom-Html -Content $VersionsRequest.Content
 
     $VersionsToSupport = @()
 
