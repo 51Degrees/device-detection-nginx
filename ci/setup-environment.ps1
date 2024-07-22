@@ -103,49 +103,9 @@ if ($FullTests -eq $True) {
     /usr/sbin/nginx -v 2>&1 | grep -F $NginxVersion || $(throw "Failed to install Nginx Plus $NginxVersion")
 }
 
-# Install the Microsoft Edge driver for Selenium tests
-Write-Output "Moving into $JsExamplePath"
-Push-Location $JsExamplePath
-try {
-    Write-Output "Install Microsoft Edge"
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-    sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
-    sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-stable.list'
-    sudo rm microsoft.gpg
-
-    sudo apt-get update
-    sudo apt-get install microsoft-edge-stable -y
-
-    Write-Output "Get version of edge installed"
-    if ($(Test-Path -Path "/opt/microsoft/msedge/msedge") -eq $False) {
-
-        Write-output 'Can not find Edge Stable executable.'
-        exit 1
-
-    }
-    $EdgeVersion = $(/opt/microsoft/msedge/msedge --product-version)
-
-    Write-output "Download the driver for microsoft edge"
-    mkdir driver
-    Push-Location driver
-    try {
-        wget https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver/$EdgeVersion/edgedriver_linux64.zip
-        Expand-Archive edgedriver_linux64.zip
-    }
-    finally {
-        Pop-Location
-    }
-
-    Write-Output "Install Apache dev for performance tests"
-    sudo apt-get update -y
-    sudo apt-get install cmake apache2-dev libapr1-dev libaprutil1-dev -y
-
-}
-finally {
-
-    Pop-Location
-
-}
+Write-Output "Install Apache dev for performance tests"
+sudo apt-get update -y
+sudo apt-get install cmake apache2-dev libapr1-dev libaprutil1-dev -y
 
 # Install any extra requirements for the module
 Write-Output "Installing NGINX dependencies"
