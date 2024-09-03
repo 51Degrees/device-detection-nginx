@@ -359,13 +359,13 @@ if (!$t_lite) {
 	$r = get_with_client_hints('/single');
 	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (single, hardware-model)');
 	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (single, hardware-vendor)');
-	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (single, platform-version)');
+	like($r, qr/x-platform-version: Unknown/, 'Client hints non-match (single, platform-version)');
 
 	# Single User-Agent (new)
 	$r = get_with_client_hints('/ua');
 	like($r, qr/x-hardware-model: Generic Android/, 'Client hints non-match (ua, hardware-model)');
 	like($r, qr/x-hardware-vendor: Unknown/, 'Client hints non-match (ua, hardware-vendor)');
-	like($r, qr/x-platform-version: 10.0/, 'Client hints non-match (ua, platform-version)');
+	like($r, qr/x-platform-version: Unknown/, 'Client hints non-match (ua, platform-version)');
 
 	# User-Agent and Client-Hints
 	$r = get_with_client_hints('/ua_uach');
