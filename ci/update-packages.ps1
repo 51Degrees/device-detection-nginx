@@ -68,6 +68,7 @@ try {
                 Image = $Image
                 Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)"
                 NginxVersion = $SupportedVersion.OpenSourceVersion
+                NginxPlusVersion = $SupportedVersion.Version
                 # Only run performance if this is the latest NGINX Plus version
                 RunPerformance = $IsLatest
                 # Only run the full NGINX test suite if this is the latest NGINX Plus version

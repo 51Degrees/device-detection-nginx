@@ -3,6 +3,7 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.25.5",
     "NginxVersion": "1.25.5",
+    "NginxPlusVersion": "32",
     "RunPerformance": true,
     "FullTests": true,
     "PackageRequirement": true
@@ -11,12 +12,14 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.25.5_MemCheck",
     "NginxVersion": "1.25.5",
+    "NginxPlusVersion": "32",
     "MemCheck": true
   },
   {
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.25.5_MemCheck_Static",
     "NginxVersion": "1.25.5",
+    "NginxPlusVersion": "32",
     "BuildMethod": "static",
     "MemCheck": true
   },
@@ -24,6 +27,7 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.25.3",
     "NginxVersion": "1.25.3",
+    "NginxPlusVersion": "31",
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true
@@ -32,6 +36,7 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.25.1",
     "NginxVersion": "1.25.1",
+    "NginxPlusVersion": "30",
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true
@@ -40,6 +45,7 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.23.4",
     "NginxVersion": "1.23.4",
+    "NginxPlusVersion": "29",
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true
@@ -48,6 +54,7 @@
     "Image": "ubuntu-20.04",
     "Name": "ubuntu-20.04_Nginx1.23.2",
     "NginxVersion": "1.23.2",
+    "NginxPlusVersion": "28",
     "RunPerformance": false,
     "FullTests": false,
     "PackageRequirement": true

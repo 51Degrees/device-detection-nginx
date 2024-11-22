@@ -3,6 +3,7 @@ param(
     [string]$RepoName,
     [string]$Name = "1.21.3 dynamic",
     [string]$NginxVersion = "1.21.3",
+    [string]$NginxPlusVersion = "25",
     [bool]$FullTests = $False,
     [string]$BuildMethod = "dynamic"
 )
@@ -97,7 +98,8 @@ if ($FullTests -eq $True) {
     
     Write-Output "Update the repository and install Nginx Plus"
     sudo apt-get update
-    sudo apt-get install nginx-plus -y --allow-unauthenticated
+    $packageVersion = ((apt-cache show nginx-plus | Select-String -CaseSensitive '^Version: ') -replace 'Version: ' -clike "$NginxPlusVersion-*")[0]
+    sudo apt-get install nginx-plus=$packageVersion -y --allow-unauthenticated
 
     Write-Output "Check if installation was successful"
     /usr/sbin/nginx -v 2>&1 | grep -F $NginxVersion || $(throw "Failed to install Nginx Plus $NginxVersion")
