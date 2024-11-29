@@ -40,9 +40,13 @@ try {
 
         # Now do the same with the NGINX Plus executable
         Write-Output "Running full NGINX unit tests against NGINX Plus"
-        # As we're not using the makefile, we need to set the environment variables ourselves
+
+        # For mgmt module we need to set permissions to nginx-mgmt-state
+        sudo chmod -R a+xrw /var/lib
+
+        # As we're not using the makefile, we need to set the environment variables ourselves, and add common path to license_token
         $env:TEST_NGINX_BINARY="/usr/sbin/nginx"
-        $env:TEST_NGINX_GLOBALS="load_module $RepoPath/build/modules/ngx_http_51D_module.so;"
+        $env:TEST_NGINX_GLOBALS="mgmt {license_token /etc/nginx/license.jwt;} load_module $RepoPath/build/modules/ngx_http_51D_module.so;"
         $env:TEST_NGINX_GLOBALS_HTTP="51D_file_path $RepoPath/device-detection-cxx/device-detection-data/TAC-HashV41.hash;"
         prove --formatter TAP::Formatter::JUnit -v tests/51degrees.t tests/nginx-tests :: TAC-HashV41.hash > $RepoPath/test-results/unit/$($Name)_Full_Plus.xml
         $Passed = $($Passed -and $LASTEXITCODE -eq 0)
