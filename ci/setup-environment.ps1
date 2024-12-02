@@ -69,17 +69,22 @@ if ($FullTests -eq $True) {
 
     Write-Output "Create ssl directory for Nginx Plus"
     sudo mkdir -p /etc/ssl/nginx
-
+    sudo mkdir -p /etc/nginx
+    
     Write-Output "Copy the nginx-repo.* file to the created directory"
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
+    sudo cp $([IO.Path]::Combine($RepoPath, "license.jwt")) /etc/nginx
     
     Write-Output "Setting permissions for the certificates"
     sudo chown -R root:root /etc/ssl/nginx
     sudo chmod -R a+r /etc/ssl/nginx
+    sudo chmod -R a+r /etc/nginx
+    
     ls -l /etc/ssl
     ls -l /etc/ssl/nginx
-
+    ls -l /etc/nginx
+    
     Write-Output "Certificate expiration date:"
     openssl x509 -enddate -noout -in /etc/ssl/nginx/nginx-repo.crt
 
