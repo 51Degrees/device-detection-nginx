@@ -19,3 +19,4 @@ jobs:
       DeviceDetectionUrl: ${{ secrets.DEVICE_DETECTION_URL }}
       NginxKey: ${{ secrets.NGINX_PLUS_KEY }}
       NginxCert: ${{ secrets.NGINX_PLUS_CERT }}
+      NginxJwtToken: ${{ secrets.NGINX_PLUS_JWT_TOKEN }}
