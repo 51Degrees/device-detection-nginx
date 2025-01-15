@@ -1,16 +1,7 @@
-
 param (
-    [Parameter(Mandatory=$true)]
-    [string]$RepoName,
-    [Parameter(Mandatory=$true)]
-    [string]$VariableName
+    [Parameter(Mandatory)][string]$RepoName,
+    [string]$VariableName = "Version"
 )
+$ErrorActionPreference = "Stop"
 
-# This is a common step, so let's call that
-./steps/get-next-package-version.ps1 -RepoName $RepoName -VariableName "GitVersion"
-
-# Set the variable for the caller
-Write-Output "Setting '$VariableName' to '$($GitVersion.SemVer)'"
-Set-Variable -Name $VariableName -Value $GitVersion.SemVer -Scope Global
-
-exit $LASTEXITCODE
+Set-Variable -Scope Global -Name $VariableName -Value (./steps/get-next-package-version.ps1 -RepoName $RepoName)
