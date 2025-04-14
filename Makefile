@@ -135,12 +135,9 @@ mem-check: set-mem install
 	
 test-prep:
 	if [ ! -f "tests/nginx-tests/lib/Test/Nginx.pm" ]; then \
-		if ls tests/nginx-tests* 1> /dev/null 2>&1; then \
-			rm -r tests/nginx-tests*; \
-		fi; \
-		cd tests && curl -L -O "http://hg.nginx.org/nginx-tests/archive/tip.tar.gz"; \
-		tar zxf tip.tar.gz; \
-		mv nginx-tests* nginx-tests; \
+		rm -rf tests/nginx-tests; mkdir -p tests/nginx-tests; \
+		curl -fL "https://github.com/nginx/nginx-tests/archive/refs/heads/master.tar.gz" \
+		| tar -xzC tests/nginx-tests --strip-components 1; \
 	fi;
 
 test-full:
