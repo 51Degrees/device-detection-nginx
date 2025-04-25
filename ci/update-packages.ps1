@@ -1,108 +1,59 @@
 param(
-    [Parameter(Mandatory)][string]$RepoName
+    [Parameter(Mandatory)][string]$RepoName,
+    [string[]]$Images = "ubuntu-latest"
 )
-$ErrorActionPreference = "stop"
+$ErrorActionPreference = "Stop"
 
-$Images = @("ubuntu-latest")
+Write-Host "Fetching releases document..."
+$req = Invoke-WebRequest "https://raw.githubusercontent.com/nginx/documentation/refs/heads/main/content/nginx/releases.md"
 
-$RepoPath = [IO.Path]::Combine($pwd, $RepoName)
-$OptionsPath = [IO.Path]::Combine($RepoPath, "ci", "options.json")
+Write-Host "Parsing the table of supported releases..."
+$tableStart = $req.Content.IndexOf("| NGINX Plus Release |")
+$tableEnd = $req.Content.IndexOf("`n`n", $tableStart)
+$supportedReleases = ([regex]'(?m)^\| R(\d+)').Matches($req.Content.Substring($tableStart, $tableEnd-$tableStart)) | ForEach-Object { $_.Groups[1].Value }
+Write-Host "Supported NGINX Plus releases: $supportedReleases"
 
-Write-Output "Entering '$RepoPath'"
-Push-Location $RepoPath
+Write-Host "Searching for corresponding Open Source versions of each release..."
+$releaseRegex = [regex]'(?mx)                       # enable multiline mode and allow comments/spaces
+    ^\#\#\sNGINX\sPlus\sRelease\s(\d+)\s\(R\d+\) \n # \s is required to match non-breaking spaces that the document uses
+    .* \n                                           # discard release date since we know supported versions from the table
+    _?Based\son\sNGINX\sOpen\sSource\s([0-9.]+)
+'
+$openSourceOf = @{}
+$releaseRegex.Matches($req.Content) | ForEach-Object { $openSourceOf[$_.Groups[1].Value] = $_.Groups[2].Value }
 
-try {
-
-    if (-not (Get-Module -ErrorAction Ignore -ListAvailable PowerHTML)) {
-        Write-Output "Installing PowerHTML"
-        Install-Module PowerHTML -Force
-    }
-    Import-Module PowerHTML
-
-    # This is the 24 months that NGINX Plus releases are supported for.
-    $EosdDays = 365 * 2
-    $CurrentDate = Get-Date
-    $VersionsUrl = "https://docs.nginx.com/nginx/releases/"
-
-    # This page details the NGINX Plus releases, and which opensource version they
-    # are based on. It also contains the date each will be supported until.
-    # The format is consistent, so we can parse versions from there.
-    Write-Output "Getting versions from '$VersionsUrl'"
-    $VersionsRequest = Invoke-WebRequest -Uri $VersionsUrl
-    $Html = ConvertFrom-Html -Content $VersionsRequest.Content
-
-    $VersionsToSupport = @()
-
-    Write-Output "Parsing versions"
-    foreach ($Heading in $Html.SelectNodes("//h2")) {
-        # Replace the &nbsp; characters with spaces when using any of the strings.
-        if ($Heading.InnerText.Replace([char]0x00A0, ' ').StartsWith("NGINX Plus Release")) {
-            # Get the version from a string like 'NGINX Plus Release 28 (R28)'
-            $Version = $Heading.InnerText.Replace([char]0x00A0, ' ').Split(" ")[3]
-            # Release date and the opensource version are in the next element.
-            $Details = $Heading.NextSibling.SelectNodes("em")
-            # Get the date from a string like '29 November 2022'
-            $DateString = $Details[0].InnerText
-            $ReleaseDate = [DateTime]::Parse($DateString)
-            # Get the opensource version from a string like 'Based on NGINX Open Source 1.23.2'
-            $OpenSourceVersionString = $Details[1].InnerText
-            $OpenSourceVersion = $($OpenSourceVersionString.Replace([char]0x00A0, ' ') -replace "Based on NGINX Open Source ([0-9]+\.[0-9]+\.[0-9]+).*", '$1')
-            if ($($CurrentDate - $ReleaseDate) -lt [TimeSpan]::FromDays($EosdDays)) {
-                $SupportedVersion = @{}
-                $SupportedVersion.Version = $Version
-                $SupportedVersion.OpenSourceVersion = $OpenSourceVersion
-                $VersionsToSupport += $SupportedVersion
-            }
+Write-Host "Building options array..."
+[Collections.ArrayList]$options = @()
+foreach ($release in $supportedReleases) {
+    $isLatest = $options.Count -lt 1
+    foreach ($image in $Images) {
+        [void]$options.Add([ordered]@{
+            Image = $image
+            Name = "$($image)_Nginx$($openSourceOf[$release])"
+            NginxVersion = $openSourceOf[$release]
+            NginxPlusVersion = $release
+            RunPerformance = $IsLatest # Only run performance if this is the latest NGINX Plus version
+            FullTests = $IsLatest # Only run the full NGINX test suite if this is the latest NGINX Plus version
+            PackageRequirement = $True
+        })
+        if ($isLatest) {
+            # Add memory check configurations if this is the latest NGINX Plus version
+            [void]$options.Add([ordered]@{
+                Image = $image
+                Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck"
+                NginxVersion = $openSourceOf[$release]
+                MemCheck = $True
+            })
+            [void]$options.Add([ordered]@{
+                Image = $image
+                Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck_Static"
+                NginxVersion = $openSourceOf[$release]
+                BuildMethod = "static"
+                MemCheck = $True
+            })
         }
     }
-
-    Write-Output "Building options file"
-    $Options = @()
-    $IsLatest = $True
-    foreach ($SupportedVersion in $VersionsToSupport) {
-    
-        foreach ($Image in $Images) {
-            # All configurations have a configuration added
-            $Options += [ordered]@{
-                Image = $Image
-                Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)"
-                NginxVersion = $SupportedVersion.OpenSourceVersion
-                NginxPlusVersion = $SupportedVersion.Version
-                # Only run performance if this is the latest NGINX Plus version
-                RunPerformance = $IsLatest
-                # Only run the full NGINX test suite if this is the latest NGINX Plus version
-                FullTests = $IsLatest
-                PackageRequirement = $True
-            }
-            if ($IsLatest -eq $True) {
-                # Add memory check configurations if this is the latest NGINX Plus version
-                $Options += [ordered]@{
-                    Image = $Image
-                    Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)_MemCheck"
-                    NginxVersion = $SupportedVersion.OpenSourceVersion
-                    MemCheck = $True
-                }
-                $Options += [ordered]@{
-                    Image = $Image
-                    Name = "$($Image)_Nginx$($SupportedVersion.OpenSourceVersion)_MemCheck_Static"
-                    NginxVersion = $SupportedVersion.OpenSourceVersion
-                    BuildMethod = "static"
-                    MemCheck = $True
-                }
-            }
-        }
-        # The versions are ordered by date, so only the first in the array is the latest.
-        $IsLatest = $False
-    }
-
-    Write-Output "Writing options file to '$OptionsPath'"
-    Write-Output "Content is : "
-    Write-Output $($Options | ConvertTo-Json)
-    $Options | ConvertTo-Json > $OptionsPath
 }
-finally {
 
-    Write-Output "Leaving '$RepoPath'"
-    Pop-Location
-
-}
+Write-Host "Writing options file to '$RepoName/ci/options.json'"
+$Options | ConvertTo-Json | Tee-Object -FilePath ($IsWindows ? '\\.\CON' : '/dev/tty') > "$RepoName/ci/options.json"
