@@ -56,4 +56,5 @@ foreach ($release in $supportedReleases) {
 }
 
 Write-Host "Writing options file to '$RepoName/ci/options.json'"
-$Options | ConvertTo-Json | Tee-Object -FilePath ($IsWindows ? '\\.\CON' : '/dev/tty') > "$RepoName/ci/options.json"
+$Options | ConvertTo-Json > "$RepoName/ci/options.json"
+Get-Content "$RepoName/ci/options.json"
