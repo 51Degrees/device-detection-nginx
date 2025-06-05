@@ -10,17 +10,24 @@ $req = Invoke-WebRequest "https://raw.githubusercontent.com/nginx/documentation/
 Write-Host "Parsing the table of supported releases..."
 $tableStart = $req.Content.IndexOf("| NGINX Plus Release |")
 $tableEnd = $req.Content.IndexOf("`n`n", $tableStart)
-$supportedReleases = ([regex]'(?m)^\| R(\d+)').Matches($req.Content.Substring($tableStart, $tableEnd-$tableStart)) | ForEach-Object { $_.Groups[1].Value }
+$supportedReleases = ([regex]'(?m)^\| \[R(\d+)\]').Matches($req.Content.Substring($tableStart, $tableEnd-$tableStart)) | ForEach-Object { $_.Groups[1].Value }
 Write-Host "Supported NGINX Plus releases: $supportedReleases"
 
+if (!$supportedReleases) {
+    Write-Error "Failed to parse the list of supported releases"
+}
+
 Write-Host "Searching for corresponding Open Source versions of each release..."
-$releaseRegex = [regex]'(?mx)                       # enable multiline mode and allow comments/spaces
-    ^\#\#\sNGINX\sPlus\sRelease\s(\d+)\s\(R\d+\) \n # \s is required to match non-breaking spaces that the document uses
-    .* \n                                           # discard release date since we know supported versions from the table
+$releaseRegex = [regex]'(?mx)                          # enable multiline mode and allow comments/spaces
+    ^\#\#\sNGINX\sPlus\sRelease\s(\d+)\s\(R\d+\) .* \n # \s is required to match non-breaking spaces that the document uses
+    .* \n                                              # discard release date since we know supported versions from the table
     _?Based\son\sNGINX\sOpen\sSource\s([0-9.]+)
 '
 $openSourceOf = @{}
 $releaseRegex.Matches($req.Content) | ForEach-Object { $openSourceOf[$_.Groups[1].Value] = $_.Groups[2].Value }
+if (!$openSourceOf.Count) {
+    Write-Error "Failed to parse the list of releases"
+}
 
 Write-Host "Building options array..."
 [Collections.ArrayList]$options = @()
