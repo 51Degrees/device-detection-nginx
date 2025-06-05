@@ -1,8 +1,8 @@
 [
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.27.4",
-    "NginxVersion": "1.27.4",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "34",
     "RunPerformance": true,
     "FullTests": true,
@@ -10,21 +10,21 @@
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.27.4_MemCheck",
-    "NginxVersion": "1.27.4",
+    "Name": "ubuntu-latest_Nginx_MemCheck",
+    "NginxVersion": null,
     "MemCheck": true
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.27.4_MemCheck_Static",
-    "NginxVersion": "1.27.4",
+    "Name": "ubuntu-latest_Nginx_MemCheck_Static",
+    "NginxVersion": null,
     "BuildMethod": "static",
     "MemCheck": true
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.27.2",
-    "NginxVersion": "1.27.2",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "33",
     "RunPerformance": false,
     "FullTests": false,
@@ -32,8 +32,8 @@
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.5",
-    "NginxVersion": "1.25.5",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "32",
     "RunPerformance": false,
     "FullTests": false,
@@ -41,8 +41,8 @@
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.3",
-    "NginxVersion": "1.25.3",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "31",
     "RunPerformance": false,
     "FullTests": false,
@@ -50,8 +50,8 @@
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.25.1",
-    "NginxVersion": "1.25.1",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "30",
     "RunPerformance": false,
     "FullTests": false,
@@ -59,8 +59,8 @@
   },
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.23.4",
-    "NginxVersion": "1.23.4",
+    "Name": "ubuntu-latest_Nginx",
+    "NginxVersion": null,
     "NginxPlusVersion": "29",
     "RunPerformance": false,
     "FullTests": false,
