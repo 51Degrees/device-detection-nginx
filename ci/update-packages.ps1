@@ -10,8 +10,12 @@ $req = Invoke-WebRequest "https://raw.githubusercontent.com/nginx/documentation/
 Write-Host "Parsing the table of supported releases..."
 $tableStart = $req.Content.IndexOf("| NGINX Plus Release |")
 $tableEnd = $req.Content.IndexOf("`n`n", $tableStart)
-$supportedReleases = ([regex]'(?m)^\| R(\d+)').Matches($req.Content.Substring($tableStart, $tableEnd-$tableStart)) | ForEach-Object { $_.Groups[1].Value }
+$supportedReleases = ([regex]'(?m)^\| \[R(\d+)\]').Matches($req.Content.Substring($tableStart, $tableEnd-$tableStart)) | ForEach-Object { $_.Groups[1].Value }
 Write-Host "Supported NGINX Plus releases: $supportedReleases"
+
+if (!$supportedReleases) {
+    Write-Error "Failed to parse the list of supported releases"
+}
 
 Write-Host "Searching for corresponding Open Source versions of each release..."
 $releaseRegex = [regex]'(?mx)                       # enable multiline mode and allow comments/spaces
