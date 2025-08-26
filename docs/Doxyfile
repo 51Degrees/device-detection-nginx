@@ -56,7 +56,7 @@ PROJECT_LOGO           = ../../documentation/docs/images/logo-51Degrees-Docs.png
 # The PROJECT_URL tag is used to specify the URL which is linked by the
 # PROJECT_LOGO.
 
-PROJECT_URL            = ../../documentation/4.4/index.html
+PROJECT_URL            = /documentation/4.5/index.html
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
