@@ -17,7 +17,7 @@ $(eval $(API):;@:)
 
 ifneq (test,$(firstword $(MAKECMDGOALS)))
 	API := hash
-	ARGS := -std=gnu11 -Wall -Wno-unused-variable -Wno-missing-braces
+	ARGS := -std=gnu11 -Wall -Wno-unused-variable -Wno-missing-braces -Wno-type-limits -Wno-unused-function -Wno-missing-field-initializers -Wno-unused-but-set-variable
 endif
 
 
@@ -62,7 +62,7 @@ clean:
 build: clean
 	mkdir -p 51Degrees_module/src/hash
 	mkdir -p 51Degrees_module/src/common-cxx
-	exit
+	# exit
 	cp module_conf/$(API)_config 51Degrees_module/config
 	cp device-detection-cxx/src/*.c 51Degrees_module/src/
 	cp device-detection-cxx/src/*.h 51Degrees_module/src/

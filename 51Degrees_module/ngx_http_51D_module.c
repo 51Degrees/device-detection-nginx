@@ -1424,7 +1424,6 @@ ngx_http_51D_init_process(ngx_cycle_t *cycle)
 	// is the number of unique headers.
 	fdmcf->results = ResultsHashCreate(
 		fdmcf->resourceManager,
-		dataSet->b.b.uniqueHeaders->count,
 		overridesCount);
 
 	// Initialise the response headers array.
