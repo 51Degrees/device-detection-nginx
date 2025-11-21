@@ -1,16 +1,19 @@
-name: Nightly Package Update
+name: Package Update
 
 on:
   workflow_dispatch:
-  schedule:
-    # * is a special character in YAML so quote this string
-    - cron:  '0 0 * * *'
+    inputs:
+      dryrun:
+        type: boolean
+        default: false
 
 jobs:
-  Nightly_Package_Update:
+  PackageUpdate:
+    name: Package Update
     uses: 51Degrees/common-ci/.github/workflows/nightly-package-update.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
       org-name: ${{ github.event.repository.owner.login }}
+      dryrun: ${{ inputs.dryrun || false }}
     secrets:
       token: ${{ secrets.ACCESS_TOKEN }}
