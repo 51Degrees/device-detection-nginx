@@ -12,13 +12,6 @@ $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $TestsPath = [IO.Path]::Combine($RepoPath, "tests")
 $JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
 
-# Install perl libraries
-Write-Output 'Install perl libraries for test output formatters'
-# cpan will ask for auto configuration first time it is run so answer 'yes'.
-Write-Output y | sudo cpan
-sudo cpan  App::cpanminus --notest
-sudo cpanm --force TAP::Formatter::JUnit --notest
-
 # Get the version of nginx-test to use. Where new tests have been introduced, previous versions
 # of NGINX do not always pass them
 $ParsedVersion = [System.Version]::Parse($NginxVersion)
@@ -70,21 +63,21 @@ if ($FullTests -eq $True) {
     Write-Output "Create ssl directory for Nginx Plus"
     sudo mkdir -p /etc/ssl/nginx
     sudo mkdir -p /etc/nginx
-    
+
     Write-Output "Copy the nginx-repo.* file to the created directory"
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
     sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
     sudo cp $([IO.Path]::Combine($RepoPath, "license.jwt")) /etc/nginx
-    
+
     Write-Output "Setting permissions for the certificates"
     sudo chown -R root:root /etc/ssl/nginx
     sudo chmod -R a+r /etc/ssl/nginx
     sudo chmod -R a+r /etc/nginx
-    
+
     ls -l /etc/ssl
     ls -l /etc/ssl/nginx
     ls -l /etc/nginx
-    
+
     Write-Output "Certificate expiration date:"
     openssl x509 -enddate -noout -in /etc/ssl/nginx/nginx-repo.crt
 
@@ -97,10 +90,10 @@ if ($FullTests -eq $True) {
     Write-Output "Add Nginx Plus repository"
     # Add allow-insecure because there is an issue with the signing of the NGINX Plus repository.
     printf "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg allow-insecure=yes] https://pkgs.nginx.com/plus/ubuntu $(lsb_release -cs) nginx-plus\n" | sudo tee /etc/apt/sources.list.d/nginx-plus.list
-    
+
     Write-Output "Download nginx-plus apt configuration files to /etc/apt/apt.conf.d"
     sudo wget -P /etc/apt/apt.conf.d https://cs.nginx.com/static/files/90pkgs-nginx
-    
+
     Write-Output "Update the repository and install Nginx Plus"
     sudo apt-get update
     $packageVersion = ((apt-cache show nginx-plus | Select-String -CaseSensitive '^Version: ') -replace 'Version: ' -clike "$NginxPlusVersion-*")[0]
@@ -118,3 +111,6 @@ sudo apt-get install cmake apache2-dev libapr1-dev libaprutil1-dev -y
 Write-Output "Installing NGINX dependencies"
 sudo apt-get install make zlib1g-dev libpcre3 libpcre3-dev
 
+# Install perl libraries
+Write-Output 'Install perl libraries for test output formatters'
+sudo apt-get install -yq libtap-formatter-junit-perl
