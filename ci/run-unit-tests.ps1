@@ -32,6 +32,7 @@ try {
     cat $RepoPath/test-results/unit/$Name.xml
 
     if ($FullTests -eq $True) {
+        $env:ALLOW_PASSING_TODOS = 'yep' # don't consider Nginx's todo tests as failures
 
         # If full tests are requested, then run the full test suite (NGINX core tests, with the module enabled)
         Write-Output "Running full NGINX unit tests"
