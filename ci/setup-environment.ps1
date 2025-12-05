@@ -1,16 +1,19 @@
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$RepoName,
+    [Parameter(Mandatory)][string]$RepoName,
+    [bool]$FullTests,
+    [string]$NginxKey,
+    [string]$NginxCert,
+    [string]$NginxJwtToken,
     [string]$Name = "1.21.3 dynamic",
     [string]$NginxVersion = "1.21.3",
     [string]$NginxPlusVersion = "25",
-    [bool]$FullTests = $False,
     [string]$BuildMethod = "dynamic"
 )
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $TestsPath = [IO.Path]::Combine($RepoPath, "tests")
-$JsExamplePath = [IO.Path]::Combine($RepoPath, "tests", "examples", "jsExample")
 
 # Get the version of nginx-test to use. Where new tests have been introduced, previous versions
 # of NGINX do not always pass them
@@ -64,10 +67,11 @@ if ($FullTests -eq $True) {
     sudo mkdir -p /etc/ssl/nginx
     sudo mkdir -p /etc/nginx
 
-    Write-Output "Copy the nginx-repo.* file to the created directory"
-    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.key")) /etc/ssl/nginx
-    sudo cp $([IO.Path]::Combine($RepoPath, "nginx-repo.crt")) /etc/ssl/nginx
-    sudo cp $([IO.Path]::Combine($RepoPath, "license.jwt")) /etc/nginx
+# Write the key and certificate files for NGINX Plus so it can be installed.
+    Write-Output "Copy NGINX Plus credentials to the created directory"
+    $NginxKey | sudo cp /dev/stdin /etc/ssl/nginx/nginx-repo.key
+    $NginxCert | sudo cp /dev/stdin /etc/ssl/nginx/nginx-repo.crt
+    $NginxJwtToken | sudo cp /dev/stdin /etc/nginx/license.jwt
 
     Write-Output "Setting permissions for the certificates"
     sudo chown -R root:root /etc/ssl/nginx
