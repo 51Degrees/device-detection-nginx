@@ -24,9 +24,6 @@ if ($ParsedVersion -le [System.Version]::Parse("1.19.5")) {
 elseif ($ParsedVersion -le [System.Version]::Parse("1.23.2")) {
     $TestCommit = "3356f91a3fdae372d0946e4c89a9413f558c8017"
 }
-elseif ($ParsedVersion -le [System.Version]::Parse("1.29.6")) {
-    $TestCommit = "8a8a05e5e4401727cc32d865cb437e3c3d820a46"
-}
 else {
     $TestCommit = $Null
 }
