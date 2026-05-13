@@ -25,7 +25,7 @@ elseif ($ParsedVersion -le [System.Version]::Parse("1.23.2")) {
     $TestCommit = "3356f91a3fdae372d0946e4c89a9413f558c8017"
 }
 else {
-    $TestCommit = $Null
+    $TestCommit = 'd87ee27450e662f2942fe9653391ed3351d91ca4' # latest working with Nginx PLUS
 }
 
 
