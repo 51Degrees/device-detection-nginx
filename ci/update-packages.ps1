@@ -19,7 +19,7 @@ if (!$supportedReleases) {
 
 Write-Host "Searching for corresponding Open Source versions of each release..."
 $releaseRegex = [regex]'(?mx)                          # enable multiline mode and allow comments/spaces
-    ^\#\#\sNGINX\sPlus\sRelease\s(\d+)\s\(R\d+\) .* \n # \s is required to match non-breaking spaces that the document uses
+    ^\#+\sNGINX\sPlus\sRelease\s(\d+)\s\(R\d+\) .* \n # \s is required to match non-breaking spaces that the document uses
     .* \n                                              # discard release date since we know supported versions from the table
     _?Based\son\sNGINX\sOpen\sSource\s([0-9.]+)
 '
