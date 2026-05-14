@@ -1300,7 +1300,7 @@ initRespHeaders(
 					return NGX_ERROR;
 				}
 
-				strcpy((char *)headerNames[respHeaderCount].data, headerName);
+				ngx_memcpy(headerNames[respHeaderCount].data, headerName, headerNames[respHeaderCount].len + 1);
 				headerIndex = respHeaderCount;
 				respHeaderCount++;
 			}
@@ -1389,8 +1389,8 @@ initRespHeaders(
 					return NGX_ERROR;
 				}
 
-				strcpy((char *)respHeader->property[respHeader->propertyCount]->data,
-					propertyName);
+				ngx_memcpy(respHeader->property[respHeader->propertyCount]->data,
+					propertyName, len + 1);
 				respHeader->propertyCount++;
 			}
 		}
@@ -1575,12 +1575,12 @@ static void add_value(char *delimiter, char *val, char *dst, size_t length)
 {
 	// If the buffer already contains characters, append a pipe.
 	if (dst[0] != '\0') {
-		strncat(dst, delimiter, length);
-		length -= strlen(delimiter);
+		ngx_cpystrn((u_char *)(dst + ngx_strlen(dst)), (u_char *)delimiter, length + 1);
+		length -= ngx_strlen(delimiter);
 	}
 
     // Append the value.
-    strncat(dst, val, length);
+    ngx_cpystrn((u_char *)(dst + ngx_strlen(dst)), (u_char *)val, length + 1);
 }
 
 /**
@@ -1870,7 +1870,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 				return evidence;
 			}
 
-			strcpy((char *)ngxHeaderName.data, headerName);
+			ngx_memcpy(ngxHeaderName.data, headerName, ngxHeaderName.len + 1);
 			queryEvidence = get_evidence_from_query_string(r, &ngxHeaderName);
 			if (queryEvidence != NULL && queryEvidence->len > 0) {
 				EvidenceAddString(
@@ -2687,7 +2687,7 @@ set_data(
 	int propertiesCount,
 	ngx_http_51D_main_conf_t *fdmcf)
 {
-	char *tok, *tokPos = NULL;
+	char *tok, *tokPos = NULL, *saveptr = NULL;
 
 	// Allocate space for the properties array.
 	data->property =
@@ -2697,7 +2697,7 @@ set_data(
 		return NGX_CONF_ERROR;	
 	}
 
-	tok = strtok((char *)propertiesString, (const char *)",");
+	tok = strtok_r((char *)propertiesString, (const char *)",", &saveptr);
 	while (tok != NULL) {
 		data->property[data->propertyCount] =
 			(ngx_str_t *)ngx_palloc(cf->pool, sizeof(ngx_str_t));
@@ -2713,11 +2713,11 @@ set_data(
 			return NGX_CONF_ERROR;
 		}
 
-		strcpy(
-			(char *)data->property[data->propertyCount]->data,
-			(const char *)tok);
-		data->property[data->propertyCount]->len =
-			ngx_strlen(data->property[data->propertyCount]->data);
+		data->property[data->propertyCount]->len = ngx_strlen(tok);
+		ngx_memcpy(
+			data->property[data->propertyCount]->data,
+			(u_char *)tok,
+			data->property[data->propertyCount]->len + 1);
 
 		// A is not already included if it does not present
 		// in the composed properties string and is not a substring
@@ -2739,7 +2739,7 @@ set_data(
 				FIFTYONE_DEGREES_MAX_PROPS_STRING - strlen(fdmcf->properties));
 		}
 		data->propertyCount++;
-		tok = strtok(NULL, ",");
+		tok = strtok_r(NULL, ",", &saveptr);
 	}
 
 	// Set the variable name or other header if they are specified.
@@ -2798,7 +2798,7 @@ ngx_http_51D_set_header(
 	// Set the name of the header.
 	header->headerName.data = (u_char *)ngx_palloc(cf->pool, value[1].len + 1);
 	header->lowerHeaderName.data = (u_char *)ngx_palloc(cf->pool, value[1].len + 1);
-	strcpy((char *)header->headerName.data, (char *)value[1].data);
+	ngx_memcpy(header->headerName.data, value[1].data, value[1].len + 1);
 	header->headerName.len = value[1].len;
 	ngx_strlow(header->lowerHeaderName.data, header->headerName.data, header->headerName.len);
 	header->lowerHeaderName.len = header->headerName.len;
