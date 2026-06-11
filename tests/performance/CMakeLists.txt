@@ -33,7 +33,8 @@ download_file(
 add_custom_target(perf ALL
     COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/runPerf.sh .
 	COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.template .
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/runPerf.sh ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.template
+	COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.ipi.template .
+    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/runPerf.sh ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.template ${CMAKE_CURRENT_LIST_DIR}/nginx.conf.ipi.template
 
     VERBATIM
 )

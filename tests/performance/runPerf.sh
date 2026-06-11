@@ -8,6 +8,10 @@ CAL=calibrate
 PRO=process
 PERF=./ApacheBench-prefix/src/ApacheBench-build/bin/runPerf.sh
 
+# The engine to test. Either 'hash' (device detection, the default) or
+# 'ipi' (IP intelligence).
+ENGINE=${ENGINE:-hash}
+
 # Get the repo directory as an absolute path
 ORIGINPATH="$(pwd)"
 cd $FULLPATH/../../../
@@ -18,11 +22,33 @@ echo $REPO_DIR
 
 # Create the nginx.conf
 MODULES_DIR=$REPO_DIR/build/modules
-DATA_FILE_DIR=$REPO_DIR/device-detection-cxx/device-detection-data
-sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.template > ./nginx.conf
-sed -i "s/\${DATA_FILE_DIR}/${DATA_FILE_DIR//\//\\/}/g" ./nginx.conf
-if [ "$DATA_FILE_NAME" ]; then
-	sed -i "s/51Degrees-LiteV4\.1\.hash/${DATA_FILE_NAME}/g" nginx.conf
+if [ "$ENGINE" == "ipi" ]; then
+	DATA_FILE_DIR_IPI=$REPO_DIR/ip-intelligence-cxx/ip-intelligence-data
+	sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.ipi.template > ./nginx.conf
+	sed -i "s/\${DATA_FILE_DIR_IPI}/${DATA_FILE_DIR_IPI//\//\\/}/g" ./nginx.conf
+	if [ "$DATA_FILE_NAME_IPI" ]; then
+		sed -i "s/51Degrees-IPIV4AsnIpiV41\.ipi/${DATA_FILE_NAME_IPI}/g" nginx.conf
+	fi
+	# The benchmark harness rotates through the lines of uas.csv using the
+	# User-Agent header. Replace it with the IP addresses evidence file so
+	# that each request carries an IP address, and keep a backup to restore
+	# after the run.
+	if [ ! -f uas.csv.bkp ]; then
+		cp uas.csv uas.csv.bkp
+	fi
+	cp $REPO_DIR/ip-intelligence-cxx/ip-intelligence-data/evidence.csv uas.csv
+else
+	DATA_FILE_DIR=$REPO_DIR/device-detection-cxx/device-detection-data
+	sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.template > ./nginx.conf
+	sed -i "s/\${DATA_FILE_DIR}/${DATA_FILE_DIR//\//\\/}/g" ./nginx.conf
+	if [ "$DATA_FILE_NAME" ]; then
+		sed -i "s/51Degrees-LiteV4\.1\.hash/${DATA_FILE_NAME}/g" nginx.conf
+	fi
+	# Restore the User-Agents file if a previous IP intelligence run
+	# replaced it.
+	if [ -f uas.csv.bkp ]; then
+		mv uas.csv.bkp uas.csv
+	fi
 fi
 
 # Create required directories and target files for service
@@ -41,6 +67,11 @@ $PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $P
 
 # Replace the original config
 mv $REPO_DIR/build/nginx.conf.bkp $REPO_DIR/build/nginx.conf
+
+# Restore the User-Agents file if this was an IP intelligence run.
+if [ -f uas.csv.bkp ]; then
+	mv uas.csv.bkp uas.csv
+fi
 
 # Remove coredumps folder
 if [ ! "$(find coredumps -type f)" ]; then
