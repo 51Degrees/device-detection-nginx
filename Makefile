@@ -28,14 +28,30 @@ else
 	DATAFILE := $(FIFTYONEDEGREES_DATAFILE)
 endif
 
+ifndef FIFTYONEDEGREES_DATAFILE_IPI
+	DATAFILE_IPI := 51Degrees-IPIV4AsnIpiV41.ipi
+else
+	DATAFILE_IPI := $(FIFTYONEDEGREES_DATAFILE_IPI)
+endif
+
 MODULEPATH := $(FULLPATH)/build/modules/ngx_http_51D_module.so
 FILEPATH := $(FULLPATH)/device-detection-cxx/device-detection-data/$(DATAFILE)
+FILEPATH_IPI := $(FULLPATH)/ip-intelligence-cxx/ip-intelligence-data/$(DATAFILE_IPI)
 
 
+# For dynamic builds, both the device detection and IP intelligence modules
+# are built. For static builds, only the module selected by the API variable
+# (hash by default) is linked in. The two modules cannot be linked statically
+# into one binary as each carries its own copy of the common-cxx sources
+# compiled with different data file layout options.
 ifndef STATIC_BUILD
-	MODULE_ARG := --add-dynamic-module
+	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
 else
-	MODULE_ARG := --add-module
+	ifeq ($(API),ipi)
+		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_ipi_module
+	else
+		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_module
+	endif
 endif
 
 .PHONY hash:
@@ -43,6 +59,9 @@ endif
 clean:
 	if [ -d "51Degrees_module/src" ]; then \
 		rm -rf 51Degrees_module/src; \
+	fi
+	if [ -d "51Degrees_ipi_module/src" ]; then \
+		rm -rf 51Degrees_ipi_module/src; \
 	fi
 	if [ -d "build" ]; then \
 		rm -rf build; \
@@ -63,13 +82,43 @@ build: clean
 	mkdir -p 51Degrees_module/src/hash
 	mkdir -p 51Degrees_module/src/common-cxx
 	# exit
-	cp module_conf/$(API)_config 51Degrees_module/config
+	cp module_conf/hash_config 51Degrees_module/config
 	cp device-detection-cxx/src/*.c 51Degrees_module/src/
 	cp device-detection-cxx/src/*.h 51Degrees_module/src/
 	cp device-detection-cxx/src/hash/*.c 51Degrees_module/src/hash/
 	cp device-detection-cxx/src/hash/*.h 51Degrees_module/src/hash/
 	cp device-detection-cxx/src/common-cxx/*.c 51Degrees_module/src/common-cxx/
 	cp device-detection-cxx/src/common-cxx/*.h 51Degrees_module/src/common-cxx/
+	# The IP intelligence module carries its own copy of the common-cxx
+	# sources as the IP intelligence data file format requires them to be
+	# compiled with different data file layout options to device detection.
+	# The directories are renamed (and the include paths rewritten below)
+	# because nginx names addon object files by the last directory component
+	# only, so directory names must be unique across the two modules.
+	mkdir -p 51Degrees_ipi_module/src/ipi-common-cxx
+	mkdir -p 51Degrees_ipi_module/src/ipi-graph
+	cp module_conf/ipi_config 51Degrees_ipi_module/config
+	cp ip-intelligence-cxx/src/*.c 51Degrees_ipi_module/src/
+	cp ip-intelligence-cxx/src/*.h 51Degrees_ipi_module/src/
+	cp ip-intelligence-cxx/src/ip-graph-cxx/*.c 51Degrees_ipi_module/src/ipi-graph/
+	cp ip-intelligence-cxx/src/ip-graph-cxx/*.h 51Degrees_ipi_module/src/ipi-graph/
+	cp ip-intelligence-cxx/src/common-cxx/*.c 51Degrees_ipi_module/src/ipi-common-cxx/
+	cp ip-intelligence-cxx/src/common-cxx/*.h 51Degrees_ipi_module/src/ipi-common-cxx/
+	# Rewrite the include paths in the copied sources to match the renamed
+	# directories.
+	find 51Degrees_ipi_module/src -maxdepth 1 \( -name "*.c" -o -name "*.h" \) -exec sed -i \
+		-e 's#"common-cxx/#"ipi-common-cxx/#g' \
+		-e 's#"ip-graph-cxx/#"ipi-graph/#g' {} +
+	find 51Degrees_ipi_module/src/ipi-graph \( -name "*.c" -o -name "*.h" \) -exec sed -i \
+		-e 's#"\.\./common-cxx/#"../ipi-common-cxx/#g' {} +
+	# Inject the data file layout defines into the copied IP intelligence
+	# sources. Nginx does not support per module compiler flags so the
+	# defines cannot be set globally without affecting the device detection
+	# module. These must match the defines in ngx_http_51D_ipi_module.c.
+	find 51Degrees_ipi_module/src -name "*.c" -exec sed -i \
+		-e '1i #define FIFTYONE_DEGREES_LARGE_DATA_FILE_SUPPORT' \
+		-e '1i #define FIFTYONE_DEGREES_REDUCED_FILE' \
+		-e '1i #define _FILE_OFFSET_BITS 64' {} +
 
 
 get-source:
@@ -83,7 +132,7 @@ configure: build
 	./configure \
 	--prefix=$(CURDIR)/build \
 	--with-ld-opt="-lm -latomic $(MEM_LD_FLAGS)" \
-	$(MODULE_ARG)=$(CURDIR)/51Degrees_module \
+	$(MODULE_ARGS) \
 	--with-compat \
 	--with-cc-opt="$(ARGS) $(MEM_CC_FLAGS)" \
 	--with-debug \
@@ -108,6 +157,7 @@ install: configure
 	sed -i "s!%%DAEMON_MODE%%!on!g" build/nginx.conf
 	sed -i "s!%%MODULE_PATH%%!!g" build/nginx.conf
 	sed -i "s!%%FILE_PATH%%!$(FILEPATH)!g" build/nginx.conf
+	sed -i "s!%%FILE_PATH_IPI%%!$(FILEPATH_IPI)!g" build/nginx.conf
 	sed -i "s!%%TEST_GLOBALS%%!!g" build/nginx.conf
 	sed -i "s!%%TEST_GLOBALS_HTTP%%!!g" build/nginx.conf
 	echo > build/html/$(API)
@@ -125,7 +175,8 @@ all-versions:
 	$(foreach version, \
 		1.19.0 1.19.5 1.19.8 1.20.0, \
 		$(MAKE) module VERSION=$(version); \
-		mv build/modules/ngx_http_51D_module.so modules/ngx_http_51D_hash_module-$(version).so;)
+		mv build/modules/ngx_http_51D_module.so modules/ngx_http_51D_hash_module-$(version).so; \
+		mv build/modules/ngx_http_51D_ipi_module.so modules/ngx_http_51D_ipi_module-$(version).so;)
 
 set-mem:
 	$(eval MEM_CC_FLAGS := -O0 -g -fsanitize=address)
@@ -147,7 +198,7 @@ test-examples: test-prep
 ifeq (,$(wildcard $(FULLPATH)/nginx))
 	$(error Local binary must be built first (use "make install"))
 else
-	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_FILE_PATH="$(FILEPATH)" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v tests/examples :: $(DATAFILE))
+	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_FILE_PATH="$(FILEPATH)" TEST_FILE_PATH_IPI="$(FILEPATH_IPI)" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v tests/examples :: $(DATAFILE))
 ifdef FIFTYONEDEGREES_TEST_OUTPUT
 	$(CMD) > $(FIFTYONEDEGREES_TEST_OUTPUT)
 else
