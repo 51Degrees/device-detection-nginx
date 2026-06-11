@@ -45,20 +45,20 @@ FILEPATH_IPI := $(FULLPATH)/ip-intelligence-cxx/ip-intelligence-data/$(DATAFILE_
 # into one binary as each carries its own copy of the common-cxx sources
 # compiled with different data file layout options.
 ifndef STATIC_BUILD
-	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
+	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_hash_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
 else
 	ifeq ($(API),ipi)
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_ipi_module
 	else
-		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_module
+		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_hash_module
 	endif
 endif
 
 .PHONY hash:
 
 clean:
-	if [ -d "51Degrees_module/src" ]; then \
-		rm -rf 51Degrees_module/src; \
+	if [ -d "51Degrees_hash_module/src" ]; then \
+		rm -rf 51Degrees_hash_module/src; \
 	fi
 	if [ -d "51Degrees_ipi_module/src" ]; then \
 		rm -rf 51Degrees_ipi_module/src; \
@@ -79,16 +79,16 @@ clean:
 	fi;
 
 build: clean
-	mkdir -p 51Degrees_module/src/hash
-	mkdir -p 51Degrees_module/src/common-cxx
+	mkdir -p 51Degrees_hash_module/src/hash
+	mkdir -p 51Degrees_hash_module/src/common-cxx
 	# exit
-	cp module_conf/hash_config 51Degrees_module/config
-	cp device-detection-cxx/src/*.c 51Degrees_module/src/
-	cp device-detection-cxx/src/*.h 51Degrees_module/src/
-	cp device-detection-cxx/src/hash/*.c 51Degrees_module/src/hash/
-	cp device-detection-cxx/src/hash/*.h 51Degrees_module/src/hash/
-	cp device-detection-cxx/src/common-cxx/*.c 51Degrees_module/src/common-cxx/
-	cp device-detection-cxx/src/common-cxx/*.h 51Degrees_module/src/common-cxx/
+	cp module_conf/hash_config 51Degrees_hash_module/config
+	cp device-detection-cxx/src/*.c 51Degrees_hash_module/src/
+	cp device-detection-cxx/src/*.h 51Degrees_hash_module/src/
+	cp device-detection-cxx/src/hash/*.c 51Degrees_hash_module/src/hash/
+	cp device-detection-cxx/src/hash/*.h 51Degrees_hash_module/src/hash/
+	cp device-detection-cxx/src/common-cxx/*.c 51Degrees_hash_module/src/common-cxx/
+	cp device-detection-cxx/src/common-cxx/*.h 51Degrees_hash_module/src/common-cxx/
 	# The IP intelligence module carries its own copy of the common-cxx
 	# sources as the IP intelligence data file format requires them to be
 	# compiled with different data file layout options to device detection.
