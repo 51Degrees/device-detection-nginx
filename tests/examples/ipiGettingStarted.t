@@ -71,7 +71,11 @@ EOF
 ###############################################################################
 
 # An IP address with a stable, well known network registration which is
-# expected to be present in all IP intelligence data files.
+# expected to be present in all IP intelligence data files. The test runs
+# on a local machine where the client IP address reported by Nginx is a
+# loopback address, so this address is passed in the client_ip query
+# string argument to override the reported client IP address for the
+# match.
 my $knownIp = '212.58.224.22';
 
 ###############################################################################

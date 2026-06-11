@@ -133,6 +133,8 @@ curl "http://localhost:8888/test?client_ip=212.58.224.22" -I
 ```
 Values are returned in the form `"value":weight` where the weight indicates the confidence the engine has in the value.
 
+Note the use of the `client_ip` query string argument here and throughout the examples and tests. When running on a local machine the client IP address reported by Nginx is a loopback or private network address, which has no useful IP intelligence associated with it. Passing a real IP address in the `client_ip` query string argument, read by the `51D_match_ipi` directive through the `$arg_client_ip` variable, overrides the reported client IP address for that match. In production, where requests arrive from real client IP addresses, the variable argument can be omitted so the match uses the client IP address directly, or pointed at another variable such as a forwarded header from an upstream proxy.
+
 The above gave you a quick overview of how to use the 51Degrees Nginx module. However, that used a pre-built binaries of 51Degrees module, and in some cases, it might not work on your target machine due to the differences in the build environment that was used. In those cases, you will have options to rebuild the module yourself. This is detailed in the [Build and Test](#build-and-test) section.
 
 ## Latest releases
