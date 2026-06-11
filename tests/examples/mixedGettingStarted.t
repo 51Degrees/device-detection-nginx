@@ -1,0 +1,96 @@
+#!/usr/bin/perl
+
+# (C) Sergey Kandaurov
+# (C) Maxim Dounin
+# (C) Nginx, Inc.
+
+# Tests for the 51Degrees device detection and IP intelligence modules
+# loaded together in the same Nginx configuration.
+
+###############################################################################
+
+use warnings;
+use strict;
+use File::Temp qw/ tempdir /;
+use Test::More;
+use File::Copy;
+
+BEGIN { use FindBin; chdir($FindBin::Bin); }
+
+use lib '../nginx-tests/lib';
+use Test::Nginx;
+use URI::Escape;
+
+###############################################################################
+
+select STDERR; $| = 1;
+select STDOUT; $| = 1;
+
+sub read_example($) {
+	my ($name) = @_;
+	open my $fh, '<', '../../examples/mixed/' . $name or die "Can't open file $name: $!";
+	read $fh, my $content, -s $fh;
+	close $fh;
+
+	return $content;
+}
+
+# Both data files are required for this test. Skip when either is not
+# present.
+my $hashFilePath = $ENV{TEST_FILE_PATH};
+my $ipiFilePath = $ENV{TEST_FILE_PATH_IPI};
+if (!defined $hashFilePath || !-e $hashFilePath) {
+	plan(skip_all => 'No device detection data file. Set TEST_FILE_PATH.');
+}
+if (!defined $ipiFilePath || !-e $ipiFilePath) {
+	plan(skip_all => 'No IP intelligence data file. Set TEST_FILE_PATH_IPI.');
+}
+
+my $t = Test::Nginx->new()->has(qw/http/)->plan(4);
+
+my $t_file = read_example('gettingStarted.conf');
+# Remove the documentation block
+$t_file =~ s/\/\*\*.+\*\//''/gmse;
+# Replace all variable place holders.
+$t_file =~ s/%%DAEMON_MODE%%/'off'/gmse;
+$t_file =~ s/%%MODULE_PATH%%/$ENV{TEST_MODULE_PATH}/gmse;
+$t_file =~ s/%%FILE_PATH%%/$hashFilePath/gmse;
+$t_file =~ s/%%FILE_PATH_IPI%%/$ipiFilePath/gmse;
+$t->write_file_expand('nginx.conf', $t_file);
+
+$t->write_file('mixed', '');
+
+$t->run();
+
+sub get_with_ua {
+	my ($uri, $ua) = @_;
+	return http(<<EOF);
+HEAD $uri HTTP/1.1
+Host: localhost
+Connection: close
+User-Agent: $ua
+
+EOF
+}
+
+###############################################################################
+# Constants.
+###############################################################################
+
+my $mobileUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D167 Safari/9537.53';
+
+# An IP address with a stable, well known network registration which is
+# expected to be present in all IP intelligence data files.
+my $knownIp = '212.58.224.22';
+
+###############################################################################
+# Test mixed/gettingStarted.conf example.
+###############################################################################
+
+my $r = get_with_ua('/mixed?client_ip=' . $knownIp, $mobileUserAgent);
+like($r, qr/x-mobile: True/, 'Mobile match (device detection)');
+like($r, qr/x-asn: .+/, 'ASN name set (client IP)');
+like($r, qr/x-asn-query: .+/, 'ASN name set (query IP)');
+unlike($r, qr/x-asn-query: (NoMatch)?\r/, 'Query IP matched');
+
+###############################################################################

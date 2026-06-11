@@ -193,11 +193,12 @@ giving three separate headers.
 Values returned by `51D_match_ipi` take the form `"value":weight` where the weight is a number between 0 and 1 indicating the confidence the engine has in the value. A property may return more than one weighted value separated by a pipe. The double quotes are escaped with a backslash when set in a header.
 
 ## Examples
-All examples are located in the `examples` folder. Device detection examples are in the `hash` sub-folder and IP intelligence examples are in the `ipi` sub-folder:
+All examples are located in the `examples` folder. Device detection examples are in the `hash` sub-folder, IP intelligence examples are in the `ipi` sub-folder, and examples using both engines together are in the `mixed` sub-folder:
 |Example|Description|
 |-------|-----------|
 |gettingStarted.conf|Shows a simple instance of how to use 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all in a configuration file.|
 |ipi/gettingStarted.conf|Shows a simple instance of how to use 51D_match_ipi in a configuration file, both with the client IP address and with an IP address from a query argument.|
+|mixed/gettingStarted.conf|Shows how to load the device detection and IP intelligence modules together and use 51D_match_all and 51D_match_ipi in the same location.|
 |config.conf|Shows how to configure 51Degrees detection using directives such as 51D_drift, 51D_difference, etc...|
 |matchQuery.conf|Shows how to perform detection using input from http request query argument|
 |matchMetrics.conf|Shows how to obtain other match metrics of the detection such as drift, difference, method and etc...|
@@ -309,6 +310,12 @@ cmake --build .
 ./runPerf.sh
 ```
   - This step will build our internal version of `Apache Benchmark` and use it for performance testing.
+
+By default the performance test exercises the device detection module using a file of 20,000 User-Agents. To run the same test against the IP intelligence module, set the `ENGINE` variable:
+```
+ENGINE=ipi ./runPerf.sh
+```
+This uses the `evidence.csv` file of 20,000 IP addresses from the ip-intelligence-data sub-module, with each request carrying an IP address which the `51D_match_ipi` directive reads from the User-Agent header via the `$http_user_agent` variable. The nightly CI runs both variants and records a `DetectionsPerSecond` result for each, which feeds the benchmark graphs published from the `gh-images` branch.
 
 # For Developer
 
