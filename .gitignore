@@ -5,3 +5,4 @@ nginx
 51Degrees_hash_module/config
 51Degrees_ipi_module/src/
 51Degrees_ipi_module/config
+tests/nginx-tests/

@@ -213,6 +213,8 @@ To run these examples, follow the instructions detailed in each example.
 # Build and Test (Linux)
 Before build and test the 51Degrees module, make sure to check out the project and all of its sub-modules.
 
+The module is built and tested on Linux. On Windows, use WSL with the repository checked out with LF line endings. The `.gitattributes` file enforces LF in the working tree, so a normal clone works regardless of the `core.autocrlf` setting. A checkout made before the `.gitattributes` file was added can be renormalised with `git rm -rq --cached . && git reset --hard`. All `make` targets and test scripts then run from the same checkout inside WSL.
+
 ## Fetching sub-modules
 
 This repository has sub-modules that must be fetched.
