@@ -1,7 +1,7 @@
 [
   {
     "Image": "ubuntu-latest",
-    "Name": "ubuntu-latest_Nginx1.29.3",
+    "Name": "ubuntu-latest",
     "NginxVersion": "1.29.3",
     "NginxPlusVersion": "36",
     "RunPerformance": true,
@@ -13,6 +13,12 @@
     "Name": "ubuntu-latest_Nginx1.29.3_MemCheck",
     "NginxVersion": "1.29.3",
     "MemCheck": true
+  },
+  {
+    "Image": "ubuntu-latest",
+    "Name": "ubuntu-latest_IPI",
+    "NginxVersion": "1.29.3",
+    "RunPerformance": true
   },
   {
     "Image": "ubuntu-latest",

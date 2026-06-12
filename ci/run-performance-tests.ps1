@@ -9,6 +9,29 @@ $PSNativeCommandUseErrorActionPreference = $true
 $repo = (Get-Item $PSScriptRoot/..).FullName
 $summary = New-Item -ItemType directory -Force -Path $repo/test-results/performance-summary
 
+# Write the results of the last runPerf.sh run for comparison under the
+# given configuration name.
+function Write-Results {
+    param([Parameter(Mandatory)][string]$ResultsName)
+    $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
+    @{
+        HigherIsBetter = @{
+            DetectionsPerSecond = 1/($results.overhead_ms / 1000)
+        }
+        LowerIsBetter = @{
+            AvgMillisecsPerDetection = $results.overhead_ms
+        }
+    } | ConvertTo-Json > $summary/results_$ResultsName.json
+}
+
+# The IP intelligence results are published under the _IPI suffixed
+# configuration name so that they get their own performance graph. The
+# main configuration produces the results for both names, as the publish
+# flow only runs the performance tests for the main configuration. When
+# this script runs for the dedicated _IPI configuration, in the pull
+# request flow, only the IP intelligence test is run.
+$ipiOnly = $Name -like '*_IPI'
+
 $build = New-Item -ItemType directory -Force -Path "$repo/tests/performance/build"
 Push-Location $build
 try {
@@ -17,59 +40,45 @@ try {
     cmake ..
     cmake --build .
 
-    # When running the performance tests, set the data file name manually,
-    # then unset once we're done
-    Write-Host "Running device detection performance test"
-    $env:DATA_FILE_NAME="TAC-HashV41.hash"
-    ./runPerf.sh
-    $env:DATA_FILE_NAME=$Null
+    if (-not $ipiOnly) {
+        # When running the performance tests, set the data file name manually,
+        # then unset once we're done
+        Write-Host "Running device detection performance test"
+        $env:DATA_FILE_NAME="TAC-HashV41.hash"
+        ./runPerf.sh
+        $env:DATA_FILE_NAME=$Null
 
-    # Write out the results for comparison
-    Write-Host "Writing device detection performance test results"
-    $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
-    @{
-        HigherIsBetter = @{
-            DetectionsPerSecond = 1/($results.overhead_ms / 1000)
-        }
-        LowerIsBetter = @{
-            AvgMillisecsPerDetection = $results.overhead_ms
-        }
-    } | ConvertTo-Json > $summary/results_$Name.json
+        Write-Host "Writing device detection performance test results"
+        Write-Results $Name
+    }
 
-    # Run the performance test again for the IP intelligence module using
-    # the Asn data file included in the ip-intelligence-data sub-module.
+    # Run the performance test for the IP intelligence module using the
+    # Asn data file included in the ip-intelligence-data sub-module.
     Write-Host "Running IP intelligence performance test"
     $env:ENGINE="ipi"
     ./runPerf.sh
     $env:ENGINE=$Null
 
-    # Write out the results for comparison
     Write-Host "Writing IP intelligence performance test results"
-    $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
-    @{
-        HigherIsBetter = @{
-            DetectionsPerSecond = 1/($results.overhead_ms / 1000)
-        }
-        LowerIsBetter = @{
-            AvgMillisecsPerDetection = $results.overhead_ms
-        }
-    } | ConvertTo-Json > $summary/results_$($Name)_IPI.json
+    Write-Results ($ipiOnly ? $Name : "$($Name)_IPI")
 } finally {
     Pop-Location
 }
 
 
-Push-Location $repo
-try {
-    # Run the stress test script. ApacheBench will already be built from the previous test
-    Write-Host "Run stress tests using ApacheBench"
-    if (Test-Path -Path "tests/performance/build/ApacheBench-prefix/src/ApacheBench-build/bin/ab") {
-        $env:DATA_FILE_NAME="TAC-HashV41.hash"
-        ./test.sh
-        $env:DATA_FILE_NAME=$Null
-    } else {
-        Write-Error 'The performance test need to be build first.'
+if (-not $ipiOnly) {
+    Push-Location $repo
+    try {
+        # Run the stress test script. ApacheBench will already be built from the previous test
+        Write-Host "Run stress tests using ApacheBench"
+        if (Test-Path -Path "tests/performance/build/ApacheBench-prefix/src/ApacheBench-build/bin/ab") {
+            $env:DATA_FILE_NAME="TAC-HashV41.hash"
+            ./test.sh
+            $env:DATA_FILE_NAME=$Null
+        } else {
+            Write-Error 'The performance test need to be build first.'
+        }
+    } finally {
+        Pop-Location
     }
-} finally {
-    Pop-Location
 }

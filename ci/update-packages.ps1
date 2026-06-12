@@ -36,7 +36,12 @@ foreach ($release in $supportedReleases) {
     foreach ($image in $Images) {
         [void]$options.Add([ordered]@{
             Image = $image
-            Name = "$($image)_Nginx$($openSourceOf[$release])"
+            # The latest version's configuration runs the performance tests
+            # and is named after the image alone, with no NGINX version. The
+            # performance graphs published to the gh-images branch are named
+            # after the configuration, and a stable name keeps the published
+            # graph URLs working across version updates.
+            Name = $isLatest ? $image : "$($image)_Nginx$($openSourceOf[$release])"
             NginxVersion = $openSourceOf[$release]
             NginxPlusVersion = $release
             RunPerformance = $IsLatest # Only run performance if this is the latest NGINX Plus version
@@ -50,6 +55,17 @@ foreach ($release in $supportedReleases) {
                 Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck"
                 NginxVersion = $openSourceOf[$release]
                 MemCheck = $True
+            })
+            # The IP intelligence performance graph is published under this
+            # separate configuration name. The results file for it is
+            # produced by the main configuration above, see
+            # ci/run-performance-tests.ps1, so this configuration has no
+            # PackageRequirement and the publish flow skips its jobs.
+            [void]$options.Add([ordered]@{
+                Image = $image
+                Name = "$($image)_IPI"
+                NginxVersion = $openSourceOf[$release]
+                RunPerformance = $True
             })
             # # TODO: uncomment when static build works
             # [void]$options.Add([ordered]@{
