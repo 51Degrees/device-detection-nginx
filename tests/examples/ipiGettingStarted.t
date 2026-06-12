@@ -19,11 +19,34 @@ BEGIN { use FindBin; chdir($FindBin::Bin); }
 use lib '../nginx-tests/lib';
 use Test::Nginx;
 use URI::Escape;
+use POSIX qw/ WNOHANG /;
 
 ###############################################################################
 
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
+
+# A full IP intelligence data file is loaded into shared memory before the
+# master process writes its pid file, which can take tens of seconds. The
+# five second wait in Test::Nginx::waitforfile is too short for that, so
+# extend it to two minutes. The loop still returns as soon as the pid file
+# appears, so small data files are unaffected.
+{
+	no warnings 'redefine';
+	*Test::Nginx::waitforfile = sub {
+		my ($self, $file, $pid) = @_;
+		my $exited;
+
+		for (1 .. 1200) {
+			return 1 if -e $file;
+			return 0 if $exited;
+			$exited = waitpid($pid, WNOHANG) != 0 if $pid;
+			select undef, undef, undef, 0.1;
+		}
+
+		return undef;
+	};
+}
 
 sub read_example($) {
 	my ($name) = @_;
