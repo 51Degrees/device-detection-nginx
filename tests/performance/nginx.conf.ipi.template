@@ -1,0 +1,32 @@
+worker_processes 4;
+
+load_module ${MODULES_DIR}/ngx_http_51D_ipi_module.so;
+
+working_directory coredumps/;
+worker_rlimit_core 500M;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+    51D_file_path_ipi ${DATA_FILE_DIR_IPI}/51Degrees-IPIV4AsnIpiV41.ipi;
+
+    server {
+        listen       127.0.0.1:3000;
+        server_name  localhost;
+
+		location /calibrate {
+			# Do nothing
+		}
+
+		location /process {
+			# The benchmark harness rotates through a file of IP addresses
+			# using the User-Agent header, so the match is performed on the
+			# value of that header rather than the client IP address which
+			# would be the same for every request.
+			51D_match_ipi x-asn AsnName $http_user_agent;
+			add_header x-asn $http_x_asn;
+		}
+    }
+}

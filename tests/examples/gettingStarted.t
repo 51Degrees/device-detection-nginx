@@ -4,7 +4,7 @@
 # (C) Maxim Dounin
 # (C) Nginx, Inc.
 
-# Tests for 51Degrees Hash Trie module.
+# Tests for 51Degrees Hash module.
 
 ###############################################################################
 

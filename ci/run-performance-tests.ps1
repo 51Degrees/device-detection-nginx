@@ -19,13 +19,13 @@ try {
 
     # When running the performance tests, set the data file name manually,
     # then unset once we're done
-    Write-Host "Running performance test"
+    Write-Host "Running device detection performance test"
     $env:DATA_FILE_NAME="TAC-HashV41.hash"
     ./runPerf.sh
     $env:DATA_FILE_NAME=$Null
 
     # Write out the results for comparison
-    Write-Host "Writing performance test results"
+    Write-Host "Writing device detection performance test results"
     $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
     @{
         HigherIsBetter = @{
@@ -35,6 +35,25 @@ try {
             AvgMillisecsPerDetection = $results.overhead_ms
         }
     } | ConvertTo-Json > $summary/results_$Name.json
+
+    # Run the performance test again for the IP intelligence module using
+    # the Asn data file included in the ip-intelligence-data sub-module.
+    Write-Host "Running IP intelligence performance test"
+    $env:ENGINE="ipi"
+    ./runPerf.sh
+    $env:ENGINE=$Null
+
+    # Write out the results for comparison
+    Write-Host "Writing IP intelligence performance test results"
+    $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
+    @{
+        HigherIsBetter = @{
+            DetectionsPerSecond = 1/($results.overhead_ms / 1000)
+        }
+        LowerIsBetter = @{
+            AvgMillisecsPerDetection = $results.overhead_ms
+        }
+    } | ConvertTo-Json > $summary/results_$($Name)_IPI.json
 } finally {
     Pop-Location
 }

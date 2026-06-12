@@ -1,0 +1,24 @@
+ngx_addon_name=ngx_http_51D_ipi_module
+
+# The engine sources copied into this module's src directory are compiled
+# with FIFTYONE_DEGREES_LARGE_DATA_FILE_SUPPORT, FIFTYONE_DEGREES_REDUCED_FILE
+# and _FILE_OFFSET_BITS=64 defined. The defines are injected into the copied
+# sources by the build target in the Makefile as nginx does not support per
+# module compiler flags. The module source defines them itself before any
+# include.
+#
+# The module is linked with -Wl,-Bsymbolic so that, when loaded alongside the
+# device detection module, the fiftyoneDegrees* symbols which exist in both
+# modules with different struct layouts always bind to the copies within this
+# module.
+if test -n "$ngx_module_link"; then
+	ngx_module_type=HTTP
+	ngx_module_name=ngx_http_51D_ipi_module
+	ngx_module_srcs="$ngx_addon_dir/ngx_http_51D_ipi_module.c $ngx_addon_dir/src/*.c $ngx_addon_dir/src/ipi-graph/*.c $ngx_addon_dir/src/ipi-common-cxx/*.c"
+	ngx_module_libs="-Wl,-Bsymbolic"
+
+	. auto/module
+else
+	HTTP_MODULES="$HTTP_MODULES ngx_http_51D_ipi_module"
+	NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_http_51D_ipi_module.c $ngx_addon_dir/src/*.c $ngx_addon_dir/src/ipi-graph/*.c $ngx_addon_dir/src/ipi-common-cxx/*.c"
+fi
