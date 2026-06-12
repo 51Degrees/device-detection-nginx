@@ -41,7 +41,7 @@ if (!defined $ipiFilePath || !-e $ipiFilePath) {
 	plan(skip_all => 'No IP intelligence data file. Set TEST_FILE_PATH_IPI.');
 }
 
-my $t = Test::Nginx->new()->has(qw/http/)->plan(4);
+my $t = Test::Nginx->new()->has(qw/http/)->plan(6);
 
 my $t_file = read_example('gettingStarted.conf');
 # Remove the documentation block
@@ -86,6 +86,15 @@ my $r = get_uri('/ipi?client_ip=' . $knownIp);
 like($r, qr/x-asn: .+/, 'ASN name set (client IP)');
 like($r, qr/x-asn-query: .+/, 'ASN name set (query IP)');
 unlike($r, qr/x-asn-query: (NoMatch)?\r/, 'Query IP matched');
+
+# Where the client_ip query argument is absent the directive which uses
+# $arg_client_ip falls back to the client IP address, so both headers
+# carry the same value.
+$r = get_uri('/ipi');
+my ($asn) = $r =~ /x-asn: (.*)\r/;
+my ($asnQuery) = $r =~ /x-asn-query: (.*)\r/;
+like($r, qr/x-asn-query: .+/, 'ASN name set without client_ip argument');
+is($asnQuery, $asn, 'Empty variable falls back to the client IP match');
 
 # The client IP address text held by nginx is not null terminated, so a
 # parse failure here indicates the module has passed it to the engine

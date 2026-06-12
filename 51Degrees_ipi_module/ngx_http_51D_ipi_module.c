@@ -1237,10 +1237,9 @@ ngx_http_51D_ipi_handler(ngx_http_request_t *r)
 	ngx_http_51D_ipi_loc_conf_t *fdlcf;
 	ngx_http_51D_ipi_match_conf_t
 		*matchConf[FIFTYONE_DEGREES_IPI_CONFIG_LEVELS];
-	ngx_uint_t haveMatch;
 	ngx_http_51D_ipi_data_to_set *currentHeader;
 	int totalHeaderCount, matchConfIndex;
-	ngx_str_t *ipAddress, *nextIpAddress;
+	ngx_str_t *clientIpAddress, *matchedIpAddress, *nextIpAddress;
 
 	// Use a module context as a marker to ensure that the matching is
 	// only performed once per request. The request internal flag cannot
@@ -1272,31 +1271,42 @@ ngx_http_51D_ipi_handler(ngx_http_request_t *r)
 		return NGX_DECLINED;
 	}
 
-	// Perform the matches which use the client IP address. The match is
+	// Perform the matches which use the client IP address. The lookup is
 	// performed once and reused for all the headers to set. The address
 	// text held by nginx is not null terminated so a null terminated copy
-	// is used for the match.
-	ipAddress = copy_string_null_terminated(r, &r->connection->addr_text);
-	haveMatch = 0;
+	// is used for the match. The matched IP address records the value the
+	// current engine results were produced from, so results are only
+	// reused when a lookup has actually been performed for the same value.
+	clientIpAddress = copy_string_null_terminated(
+		r, &r->connection->addr_text);
+	matchedIpAddress = NULL;
 	for (matchConfIndex = 0;
-		ipAddress != NULL &&
+		clientIpAddress != NULL &&
 		matchConfIndex < FIFTYONE_DEGREES_IPI_CONFIG_LEVELS;
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
 		while (currentHeader != NULL) {
 			if ((int)currentHeader->variableName.len <= 0) {
-				haveMatch =
-					(process(r, fdmcf, currentHeader, haveMatch, ipAddress)
-						== NGX_OK);
+				if (process(
+					r,
+					fdmcf,
+					currentHeader,
+					matchedIpAddress != NULL,
+					clientIpAddress) == NGX_OK) {
+					matchedIpAddress = clientIpAddress;
+				}
+				else {
+					matchedIpAddress = NULL;
+				}
 			}
 			currentHeader = currentHeader->next;
 		}
 	}
 
 	// Perform the matches which use an IP address held in a variable.
-	// Where consecutive matches use the same IP address the previous
-	// match is reused.
-	ipAddress = &(ngx_str_t)ngx_string("");
+	// Where the variable is empty, or not set, the client IP address is
+	// used instead. A new lookup is only performed when the IP address
+	// differs from the one the existing results were produced from.
 	for (matchConfIndex = 0;
 		matchConfIndex < FIFTYONE_DEGREES_IPI_CONFIG_LEVELS;
 		matchConfIndex++) {
@@ -1305,16 +1315,23 @@ ngx_http_51D_ipi_handler(ngx_http_request_t *r)
 			if ((int)currentHeader->variableName.len > 0) {
 				nextIpAddress = get_evidence_from_variable(
 					r, &currentHeader->variableName);
+				if (nextIpAddress != NULL && nextIpAddress->len == 0) {
+					nextIpAddress = clientIpAddress;
+				}
 				if (nextIpAddress != NULL) {
-					if (ipAddress != NULL &&
+					if (matchedIpAddress != NULL &&
 						strcmp(
-							(const char *)ipAddress->data,
+							(const char *)matchedIpAddress->data,
 							(const char *)nextIpAddress->data) == 0) {
-						process(r, fdmcf, currentHeader, 1, ipAddress);
+						process(r, fdmcf, currentHeader, 1, matchedIpAddress);
+					}
+					else if (process(
+						r, fdmcf, currentHeader, 0, nextIpAddress)
+						== NGX_OK) {
+						matchedIpAddress = nextIpAddress;
 					}
 					else {
-						ipAddress = nextIpAddress;
-						process(r, fdmcf, currentHeader, 0, ipAddress);
+						matchedIpAddress = NULL;
 					}
 				}
 			}
