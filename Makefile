@@ -32,6 +32,7 @@ endif
 ifndef FIFTYONEDEGREES_DATAFILE_IPI
 	DATAFILE_IPI := 51Degrees-IPIV4AsnIpiV41.ipi
 else
+$(warning FIFTYONEDEGREES_DATAFILE_IPI is deprecated and will be removed in a future release. Use 51DEGREES_IPI_PATH with an explicit path to the data file instead.)
 	DATAFILE_IPI := $(FIFTYONEDEGREES_DATAFILE_IPI)
 endif
 
@@ -47,6 +48,13 @@ FILEPATH_IPI := $(FULLPATH)/ip-intelligence-cxx/ip-intelligence-data/$(DATAFILE_
 ifdef 51DEGREES_DD_PATH
 	FILEPATH := $(51DEGREES_DD_PATH)
 	DATAFILE := $(notdir $(51DEGREES_DD_PATH))
+endif
+
+# The aligned environment variable 51DEGREES_IPI_PATH provides an explicit
+# path to an IP intelligence data file in the same way.
+ifdef 51DEGREES_IPI_PATH
+	FILEPATH_IPI := $(51DEGREES_IPI_PATH)
+	DATAFILE_IPI := $(notdir $(51DEGREES_IPI_PATH))
 endif
 
 

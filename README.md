@@ -314,9 +314,9 @@ make test 51DEGREES_DD_PATH=/path/to/51Degrees-EnterpriseV4.1.hash
 Note that when running Nginx itself the data file is always specified
 explicitly with the `51D_file_path` directive in the configuration file.
 
-The IP intelligence tests use the data file specified by the `FIFTYONEDEGREES_DATAFILE_IPI` variable, defaulting to the `51Degrees-IPIV4AsnIpiV41.ipi` file included in the sub-module. The file should be placed in the `ip-intelligence-cxx/ip-intelligence-data` folder. The IP intelligence example tests are skipped when the file is not present. e.g.
+The IP intelligence tests resolve their data file in the same order. The `51DEGREES_IPI_PATH` environment variable provides an explicit path to the file. The legacy `FIFTYONEDEGREES_DATAFILE_IPI` variable provides a file name that is combined with the `ip-intelligence-cxx/ip-intelligence-data` folder, it is deprecated and using it prints a make warning. When neither variable is set the `51Degrees-IPIV4AsnIpiV41.ipi` file included in the sub-module is used. The IP intelligence example tests are skipped when the file is not present. e.g.
 ```
-make test-examples FIFTYONEDEGREES_DATAFILE_IPI=51Degrees-IPIV4AsnIpiV41.ipi
+make test-examples 51DEGREES_IPI_PATH=/path/to/51Degrees-IPIV4AsnIpiV41.ipi
 ```
 
 ## Performance Test
@@ -376,7 +376,7 @@ Before running the tests for the example, make sure to obtain data files that co
 
 Run the example tests with the obtained data files:
 ```
-make test-examples 51DEGREES_DD_PATH=[Path to obtained data file] FIFTYONEDEGREES_DATAFILE_IPI=[Obtained IP intelligence data file]
+make test-examples 51DEGREES_DD_PATH=[Path to obtained data file] 51DEGREES_IPI_PATH=[Path to obtained IP intelligence data file]
 ```
 
 ### Javascript and overrides example test
