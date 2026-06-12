@@ -228,9 +228,9 @@ To run the 51Degrees together with the Nginx test suite, run the following comma
 make test-full
 ```
 
-These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth. Then, use the `FIFTYONEDEGREES_DATAFILE` variable to specify the file name to run the tests with. The new data file should be placed in the `device-detection-cxx\device-detection-data` folder and should have different name to `51Degrees-LiteV4.1.hash`. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
+These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth. Then, use the `51DEGREES_DD_PATH` variable to specify the path of the data file to run the tests with. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
 ```
-make [test|test-full] FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash
+make [test|test-full] 51DEGREES_DD_PATH=/path/to/51Degrees-EnterpriseV4.1.hash
 ```
 
 The data file used by the tests is resolved in the following order:
@@ -239,7 +239,8 @@ The data file used by the tests is resolved in the following order:
    path to the data file.
 2. The legacy `FIFTYONEDEGREES_DATAFILE` variable, which provides a file name
    that is combined with the `device-detection-cxx/device-detection-data`
-   folder.
+   folder. This variable is deprecated and will be removed in a future
+   release. Using it prints a make warning, use `51DEGREES_DD_PATH` instead.
 3. When neither variable is set, the free Lite data file
    `51Degrees-LiteV4.1.hash` in the `device-detection-cxx/device-detection-data`
    folder is used.
@@ -303,7 +304,7 @@ Before running the tests for the example, make sure to obtain a data file that c
 
 Run the example tests with the obtained data file:
 ```
-make test-examples FIFTYONEDEGREES_DATAFILE=[Obtained data file]
+make test-examples 51DEGREES_DD_PATH=[Path to obtained data file]
 ```
 
 ### Javascript and overrides example test

@@ -25,6 +25,7 @@ FULLPATH := $(shell pwd)
 ifndef FIFTYONEDEGREES_DATAFILE
 	DATAFILE := 51Degrees-LiteV4.1.hash
 else
+$(warning FIFTYONEDEGREES_DATAFILE is deprecated and will be removed in a future release. Use 51DEGREES_DD_PATH with an explicit path to the data file instead.)
 	DATAFILE := $(FIFTYONEDEGREES_DATAFILE)
 endif
 
