@@ -5,10 +5,9 @@ param(
     [string]$NginxVersion
 )
 
-$ModuleName = "ngx_http_51D_module.so"
+$ModuleNames = @("ngx_http_51D_module.so", "ngx_http_51D_ipi_module.so")
 $RepoPath = [IO.Path]::Combine($pwd, $RepoName)
 $OutputDir = [IO.Path]::Combine($pwd, "package-files")
-$OutputFile = [IO.Path]::Combine($OutputDir, $ModuleName)
 
 Write-Output "Entering '$RepoPath'"
 Push-Location $RepoPath
@@ -21,10 +20,12 @@ try {
     # as artifacts.
     New-Item -Path $OutputDir -ItemType Directory -Force 
     
-    $InputFile = [IO.Path]::Combine($RepoPath, "build", "modules", $ModuleName)
-
-    # Copy module
-    Copy-Item -Path $InputFile -Destination $OutputFile
+    # Copy both the device detection and IP intelligence modules
+    foreach ($ModuleName in $ModuleNames) {
+        $InputFile = [IO.Path]::Combine($RepoPath, "build", "modules", $ModuleName)
+        $OutputFile = [IO.Path]::Combine($OutputDir, $ModuleName)
+        Copy-Item -Path $InputFile -Destination $OutputFile
+    }
 
 }
 finally {
