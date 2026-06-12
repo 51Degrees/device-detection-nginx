@@ -397,6 +397,10 @@ ngx_http_51D_ipi_post_conf(ngx_conf_t *cf)
 			&resourceManagerName,
 			size,
 			&ngx_http_51D_ipi_module + tagOffset);
+	if (ngx_http_51D_ipi_shm_resource_manager == NULL) {
+		// The reason has already been logged by ngx_shared_memory_add.
+		return NGX_ERROR;
+	}
 	ngx_http_51D_ipi_shm_resource_manager->init =
 		ngx_http_51D_ipi_init_shm_resource_manager;
 	return NGX_OK;
@@ -891,17 +895,28 @@ ngx_module_t ngx_http_51D_ipi_module = {
 /**
  * Add value function. Appends a string to a list separated by the
  * delimiter specified with 51D_value_separator_ipi, or a comma by default.
+ * Values which do not fit in the remaining space are truncated.
  * @param delimiter to split values with.
  * @param val the string to add to dst.
  * @param dst the string to append the val to.
- * @param length the size remaining to append val to dst.
+ * @param length the space remaining in dst, including the null terminator.
  */
 static void add_value(char *delimiter, char *val, char *dst, size_t length)
 {
+	// Reserve the byte for the null terminator written by strncat.
+	if (length == 0) {
+		return;
+	}
+	length--;
+
 	// If the buffer already contains characters, append the delimiter.
 	if (dst[0] != '\0') {
+		size_t delimiterLength = strlen(delimiter);
+		if (delimiterLength > length) {
+			return;
+		}
 		strncat(dst, delimiter, length);
-		length -= strlen(delimiter);
+		length -= delimiterLength;
 	}
 
 	// Append the value.

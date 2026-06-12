@@ -593,6 +593,10 @@ ngx_http_51D_post_conf(ngx_conf_t *cf)
 			&resourceManagerName,
 			size,
 			&ngx_http_51D_module + tagOffset);
+	if (ngx_http_51D_shm_resource_manager == NULL) {
+		// The reason has already been logged by ngx_shared_memory_add.
+		return NGX_ERROR;
+	}
 	ngx_http_51D_shm_resource_manager->init =
 		ngx_http_51D_init_shm_resource_manager;
 	return NGX_OK;
@@ -1567,21 +1571,32 @@ search_headers_in(ngx_http_request_t *r, u_char *name, size_t len) {
 /**
  * Add value function. Appends a string to a list separated by the
  * delimiter specified with 51D_valueSeparator, or a comma by default.
+ * Values which do not fit in the remaining space are truncated.
  * @param delimiter to split values with.
  * @param val the string to add to dst.
  * @param dst the string to append the val to.
- * @param length the size remaining to append val to dst.
+ * @param length the space remaining in dst, including the null terminator.
  */
 static void add_value(char *delimiter, char *val, char *dst, size_t length)
 {
-	// If the buffer already contains characters, append a pipe.
+	// Reserve the byte for the null terminator written by strncat.
+	if (length == 0) {
+		return;
+	}
+	length--;
+
+	// If the buffer already contains characters, append the delimiter.
 	if (dst[0] != '\0') {
-		ngx_cpystrn((u_char *)(dst + ngx_strlen(dst)), (u_char *)delimiter, length + 1);
-		length -= ngx_strlen(delimiter);
+		size_t delimiterLength = strlen(delimiter);
+		if (delimiterLength > length) {
+			return;
+		}
+		strncat(dst, delimiter, length);
+		length -= delimiterLength;
 	}
 
-    // Append the value.
-    ngx_cpystrn((u_char *)(dst + ngx_strlen(dst)), (u_char *)val, length + 1);
+	// Append the value.
+	strncat(dst, val, length);
 }
 
 /**
