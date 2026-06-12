@@ -397,6 +397,10 @@ ngx_http_51D_ipi_post_conf(ngx_conf_t *cf)
 			&resourceManagerName,
 			size,
 			&ngx_http_51D_ipi_module + tagOffset);
+	if (ngx_http_51D_ipi_shm_resource_manager == NULL) {
+		// The reason has already been logged by ngx_shared_memory_add.
+		return NGX_ERROR;
+	}
 	ngx_http_51D_ipi_shm_resource_manager->init =
 		ngx_http_51D_ipi_init_shm_resource_manager;
 	return NGX_OK;
@@ -891,17 +895,28 @@ ngx_module_t ngx_http_51D_ipi_module = {
 /**
  * Add value function. Appends a string to a list separated by the
  * delimiter specified with 51D_value_separator_ipi, or a comma by default.
+ * Values which do not fit in the remaining space are truncated.
  * @param delimiter to split values with.
  * @param val the string to add to dst.
  * @param dst the string to append the val to.
- * @param length the size remaining to append val to dst.
+ * @param length the space remaining in dst, including the null terminator.
  */
 static void add_value(char *delimiter, char *val, char *dst, size_t length)
 {
+	// Reserve the byte for the null terminator written by strncat.
+	if (length == 0) {
+		return;
+	}
+	length--;
+
 	// If the buffer already contains characters, append the delimiter.
 	if (dst[0] != '\0') {
+		size_t delimiterLength = strlen(delimiter);
+		if (delimiterLength > length) {
+			return;
+		}
 		strncat(dst, delimiter, length);
-		length -= strlen(delimiter);
+		length -= delimiterLength;
 	}
 
 	// Append the value.
@@ -1360,7 +1375,7 @@ set_data(
 	ngx_str_t *value,
 	ngx_http_51D_ipi_main_conf_t *fdmcf)
 {
-	char *tok, *tokPos = NULL;
+	char *tok, *tokPos = NULL, *saveptr = NULL;
 	int propertiesCount, charPos;
 	char *propertiesString;
 
@@ -1376,7 +1391,7 @@ set_data(
 		report_insufficient_memory_status(cf->log);
 		return NGX_CONF_ERROR;
 	}
-	strcpy((char *)data->headerName.data, (char *)value[1].data);
+	ngx_memcpy(data->headerName.data, value[1].data, value[1].len + 1);
 	data->headerName.len = value[1].len;
 	ngx_strlow(
 		data->lowerHeaderName.data,
@@ -1404,7 +1419,7 @@ set_data(
 		return NGX_CONF_ERROR;
 	}
 
-	tok = strtok(propertiesString, ",");
+	tok = strtok_r(propertiesString, ",", &saveptr);
 	while (tok != NULL) {
 		data->property[data->propertyCount] =
 			(ngx_str_t *)ngx_palloc(cf->pool, sizeof(ngx_str_t));
@@ -1421,11 +1436,11 @@ set_data(
 			return NGX_CONF_ERROR;
 		}
 
-		strcpy(
-			(char *)data->property[data->propertyCount]->data,
-			(const char *)tok);
-		data->property[data->propertyCount]->len =
-			ngx_strlen(data->property[data->propertyCount]->data);
+		data->property[data->propertyCount]->len = ngx_strlen(tok);
+		ngx_memcpy(
+			data->property[data->propertyCount]->data,
+			(u_char *)tok,
+			data->property[data->propertyCount]->len + 1);
 
 		// A property is not already included if it does not present in the
 		// composed properties string and is not a substring of other
@@ -1443,7 +1458,7 @@ set_data(
 					strlen(fdmcf->properties));
 		}
 		data->propertyCount++;
-		tok = strtok(NULL, ",");
+		tok = strtok_r(NULL, ",", &saveptr);
 	}
 
 	// Set the variable name if it is specified.

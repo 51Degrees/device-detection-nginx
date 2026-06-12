@@ -593,6 +593,10 @@ ngx_http_51D_post_conf(ngx_conf_t *cf)
 			&resourceManagerName,
 			size,
 			&ngx_http_51D_module + tagOffset);
+	if (ngx_http_51D_shm_resource_manager == NULL) {
+		// The reason has already been logged by ngx_shared_memory_add.
+		return NGX_ERROR;
+	}
 	ngx_http_51D_shm_resource_manager->init =
 		ngx_http_51D_init_shm_resource_manager;
 	return NGX_OK;
@@ -1301,7 +1305,7 @@ initRespHeaders(
 					return NGX_ERROR;
 				}
 
-				strcpy((char *)headerNames[respHeaderCount].data, headerName);
+				ngx_memcpy(headerNames[respHeaderCount].data, headerName, headerNames[respHeaderCount].len + 1);
 				headerIndex = respHeaderCount;
 				respHeaderCount++;
 			}
@@ -1390,8 +1394,8 @@ initRespHeaders(
 					return NGX_ERROR;
 				}
 
-				strcpy((char *)respHeader->property[respHeader->propertyCount]->data,
-					propertyName);
+				ngx_memcpy(respHeader->property[respHeader->propertyCount]->data,
+					propertyName, len + 1);
 				respHeader->propertyCount++;
 			}
 		}
@@ -1567,21 +1571,32 @@ search_headers_in(ngx_http_request_t *r, u_char *name, size_t len) {
 /**
  * Add value function. Appends a string to a list separated by the
  * delimiter specified with 51D_valueSeparator, or a comma by default.
+ * Values which do not fit in the remaining space are truncated.
  * @param delimiter to split values with.
  * @param val the string to add to dst.
  * @param dst the string to append the val to.
- * @param length the size remaining to append val to dst.
+ * @param length the space remaining in dst, including the null terminator.
  */
 static void add_value(char *delimiter, char *val, char *dst, size_t length)
 {
-	// If the buffer already contains characters, append a pipe.
+	// Reserve the byte for the null terminator written by strncat.
+	if (length == 0) {
+		return;
+	}
+	length--;
+
+	// If the buffer already contains characters, append the delimiter.
 	if (dst[0] != '\0') {
+		size_t delimiterLength = strlen(delimiter);
+		if (delimiterLength > length) {
+			return;
+		}
 		strncat(dst, delimiter, length);
-		length -= strlen(delimiter);
+		length -= delimiterLength;
 	}
 
-    // Append the value.
-    strncat(dst, val, length);
+	// Append the value.
+	strncat(dst, val, length);
 }
 
 /**
@@ -1871,7 +1886,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 				return evidence;
 			}
 
-			strcpy((char *)ngxHeaderName.data, headerName);
+			ngx_memcpy(ngxHeaderName.data, headerName, ngxHeaderName.len + 1);
 			queryEvidence = get_evidence_from_query_string(r, &ngxHeaderName);
 			if (queryEvidence != NULL && queryEvidence->len > 0) {
 				EvidenceAddString(
@@ -2688,7 +2703,7 @@ set_data(
 	int propertiesCount,
 	ngx_http_51D_main_conf_t *fdmcf)
 {
-	char *tok, *tokPos = NULL;
+	char *tok, *tokPos = NULL, *saveptr = NULL;
 
 	// Allocate space for the properties array.
 	data->property =
@@ -2698,7 +2713,7 @@ set_data(
 		return NGX_CONF_ERROR;	
 	}
 
-	tok = strtok((char *)propertiesString, (const char *)",");
+	tok = strtok_r((char *)propertiesString, (const char *)",", &saveptr);
 	while (tok != NULL) {
 		data->property[data->propertyCount] =
 			(ngx_str_t *)ngx_palloc(cf->pool, sizeof(ngx_str_t));
@@ -2714,11 +2729,11 @@ set_data(
 			return NGX_CONF_ERROR;
 		}
 
-		strcpy(
-			(char *)data->property[data->propertyCount]->data,
-			(const char *)tok);
-		data->property[data->propertyCount]->len =
-			ngx_strlen(data->property[data->propertyCount]->data);
+		data->property[data->propertyCount]->len = ngx_strlen(tok);
+		ngx_memcpy(
+			data->property[data->propertyCount]->data,
+			(u_char *)tok,
+			data->property[data->propertyCount]->len + 1);
 
 		// A is not already included if it does not present
 		// in the composed properties string and is not a substring
@@ -2740,7 +2755,7 @@ set_data(
 				FIFTYONE_DEGREES_MAX_PROPS_STRING - strlen(fdmcf->properties));
 		}
 		data->propertyCount++;
-		tok = strtok(NULL, ",");
+		tok = strtok_r(NULL, ",", &saveptr);
 	}
 
 	// Set the variable name or other header if they are specified.
@@ -2799,7 +2814,7 @@ ngx_http_51D_set_header(
 	// Set the name of the header.
 	header->headerName.data = (u_char *)ngx_palloc(cf->pool, value[1].len + 1);
 	header->lowerHeaderName.data = (u_char *)ngx_palloc(cf->pool, value[1].len + 1);
-	strcpy((char *)header->headerName.data, (char *)value[1].data);
+	ngx_memcpy(header->headerName.data, value[1].data, value[1].len + 1);
 	header->headerName.len = value[1].len;
 	ngx_strlow(header->lowerHeaderName.data, header->headerName.data, header->headerName.len);
 	header->lowerHeaderName.len = header->headerName.len;
