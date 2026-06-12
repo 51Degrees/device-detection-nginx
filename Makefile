@@ -25,18 +25,37 @@ FULLPATH := $(shell pwd)
 ifndef FIFTYONEDEGREES_DATAFILE
 	DATAFILE := 51Degrees-LiteV4.1.hash
 else
+$(warning FIFTYONEDEGREES_DATAFILE is deprecated and will be removed in a future release. Use 51DEGREES_DD_PATH with an explicit path to the data file instead.)
 	DATAFILE := $(FIFTYONEDEGREES_DATAFILE)
 endif
 
 ifndef FIFTYONEDEGREES_DATAFILE_IPI
 	DATAFILE_IPI := 51Degrees-IPIV4AsnIpiV41.ipi
 else
+$(warning FIFTYONEDEGREES_DATAFILE_IPI is deprecated and will be removed in a future release. Use 51DEGREES_IPI_PATH with an explicit path to the data file instead.)
 	DATAFILE_IPI := $(FIFTYONEDEGREES_DATAFILE_IPI)
 endif
 
 MODULEPATH := $(FULLPATH)/build/modules/ngx_http_51D_module.so
 FILEPATH := $(FULLPATH)/device-detection-cxx/device-detection-data/$(DATAFILE)
 FILEPATH_IPI := $(FULLPATH)/ip-intelligence-cxx/ip-intelligence-data/$(DATAFILE_IPI)
+
+# The aligned environment variable 51DEGREES_DD_PATH provides an explicit
+# path to a device detection data file and is checked first. The legacy
+# FIFTYONEDEGREES_DATAFILE name variable above is retained for backwards
+# compatibility and is combined with the expected data folder when no
+# explicit path is provided.
+ifdef 51DEGREES_DD_PATH
+	FILEPATH := $(51DEGREES_DD_PATH)
+	DATAFILE := $(notdir $(51DEGREES_DD_PATH))
+endif
+
+# The aligned environment variable 51DEGREES_IPI_PATH provides an explicit
+# path to an IP intelligence data file in the same way.
+ifdef 51DEGREES_IPI_PATH
+	FILEPATH_IPI := $(51DEGREES_IPI_PATH)
+	DATAFILE_IPI := $(notdir $(51DEGREES_IPI_PATH))
+endif
 
 
 # For dynamic builds, both the device detection and IP intelligence modules
