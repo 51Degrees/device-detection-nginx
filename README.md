@@ -1,8 +1,8 @@
 # 51Degrees Real-Time Data Nginx Module
 
-![51Degrees](https://51degrees.com/img/logo.png?utm_source=github&utm_medium=repository&utm_campaign=nginx_open_source&utm_content=readme_main "Data rewards the curious") **Real-Time Data in C** Nginx module
+![51Degrees](https://51degrees.com/img/logo.png?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=51degrees-real-time-data-nginx-module "Data rewards the curious") **Real-Time Data in C** Nginx module
 
-[Developer documentation](https://51degrees.com/documentation/_other_integrations__nginx.html)
+[Developer documentation](https://51degrees.com/documentation/_other_integrations__nginx.html?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=51degrees-real-time-data-nginx-module)
 
 # Introduction 
 This project integrates the 51Degrees real-time data engines as modules to Nginx, allowing users to configure Nginx to enrich requests with real-time data by setting corresponding 51Degrees directives in the Nginx configuration file. Two engines are available, the Device Detection V4 engine which provides device properties from request headers, and the IP Intelligence engine which provides network and location properties from the client IP address. Each engine is built as its own dynamic module (`ngx_http_51D_module` for device detection and `ngx_http_51D_ipi_module` for IP intelligence) and the modules can be loaded together or independently. Currently only Linux platform is supported.
@@ -19,7 +19,7 @@ In order to use the module, you will need at least one 51Degrees data file. Each
 This repository includes a free, 'lite' file in the 'device-detection-data' 
 sub-module that has a significantly reduced set of properties. To obtain a 
 file with a more complete set of device properties see the 
-[51Degrees website](https://51degrees.com/pricing). 
+[51Degrees website](https://51degrees.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=device-detection-data-file). 
 If you want to use the lite file, you will need to install [GitLFS](https://git-lfs.github.com/).
 
 For Linux:
@@ -38,7 +38,7 @@ git lfs pull
 
 The 'ip-intelligence-data' sub-module includes a free `51Degrees-IPIV4AsnIpiV41.ipi` file which contains the Asn properties (Asn and AsnName). This file is used by default for the IP intelligence examples and tests.
 
-The sub-module also provides scripts (`get-lite-file-from-azure.sh`) to download a free, 'lite' IP intelligence data file which has a different, reduced set of properties (RegisteredCountry, RegisteredName and RegisteredOwner). Note that the version of the downloaded data file must match the version expected by the ip-intelligence-cxx sub-module, as with any 51Degrees data file. To obtain a file with the complete set of properties see the [51Degrees website](https://51degrees.com/pricing).
+The sub-module also provides scripts (`get-lite-file-from-azure.sh`) to download a free, 'lite' IP intelligence data file which has a different, reduced set of properties (RegisteredCountry, RegisteredName and RegisteredOwner). Note that the version of the downloaded data file must match the version expected by the ip-intelligence-cxx sub-module, as with any 51Degrees data file. To obtain a file with the complete set of properties see the [51Degrees website](https://51degrees.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=ip-intelligence-data-file).
 
 ## Quick Start (Device Detection)
 
@@ -140,7 +140,7 @@ The above gave you a quick overview of how to use the 51Degrees Nginx module. Ho
 ## Latest releases
 The latest releases of 51Degrees Nginx module can be found on [Github](https://github.com/51Degrees/device-detection-nginx/releases).
 
-For the supported platforms and Nginx version, please check the [tested versions page](https://51degrees.com/documentation/_info__tested_versions.html) for latest update. At the time of writing, the followings are tested by the continuous integration pipeline:
+For the supported platforms and Nginx version, please check the [tested versions page](https://51degrees.com/documentation/_info__tested_versions.html?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=latest-releases) for latest update. At the time of writing, the followings are tested by the continuous integration pipeline:
 - Platform Ubuntu (ubuntu-latest), 64bit.
 - Nginx version: 1.27.2, 1.27.4, 1.29.0 and 1.29.3
 
