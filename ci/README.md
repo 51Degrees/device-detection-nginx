@@ -18,6 +18,7 @@ The following secrets are required to run the full set of tests agains NGINX Plu
 - There are no packages produced by this repository, so the only output from the `Nightly Publish Main` workflow is a new tag and release.
 - The package update step does not update dependencies from a package manager in the same way as other repos. Instead it checks the supported versions on the [NGINX Plus Releases](https://docs.nginx.com/nginx/releases/) page, and uses that to update `options.json` to ensure they are tested.
 - As Windows is not supported, the scripts here can be a little less strict with implementation. e.g. using `cp` rather than `Copy-Item` as we know we're in a Linux environment.
+- The performance test configurations in `options.json` use stable names with no NGINX version, `ubuntu-latest` for device detection and `ubuntu-latest_IPI` for IP intelligence. The performance graphs published to the gh-images branch are named after the configuration, and the graph URLs are referenced from the documentation, so the names must not change between version updates. The `_IPI` configuration exists so that a separate IP intelligence graph is published. Its results file is produced by the main configuration in the publish flow, see `run-performance-tests.ps1`.
 
 ### Build Options
 
