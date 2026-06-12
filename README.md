@@ -40,7 +40,7 @@ The 'ip-intelligence-data' sub-module includes a free `51Degrees-IPIV4AsnIpiV41.
 
 The sub-module also provides scripts (`get-lite-file-from-azure.sh`) to download a free, 'lite' IP intelligence data file which has a different, reduced set of properties (RegisteredCountry, RegisteredName and RegisteredOwner). Note that the version of the downloaded data file must match the version expected by the ip-intelligence-cxx sub-module, as with any 51Degrees data file. To obtain a file with the complete set of properties see the [51Degrees website](https://51degrees.com/pricing).
 
-## Quick Start
+## Quick Start (Device Detection)
 
 To quickly start using 51Degrees module with Nginx, please follow the below steps:
 - Install an Nginx version 1.19.0 or above.
