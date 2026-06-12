@@ -32,7 +32,8 @@
 #include "src/hash/fiftyone.h"
 
 /**
- * @defgroup ngx_http_51D_module 51Degrees Nginx Module Internals
+ * @defgroup ngx_http_51D_module 51Degrees Device Detection Nginx Module
+ * Internals
  *
  * @{
  */

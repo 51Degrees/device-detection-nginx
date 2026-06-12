@@ -1,3 +1,6 @@
 [submodule "device-detection-cxx"]
 	path = device-detection-cxx
 	url = ../device-detection-cxx
+[submodule "ip-intelligence-cxx"]
+	path = ip-intelligence-cxx
+	url = ../ip-intelligence-cxx
