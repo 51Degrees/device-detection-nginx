@@ -1375,7 +1375,7 @@ set_data(
 	ngx_str_t *value,
 	ngx_http_51D_ipi_main_conf_t *fdmcf)
 {
-	char *tok, *tokPos = NULL;
+	char *tok, *tokPos = NULL, *saveptr = NULL;
 	int propertiesCount, charPos;
 	char *propertiesString;
 
@@ -1391,7 +1391,7 @@ set_data(
 		report_insufficient_memory_status(cf->log);
 		return NGX_CONF_ERROR;
 	}
-	strcpy((char *)data->headerName.data, (char *)value[1].data);
+	ngx_memcpy(data->headerName.data, value[1].data, value[1].len + 1);
 	data->headerName.len = value[1].len;
 	ngx_strlow(
 		data->lowerHeaderName.data,
@@ -1419,7 +1419,7 @@ set_data(
 		return NGX_CONF_ERROR;
 	}
 
-	tok = strtok(propertiesString, ",");
+	tok = strtok_r(propertiesString, ",", &saveptr);
 	while (tok != NULL) {
 		data->property[data->propertyCount] =
 			(ngx_str_t *)ngx_palloc(cf->pool, sizeof(ngx_str_t));
@@ -1436,11 +1436,11 @@ set_data(
 			return NGX_CONF_ERROR;
 		}
 
-		strcpy(
-			(char *)data->property[data->propertyCount]->data,
-			(const char *)tok);
-		data->property[data->propertyCount]->len =
-			ngx_strlen(data->property[data->propertyCount]->data);
+		data->property[data->propertyCount]->len = ngx_strlen(tok);
+		ngx_memcpy(
+			data->property[data->propertyCount]->data,
+			(u_char *)tok,
+			data->property[data->propertyCount]->len + 1);
 
 		// A property is not already included if it does not present in the
 		// composed properties string and is not a substring of other
@@ -1458,7 +1458,7 @@ set_data(
 					strlen(fdmcf->properties));
 		}
 		data->propertyCount++;
-		tok = strtok(NULL, ",");
+		tok = strtok_r(NULL, ",", &saveptr);
 	}
 
 	// Set the variable name if it is specified.
