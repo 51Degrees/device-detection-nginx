@@ -1,0 +1,5 @@
+# The module is built and tested on Linux (including WSL on Windows). The
+# nginx configure script, the Makefile and the shell scripts are processed
+# by POSIX tools which require LF line endings, so force LF in the working
+# tree regardless of the core.autocrlf setting of the clone.
+* text=auto eol=lf
