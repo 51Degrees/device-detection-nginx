@@ -41,7 +41,7 @@ if (!defined $ipiFilePath || !-e $ipiFilePath) {
 	plan(skip_all => 'No IP intelligence data file. Set TEST_FILE_PATH_IPI.');
 }
 
-my $t = Test::Nginx->new()->has(qw/http/)->plan(3);
+my $t = Test::Nginx->new()->has(qw/http/)->plan(4);
 
 my $t_file = read_example('gettingStarted.conf');
 # Remove the documentation block
@@ -86,5 +86,11 @@ my $r = get_uri('/ipi?client_ip=' . $knownIp);
 like($r, qr/x-asn: .+/, 'ASN name set (client IP)');
 like($r, qr/x-asn-query: .+/, 'ASN name set (query IP)');
 unlike($r, qr/x-asn-query: (NoMatch)?\r/, 'Query IP matched');
+
+# The client IP address text held by nginx is not null terminated, so a
+# parse failure here indicates the module has passed it to the engine
+# without taking a null terminated copy.
+unlike($t->read_file('error.log'), qr/IP address format is incorrect/,
+	'Client IP address parsed');
 
 ###############################################################################

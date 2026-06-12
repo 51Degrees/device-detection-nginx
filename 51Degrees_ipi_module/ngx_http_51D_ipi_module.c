@@ -932,6 +932,34 @@ static ngx_str_t* empty_string(ngx_http_request_t *r) {
 }
 
 /**
+ * Take a null terminated copy of an nginx string. The IP address parser
+ * in the engine reads one byte beyond the characters provided, so a string
+ * which is not null terminated, such as the connection address text, must
+ * be copied before being used for a match.
+ * @param r the nginx http request
+ * @param str the string to copy
+ * @return the null terminated copy, or NULL if memory could not be
+ * allocated
+ */
+static ngx_str_t *
+copy_string_null_terminated(ngx_http_request_t *r, ngx_str_t *str) {
+	ngx_str_t *copy = (ngx_str_t *)ngx_palloc(r->pool, sizeof(ngx_str_t));
+	if (copy == NULL) {
+		report_insufficient_memory_status(r->connection->log);
+		return NULL;
+	}
+	copy->data = (u_char *)ngx_palloc(r->pool, str->len + 1);
+	if (copy->data == NULL) {
+		report_insufficient_memory_status(r->connection->log);
+		return NULL;
+	}
+	ngx_memcpy(copy->data, str->data, str->len);
+	copy->len = str->len;
+	copy->data[copy->len] = '\0';
+	return copy;
+}
+
+/**
  * Search and get the value of an nginx variable, unescaping any URI
  * encoding. Used to obtain the IP address when a variable is specified
  * with a 51D_match_ipi directive.
@@ -1245,10 +1273,13 @@ ngx_http_51D_ipi_handler(ngx_http_request_t *r)
 	}
 
 	// Perform the matches which use the client IP address. The match is
-	// performed once and reused for all the headers to set.
-	ipAddress = &r->connection->addr_text;
+	// performed once and reused for all the headers to set. The address
+	// text held by nginx is not null terminated so a null terminated copy
+	// is used for the match.
+	ipAddress = copy_string_null_terminated(r, &r->connection->addr_text);
 	haveMatch = 0;
 	for (matchConfIndex = 0;
+		ipAddress != NULL &&
 		matchConfIndex < FIFTYONE_DEGREES_IPI_CONFIG_LEVELS;
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
