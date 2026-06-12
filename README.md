@@ -233,6 +233,25 @@ These do not run all the required tests as some tests requires properties that a
 make [test|test-full] FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash
 ```
 
+The data file used by the tests is resolved in the following order:
+
+1. The `51DEGREES_DD_PATH` environment variable, which provides an explicit
+   path to the data file.
+2. The legacy `FIFTYONEDEGREES_DATAFILE` variable, which provides a file name
+   that is combined with the `device-detection-cxx/device-detection-data`
+   folder.
+3. When neither variable is set, the free Lite data file
+   `51Degrees-LiteV4.1.hash` in the `device-detection-cxx/device-detection-data`
+   folder is used.
+
+For example:
+```
+make test 51DEGREES_DD_PATH=/path/to/51Degrees-EnterpriseV4.1.hash
+```
+
+Note that when running Nginx itself the data file is always specified
+explicitly with the `51D_file_path` directive in the configuration file.
+
 ## Performance Test
 
 The project also include a performance test suite. This required `CMake 10` or above to be installed.

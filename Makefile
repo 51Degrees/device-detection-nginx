@@ -31,6 +31,16 @@ endif
 MODULEPATH := $(FULLPATH)/build/modules/ngx_http_51D_module.so
 FILEPATH := $(FULLPATH)/device-detection-cxx/device-detection-data/$(DATAFILE)
 
+# The aligned environment variable 51DEGREES_DD_PATH provides an explicit
+# path to a device detection data file and is checked first. The legacy
+# FIFTYONEDEGREES_DATAFILE name variable above is retained for backwards
+# compatibility and is combined with the expected data folder when no
+# explicit path is provided.
+ifdef 51DEGREES_DD_PATH
+	FILEPATH := $(51DEGREES_DD_PATH)
+	DATAFILE := $(notdir $(51DEGREES_DD_PATH))
+endif
+
 
 ifndef STATIC_BUILD
 	MODULE_ARG := --add-dynamic-module
