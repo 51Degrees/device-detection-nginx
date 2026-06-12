@@ -1,0 +1,25 @@
+name: UTM link lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  utm-link-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout common-ci
+        uses: actions/checkout@v4
+        with:
+          repository: 51Degrees/common-ci
+          path: utm-lint-common-ci
+
+      - name: Lint 51degrees.com links
+        shell: pwsh
+        run: ./utm-lint-common-ci/scripts/utm-lint.ps1 -RepoRoot .
