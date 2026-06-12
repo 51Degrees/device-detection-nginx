@@ -25,11 +25,9 @@ function Write-Results {
 }
 
 # The IP intelligence results are published under the _IPI suffixed
-# configuration name so that they get their own performance graph. The
-# main configuration produces the results for both names, as the publish
-# flow only runs the performance tests for the main configuration. When
-# this script runs for the dedicated _IPI configuration, in the pull
-# request flow, only the IP intelligence test is run.
+# configuration name so that they get their own performance graph. Each
+# configuration runs only its own engine's performance test and writes
+# the results under its own name.
 $ipiOnly = $Name -like '*_IPI'
 
 $build = New-Item -ItemType directory -Force -Path "$repo/tests/performance/build"
@@ -52,15 +50,17 @@ try {
         Write-Results $Name
     }
 
-    # Run the performance test for the IP intelligence module using the
-    # Asn data file included in the ip-intelligence-data sub-module.
-    Write-Host "Running IP intelligence performance test"
-    $env:ENGINE="ipi"
-    ./runPerf.sh
-    $env:ENGINE=$Null
+    if ($ipiOnly) {
+        # Run the performance test for the IP intelligence module using the
+        # Asn data file included in the ip-intelligence-data sub-module.
+        Write-Host "Running IP intelligence performance test"
+        $env:ENGINE="ipi"
+        ./runPerf.sh
+        $env:ENGINE=$Null
 
-    Write-Host "Writing IP intelligence performance test results"
-    Write-Results ($ipiOnly ? $Name : "$($Name)_IPI")
+        Write-Host "Writing IP intelligence performance test results"
+        Write-Results $Name
+    }
 } finally {
     Pop-Location
 }

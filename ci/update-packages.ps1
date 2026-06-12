@@ -57,15 +57,17 @@ foreach ($release in $supportedReleases) {
                 MemCheck = $True
             })
             # The IP intelligence performance graph is published under this
-            # separate configuration name. The results file for it is
-            # produced by the main configuration above, see
-            # ci/run-performance-tests.ps1, so this configuration has no
-            # PackageRequirement and the publish flow skips its jobs.
+            # separate configuration name. PackageRequirement is needed for
+            # the publish flow to run the configuration's jobs at all, as
+            # the configure step filters the others out. The performance
+            # script runs only the IP intelligence test for _IPI suffixed
+            # names, see ci/run-performance-tests.ps1.
             [void]$options.Add([ordered]@{
                 Image = $image
                 Name = "$($image)_IPI"
                 NginxVersion = $openSourceOf[$release]
                 RunPerformance = $True
+                PackageRequirement = $True
             })
             # # TODO: uncomment when static build works
             # [void]$options.Add([ordered]@{

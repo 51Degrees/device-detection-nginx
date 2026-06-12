@@ -18,7 +18,8 @@
     "Image": "ubuntu-latest",
     "Name": "ubuntu-latest_IPI",
     "NginxVersion": "1.29.3",
-    "RunPerformance": true
+    "RunPerformance": true,
+    "PackageRequirement": true
   },
   {
     "Image": "ubuntu-latest",
