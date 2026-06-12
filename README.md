@@ -140,9 +140,11 @@ The above gave you a quick overview of how to use the 51Degrees Nginx module. Ho
 ## Latest releases
 The latest releases of 51Degrees Nginx module can be found on [Github](https://github.com/51Degrees/device-detection-nginx/releases).
 
-For the supported platforms and Nginx version, please check the [tested versions page](https://51degrees.com/documentation/_info__tested_versions.html) for latest update. At the time of writing, the followings are supported:
-- Platform Ubuntu-18.04 and 20.04, 64bit.
-- Nginx version: 1.19.0, 1.19.5, 1.19.10 and 1.20.0
+For the supported platforms and Nginx version, please check the [tested versions page](https://51degrees.com/documentation/_info__tested_versions.html) for latest update. At the time of writing, the followings are tested by the continuous integration pipeline:
+- Platform Ubuntu (ubuntu-latest), 64bit.
+- Nginx version: 1.27.2, 1.27.4, 1.29.0 and 1.29.3
+
+Pre-built modules are published for the Nginx versions listed by the `all-versions` target in the Makefile. Older versions back to 1.19.0 are expected to work as the module accounts for API changes across this range, but they are no longer routinely tested.
 
 ## API references
 Below is the list of directives that can be used with the 51Degrees modules. The `51D_*_ipi` directives are provided by the IP intelligence module (`ngx_http_51D_ipi_module`) and all the others by the device detection module (`ngx_http_51D_module`).
@@ -272,14 +274,14 @@ All tests are allocated in the `tests` folder.
 
 To be able to test the 51Degrees module the following libraries are required.
 - Perl 5 and prove Test::Harness
-- CMake 10 or above
+- CMake 3.24 or above
 - node and jest
 - curl
 - grep
 
 Before running any test, make sure to build the project with `make install` command. The tests are designed to test the dynamic build only so `STATIC_BUILD` will not work.
 
-To run the 51Degrees tests with the default 51Degrees Lite data file included in the `device-detection-cxx\device-detection-data` directory, run the following command:
+To run the 51Degrees tests with the default 51Degrees Lite data file included in the `device-detection-cxx/device-detection-data` directory, run the following command:
 ```
 make test
 ```
@@ -289,7 +291,7 @@ To run the 51Degrees together with the Nginx test suite, run the following comma
 make test-full
 ```
 
-These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth. Then, use the `FIFTYONEDEGREES_DATAFILE` variable to specify the file name to run the tests with. The new data file should be placed in the `device-detection-cxx\device-detection-data` folder and should have different name to `51Degrees-LiteV4.1.hash`. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
+These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth. Then, use the `FIFTYONEDEGREES_DATAFILE` variable to specify the file name to run the tests with. The new data file should be placed in the `device-detection-cxx/device-detection-data` folder and should have different name to `51Degrees-LiteV4.1.hash`. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
 ```
 make [test|test-full] FIFTYONEDEGREES_DATAFILE=51Degrees-EnterpriseV4.1.hash
 ```
@@ -301,7 +303,7 @@ make test-examples FIFTYONEDEGREES_DATAFILE_IPI=51Degrees-IPIV4AsnIpiV41.ipi
 
 ## Performance Test
 
-The project also include a performance test suite. This required `CMake 10` or above to be installed.
+The project also include a performance test suite. This required `CMake 3.24` or above to be installed.
 
 To run the performance test, please follow the below steps:
 - Make sure to build the project with `make install`.
