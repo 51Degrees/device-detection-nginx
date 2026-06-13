@@ -9,6 +9,11 @@ $ErrorActionPreference = "Stop"
 
 $failed = $false
 
+# A static build links the module into the Nginx binary, so the tests must
+# not try to load it with load_module. Pass STATIC_BUILD through to make so
+# the load_module directive is omitted.
+$staticBuild = $BuildMethod -eq 'static' ? 'STATIC_BUILD=1' : $null
+
 $repo = (Get-Item $PSScriptRoot/..).FullName
 Push-Location $repo
 try {
@@ -16,7 +21,7 @@ try {
     $results = New-Item -ItemType directory -Force -Path test-results/unit
 
     Write-Host "Running 51Degrees unit tests"
-    make test FIFTYONEDEGREES_DATAFILE=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/$Name.xml || $($failed = $true)
+    make test $staticBuild FIFTYONEDEGREES_DATAFILE=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/$Name.xml || $($failed = $true)
     # Output the full results file, as some bits are not reported in GitHub
     Get-Content -Raw $results/$Name.xml
 
