@@ -7,7 +7,7 @@ The following secrets are required:
     * Example: `github_pat_l0ng_r4nd0m_s7r1ng`
   
 The following secrets are required to run tests:
-* `DEVICE_DETECTION_KEY` - [license key](https://51degrees.com/pricing) for downloading assets (TAC hashes file and TAC CSV data file)
+* `DEVICE_DETECTION_KEY` - [license key](https://51degrees.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=ci-readme.md&utm_term=api-specific-ci-approach) for downloading assets (TAC hashes file and TAC CSV data file)
     * Example: `V3RYL0NGR4ND0M57R1NG`
 
 The following secrets are required to run the full set of tests agains NGINX Plus:
