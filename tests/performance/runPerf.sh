@@ -28,6 +28,11 @@ PASSES=$((PASSES_PER_WORKER * CONCURRENCY))
 # 'ipi' (IP intelligence).
 ENGINE=${ENGINE:-hash}
 
+# Evidence file passed to the benchmark. Empty by default, which leaves the
+# harness rotating the User-Agents file. Set for the device detection
+# engine below when an evidence file is available.
+EVIDENCE=
+
 # Get the repo directory as an absolute path
 ORIGINPATH="$(pwd)"
 cd $FULLPATH/../../../
@@ -65,6 +70,12 @@ else
 	if [ -f uas.csv.bkp ]; then
 		mv uas.csv.bkp uas.csv
 	fi
+	# Send the full evidence records, matching the other 51Degrees API
+	# benchmarks, when the evidence file is available. Otherwise fall back
+	# to the User-Agents file the harness uses by default.
+	if [ -f "$FULLPATH/evidence.yml" ]; then
+		EVIDENCE="$FULLPATH/evidence.yml"
+	fi
 fi
 
 # Create required directories and target files for service
@@ -79,7 +90,11 @@ mv $REPO_DIR/build/nginx.conf $REPO_DIR/build/nginx.conf.bkp
 cp $FULLPATH/nginx.conf $REPO_DIR/build/nginx.conf
 
 # Run the performrance
-$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST -k $CONCURRENCY
+if [ -n "$EVIDENCE" ]; then
+	$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST -k $CONCURRENCY -E "$EVIDENCE"
+else
+	$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST -k $CONCURRENCY
+fi
 
 # Replace the original config
 mv $REPO_DIR/build/nginx.conf.bkp $REPO_DIR/build/nginx.conf
