@@ -1,9 +1,21 @@
 ngx_addon_name=ngx_http_51D_module
 
 if test -n "$ngx_module_link"; then
-	ngx_module_type=HTTP
 	ngx_module_name=ngx_http_51D_module
 	ngx_module_srcs="$ngx_addon_dir/ngx_http_51D_module.c $ngx_addon_dir/src/*.c $ngx_addon_dir/src/hash/*.c $ngx_addon_dir/src/common-cxx/*.c"
+	# The module installs a body filter to serve the 51D_get_javascript
+	# content. A static build places plain HTTP modules before the core
+	# filters, which would leave the body filter below the write filter
+	# where it is never called, so register it as a filter type. This
+	# places it among the core body filters, just before the copy filter,
+	# so the JavaScript content is generated. A dynamic module is loaded
+	# after the core filters and already sits at the top of the chain, so
+	# it keeps the plain HTTP type.
+	if test "$ngx_module_link" = DYNAMIC; then
+		ngx_module_type=HTTP
+	else
+		ngx_module_type=HTTP_FILTER
+	fi
 
 	. auto/module
 else

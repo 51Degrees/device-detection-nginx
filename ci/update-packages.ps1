@@ -69,14 +69,13 @@ foreach ($release in $supportedReleases) {
                 RunPerformance = $True
                 PackageRequirement = $True
             })
-            # # TODO: uncomment when static build works
-            # [void]$options.Add([ordered]@{
-            #     Image = $image
-            #     Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck_Static"
-            #     NginxVersion = $openSourceOf[$release]
-            #     BuildMethod = "static"
-            #     MemCheck = $True
-            # })
+            [void]$options.Add([ordered]@{
+                Image = $image
+                Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck_Static"
+                NginxVersion = $openSourceOf[$release]
+                BuildMethod = "static"
+                MemCheck = $True
+            })
         }
     }
 }
