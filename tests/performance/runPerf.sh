@@ -2,11 +2,27 @@
 
 # Constants
 FULLPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-PASSES=20000
 HOST=127.0.0.1:3000
 CAL=calibrate
 PRO=process
 PERF=./ApacheBench-prefix/src/ApacheBench-build/bin/runPerf.sh
+
+# Run the benchmark with as many concurrent requests as there are
+# processors, matching the worker_processes auto setting in the config
+# templates, so that all of the Nginx workers are exercised at once. This
+# mirrors the multi threaded benchmarks of the other 51Degrees APIs rather
+# than measuring a single request at a time. Override with CONCURRENCY.
+CONCURRENCY=${CONCURRENCY:-$(nproc)}
+
+# Number of requests per worker. The total passed to ApacheBench scales
+# with the concurrency so that each phase runs for the same wall-clock
+# time however many processors the machine has. The overhead is measured
+# as the difference between the calibration and processing wall times, so
+# holding that time constant keeps the measurement resolution constant
+# and stops the difference from disappearing into timing noise on a
+# machine with many cores.
+PASSES_PER_WORKER=${PASSES_PER_WORKER:-20000}
+PASSES=$((PASSES_PER_WORKER * CONCURRENCY))
 
 # The engine to test. Either 'hash' (device detection, the default) or
 # 'ipi' (IP intelligence).
@@ -63,7 +79,7 @@ mv $REPO_DIR/build/nginx.conf $REPO_DIR/build/nginx.conf.bkp
 cp $FULLPATH/nginx.conf $REPO_DIR/build/nginx.conf
 
 # Run the performrance
-$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST
+$PERF -n $PASSES -s "$REPO_DIR/nginx" -t "$REPO_DIR/nginx -s stop" -c $CAL -p $PRO -h $HOST -k $CONCURRENCY
 
 # Replace the original config
 mv $REPO_DIR/build/nginx.conf.bkp $REPO_DIR/build/nginx.conf

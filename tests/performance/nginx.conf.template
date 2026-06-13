@@ -1,4 +1,4 @@
-worker_processes 4;
+worker_processes auto;
 
 load_module ${MODULES_DIR}/ngx_http_51D_module.so;
 
