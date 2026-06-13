@@ -69,13 +69,16 @@ foreach ($release in $supportedReleases) {
                 RunPerformance = $True
                 PackageRequirement = $True
             })
-            [void]$options.Add([ordered]@{
-                Image = $image
-                Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck_Static"
-                NginxVersion = $openSourceOf[$release]
-                BuildMethod = "static"
-                MemCheck = $True
-            })
+            # The static build itself works, but the unit and example test
+            # harnesses still load the module dynamically, so this is left
+            # disabled until they are made static aware. See issue #359.
+            # [void]$options.Add([ordered]@{
+            #     Image = $image
+            #     Name = "$($image)_Nginx$($openSourceOf[$release])_MemCheck_Static"
+            #     NginxVersion = $openSourceOf[$release]
+            #     BuildMethod = "static"
+            #     MemCheck = $True
+            # })
         }
     }
 }
