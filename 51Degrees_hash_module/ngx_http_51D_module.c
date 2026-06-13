@@ -340,6 +340,11 @@ typedef struct {
 	ngx_uint_t usePredictiveGraph;                /**< 51Degrees flag, whether
                                                        predictive graph should
                                                        be used. */
+	ngx_uint_t respHeadersEnabled;                /**< Whether any
+                                                       51D_set_resp_headers
+                                                       directive is set to on,
+                                                       requiring all data file
+                                                       properties. */
 	ngx_http_51D_match_conf_t matchConf;          /**< The match to carry out in
 	                                                   this block's locations. */
 } ngx_http_51D_main_conf_t;
@@ -480,12 +485,34 @@ get_config_hash(ngx_http_51D_main_conf_t *fdmcf) {
 	}
 
 	// Set use predictive graph
-	if (fdmcf->usePredictiveGraph != NGX_CONF_UNSET_UINT) {	
+	if (fdmcf->usePredictiveGraph != NGX_CONF_UNSET_UINT) {
 		config.usePredictiveGraph =
 			fdmcf->usePredictiveGraph == 1 ? true : false;
 	}
 
 	return config;
+}
+
+/**
+ * Get a fiftyoneDegreesPropertiesRequired instance restricted to the
+ * properties named in the configuration directives, which are accumulated
+ * in the main configuration. Detection only evaluates the components
+ * which the required properties belong to, so initialising the data set
+ * with all of its properties makes every match considerably more
+ * expensive. All of the data file's properties are initialised when no
+ * data set properties are named, or when response headers are enabled,
+ * as the SetHeader properties used by 51D_set_resp_headers are discovered
+ * from the data file rather than named in directives.
+ * @param fdmcf main configuration
+ * @return fiftyoneDegreesPropertiesRequired instance
+ */
+static PropertiesRequired
+get_properties_hash(ngx_http_51D_main_conf_t *fdmcf) {
+	PropertiesRequired properties = PropertiesDefault;
+	if (fdmcf->properties[0] != '\0' && fdmcf->respHeadersEnabled == 0) {
+		properties.string = (const char *)fdmcf->properties;
+	}
+	return properties;
 }
 
 /**
@@ -563,7 +590,7 @@ ngx_http_51D_post_conf(ngx_conf_t *cf)
 
 	// Need to get the size of memory that the resource manager will occupy.
 	ConfigHash config = get_config_hash(fdmcf);
-	PropertiesRequired properties = PropertiesDefault;
+	PropertiesRequired properties = get_properties_hash(fdmcf);
 
 	EXCEPTION_CREATE
 	size = fiftyoneDegreesHashSizeManagerFromFile(
@@ -645,7 +672,7 @@ ngx_http_51D_create_main_conf(ngx_conf_t *cf)
 	conf->usePredictiveGraph = NGX_CONF_UNSET_UINT;
 
 	// Init others
-	memset(conf->properties, 0, FIFTYONE_DEGREES_MAX_STRING);
+	memset(conf->properties, 0, FIFTYONE_DEGREES_MAX_PROPS_STRING);
     conf->dataFile = (ngx_str_t)ngx_null_string;
 	conf->results = NULL;
 	memset(conf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
@@ -653,6 +680,7 @@ ngx_http_51D_create_main_conf(ngx_conf_t *cf)
 	conf->setRespHeaderCount = 0;
 	conf->setRespHeader = NULL;
 	conf->valueSeparator = (ngx_str_t)ngx_null_string;
+	conf->respHeadersEnabled = 0;
 		
 	ngx_http_51D_init_match_conf(&conf->matchConf);
     return conf;
@@ -911,7 +939,7 @@ ngx_http_51D_init_module(ngx_cycle_t *cycle)
 
 	// Need to determine the ConfigHash at this point
 	ConfigHash config = get_config_hash(fdmcf);
-	PropertiesRequired properties = PropertiesDefault;
+	PropertiesRequired properties = get_properties_hash(fdmcf);
 
 	EXCEPTION_CREATE;
 	HashInitManagerFromFile(
@@ -2758,6 +2786,24 @@ set_data(
 		tok = strtok_r(NULL, ",", &saveptr);
 	}
 
+	// Multi header matches use the decoded GetHighEntropyValues evidence
+	// where the data file supports it, so the property which carries that
+	// evidence must be initialised with the data set even though it is
+	// not named in a directive. See get_properties_hash.
+	if ((data->multi & ngx_http_51D_multi_mode_mask_non_ua_only) != 0) {
+		tok = "JavascriptGetHighEntropyValues";
+		tokPos = ngx_strstr(fdmcf->properties, tok);
+		if (tokPos == NULL ||
+			((tokPos + ngx_strlen(tok))[0] != ',' &&
+				(tokPos + ngx_strlen(tok))[0] != '\0')) {
+			add_value(
+				",",
+				tok,
+				fdmcf->properties,
+				FIFTYONE_DEGREES_MAX_PROPS_STRING - strlen(fdmcf->properties));
+		}
+	}
+
 	// Set the variable name or other header if they are specified.
 	// If data is for response body, there will be no header.
 	// For 51D_match_single, 51D_match_ua, 51D_match_ua_client_hints and 51D_match_all, 
@@ -3076,6 +3122,12 @@ ngx_conf_t *cf, ngx_command_t *cmd, ngx_http_51D_match_conf_t *matchConf)
 
 	if (value->len > 0 && ngx_strcmp("on", value[1].data) == 0) {
 		matchConf->setHeaders = 1;
+		// The SetHeader properties are discovered from the data file, so
+		// all of its properties must be initialised. See
+		// get_properties_hash.
+		ngx_http_51D_main_conf_t *fdmcf =
+			ngx_http_conf_get_module_main_conf(cf, ngx_http_51D_module);
+		fdmcf->respHeadersEnabled = 1;
 	}
 	else if (value->len > 0 && ngx_strcmp("off", value[1].data) == 0) {
 		matchConf->setHeaders = 0;
