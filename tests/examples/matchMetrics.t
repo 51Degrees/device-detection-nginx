@@ -42,6 +42,11 @@ $t_file =~ s/\/\*\*.+\*\//''/gmse;
 # Replace variable place holders
 $t_file =~ s/%%DAEMON_MODE%%/'off'/gmse;
 $t_file =~ s/%%MODULE_PATH%%/$ENV{TEST_MODULE_PATH}/gmse;
+# A static build links the module into the Nginx binary, so omit the
+# load_module directive, which would fail to open a non existent shared
+# object.
+$t_file =~ s/^.*load_module.*
+//mg if $ENV{TEST_NGINX_STATIC};
 $t_file =~ s/%%FILE_PATH%%/$ENV{TEST_FILE_PATH}/gmse;
 $t->write_file_expand('nginx.conf', $t_file);
 

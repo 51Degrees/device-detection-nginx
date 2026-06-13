@@ -67,16 +67,29 @@ ifndef STATIC_BUILD
 	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_hash_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
 	# A dynamic build loads the module at runtime with load_module.
 	LOAD_MODULE := load_module $(MODULEPATH);
+	# A dynamic build loads both modules, so all of the examples run.
+	TEST_NGINX_STATIC :=
+	EXAMPLE_TESTS := tests/examples
 else
 	ifeq ($(API),ipi)
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_ipi_module
+		# Only the IP intelligence example uses just the IP intelligence module.
+		EXAMPLE_TESTS := tests/examples/ipiGettingStarted.t
 	else
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_hash_module
+		# The device detection examples use only the device detection module.
+		# The mixed example needs both modules and so cannot run statically.
+		EXAMPLE_TESTS := tests/examples/config.t tests/examples/gettingStarted.t \
+			tests/examples/matchMetrics.t tests/examples/matchQuery.t \
+			tests/examples/responseHeader.t
 	endif
 	# A static build links the module into the Nginx binary, so there is
 	# no module to load and a load_module directive would fail to open the
 	# non existent shared object.
 	LOAD_MODULE :=
+	# Tell the example tests to omit the load_module directive. Only the
+	# examples for the single linked module are run, see EXAMPLE_TESTS.
+	TEST_NGINX_STATIC := 1
 endif
 
 .PHONY hash:
@@ -229,7 +242,7 @@ test-examples: test-prep
 ifeq (,$(wildcard $(FULLPATH)/nginx))
 	$(error Local binary must be built first (use "make install"))
 else
-	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_FILE_PATH="$(FILEPATH)" TEST_FILE_PATH_IPI="$(FILEPATH_IPI)" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v tests/examples :: $(DATAFILE))
+	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_MODULE_PATH="$(FULLPATH)/build/" TEST_NGINX_STATIC="$(TEST_NGINX_STATIC)" TEST_FILE_PATH="$(FILEPATH)" TEST_FILE_PATH_IPI="$(FILEPATH_IPI)" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v $(EXAMPLE_TESTS) :: $(DATAFILE))
 ifdef FIFTYONEDEGREES_TEST_OUTPUT
 	$(CMD) > $(FIFTYONEDEGREES_TEST_OUTPUT)
 else
