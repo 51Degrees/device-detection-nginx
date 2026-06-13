@@ -21,6 +21,12 @@ try {
     sed -i "s/51Degrees-LiteV4\.1\.hash/TAC-HashV41\.hash/g" build/nginx.conf
     # Remove the documentation block
     sed -i "/\/\*\*/,/\*\//d" build/nginx.conf
+    # A static build links the module into the Nginx binary, so remove the
+    # load_module directive which would otherwise fail to open a shared
+    # object that a static build does not produce.
+    if ($BuildMethod -eq 'static') {
+        sed -i "/load_module/d" build/nginx.conf
+    }
     # Start NGINX
     ./nginx
 

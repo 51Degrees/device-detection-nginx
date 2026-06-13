@@ -65,12 +65,18 @@ endif
 # compiled with different data file layout options.
 ifndef STATIC_BUILD
 	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_hash_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
+	# A dynamic build loads the module at runtime with load_module.
+	LOAD_MODULE := load_module $(MODULEPATH);
 else
 	ifeq ($(API),ipi)
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_ipi_module
 	else
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_hash_module
 	endif
+	# A static build links the module into the Nginx binary, so there is
+	# no module to load and a load_module directive would fail to open the
+	# non existent shared object.
+	LOAD_MODULE :=
 endif
 
 .PHONY hash:
@@ -179,6 +185,12 @@ install: configure
 	sed -i "s!%%FILE_PATH_IPI%%!$(FILEPATH_IPI)!g" build/nginx.conf
 	sed -i "s!%%TEST_GLOBALS%%!!g" build/nginx.conf
 	sed -i "s!%%TEST_GLOBALS_HTTP%%!!g" build/nginx.conf
+ifdef STATIC_BUILD
+	# The module is linked into the Nginx binary, so remove the
+	# load_module directive which would otherwise fail to open a shared
+	# object that a static build does not produce.
+	sed -i "/load_module/d" build/nginx.conf
+endif
 	echo > build/html/$(API)
 
 install-no-module: configure-no-module	
@@ -229,7 +241,7 @@ test: test-prep
 ifeq (,$(wildcard $(FULLPATH)/nginx))
 	$(error Local binary must be built first (use "make install"))
 else
-	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_NGINX_GLOBALS="load_module $(MODULEPATH);" TEST_NGINX_GLOBALS_HTTP="51D_file_path $(FILEPATH);" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v $(TESTS) :: $(DATAFILE))
+	$(eval CMD := TEST_NGINX_BINARY="$(FULLPATH)/nginx" TEST_NGINX_GLOBALS="$(LOAD_MODULE)" TEST_NGINX_GLOBALS_HTTP="51D_file_path $(FILEPATH);" ASAN_OPTIONS=detect_odr_violation=0 LSAN_OPTIONS=suppressions=suppressions.txt prove $(FIFTYONEDEGREES_FORMATTER) -v $(TESTS) :: $(DATAFILE))
 ifdef FIFTYONEDEGREES_TEST_OUTPUT
 	$(CMD) > $(FIFTYONEDEGREES_TEST_OUTPUT)
 else
