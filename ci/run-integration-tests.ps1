@@ -57,7 +57,8 @@ try {
     Write-Host "Looking for HASH file(s)..."
     Get-ChildItem -Recurse -Filter 'TAC-HashV41.hash'
     Write-Host "Testing examples"
-    make test-examples $staticBuild DONT_CLEAN_TESTS=1 51DEGREES_DD_PATH=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/${Name}_Examples.xml
+
+    make test-examples $staticBuild DONT_CLEAN_TESTS=1 51DEGREES_DD_PATH="$PSScriptRoot/../assets/TAC-HashV41.hash" FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/${Name}_Examples.xml
 } finally {
     Pop-Location
 }
