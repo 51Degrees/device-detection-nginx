@@ -34,7 +34,7 @@ select STDOUT; $| = 1;
 # appears, so small data files are unaffected.
 {
 	no warnings 'redefine';
-	*Test::Nginx::waitforfile = sub {
+	*Test::Nginx::waitforfile = sub ($;$) {
 		my ($self, $file, $pid) = @_;
 		my $exited;
 
