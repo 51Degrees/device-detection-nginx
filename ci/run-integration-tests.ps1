@@ -55,7 +55,7 @@ try {
     # omits load_module and runs only that module's examples.
     $staticBuild = $BuildMethod -eq 'static' ? 'STATIC_BUILD=1' : $null
     Write-Host "Testing examples"
-    make test-examples $staticBuild DONT_CLEAN_TESTS=1 FIFTYONEDEGREES_DATAFILE=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/${Name}_Examples.xml
+    make test-examples $staticBuild DONT_CLEAN_TESTS=1 51DEGREES_DD_PATH=TAC-HashV41.hash FIFTYONEDEGREES_FORMATTER='--formatter TAP::Formatter::JUnit' FIFTYONEDEGREES_TEST_OUTPUT=$results/${Name}_Examples.xml
 } finally {
     Pop-Location
 }
