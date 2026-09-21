@@ -529,15 +529,8 @@ if (!$t_lite) {
 	like($r, qr/getProfileId/, 'Javascript response content using all evidence including query string.');
 
 	# Javascript using property that is not supported.
-	# NOTE: Behavior changed in version 4.5. Previously expected '51Degrees Javascript
-	# not available', but now returns actual JavaScript with default values
-	# (e.g. False|Unknown|Unknown) when the user agent is not fully supported.
-	# Version 4.5 changed to always provide JavaScript content with
-	# default/fallback values instead of an error message. The default reported
-	# for each property varies with the engine and data file version, so accept
-	# any combination.
 	$r = get_content_with_ua('/51D-single.js', $desktopUserAgent);
-	like($r, qr/(True|False|Unknown)\|(True|False|Unknown)\|(True|False|Unknown)/, 'Javascript response content body from non supported user agent');
+	like($r, qr/51Degrees Javascript not available/, 'Javascript response content body from non supported user agent');
 
 	# Javascript using property with Client Hints response headers on.
 	$r = get_content_with_ua('/51D-chua.js', $chrome89UserAgent);
@@ -553,14 +546,8 @@ $r = get_content_with_ua('/51D-non-property.js', $mobileUserAgent);
 like($r, qr/51Degrees Javascript not available/, 'Javascript response content body from non supported property');
 
 # Javascript missing User-Agent.
-# NOTE: Behavior changed in version 4.5. Previously expected '51Degrees Javascript
-# not available', but now returns actual JavaScript with default values
-# (e.g. False|Unknown|Unknown) even when User-Agent header is missing. Version
-# 4.5 changed to always provide JavaScript content with default/fallback values
-# instead of an error message. The default reported for each property varies
-# with the engine and data file version, so accept any combination.
 $r = http_get('/51D-single.js');
-like($r, qr/(True|False|Unknown)\|(True|False|Unknown)\|(True|False|Unknown)/, 'Javascript response content body with missing User-Agent');
+like($r, qr/51Degrees Javascript not available/, 'Javascript response content body with missing User-Agent');
 
 ###############################################################################
 # Test use cases.
