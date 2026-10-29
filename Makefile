@@ -37,8 +37,8 @@ $(warning FIFTYONEDEGREES_DATAFILE_IPI is deprecated and will be removed in a fu
 endif
 
 MODULEPATH := $(FULLPATH)/build/modules/ngx_http_51D_module.so
-FILEPATH := $(FULLPATH)/device-detection-cxx/device-detection-data/$(DATAFILE)
-FILEPATH_IPI := $(FULLPATH)/ip-intelligence-cxx/ip-intelligence-data/$(DATAFILE_IPI)
+FILEPATH := $(FULLPATH)/cxx/device-detection-data/$(DATAFILE)
+FILEPATH_IPI := $(FULLPATH)/cxx/ip-intelligence-data/$(DATAFILE_IPI)
 
 # The aligned environment variable 51DEGREES_DD_PATH provides an explicit
 # path to a device detection data file and is checked first. The legacy
@@ -61,7 +61,7 @@ endif
 # For dynamic builds, both the device detection and IP intelligence modules
 # are built. For static builds, only the module selected by the API variable
 # (hash by default) is linked in. The two modules cannot be linked statically
-# into one binary as each carries its own copy of the common-cxx sources
+# into one binary as each carries its own copy of the common sources
 # compiled with different data file layout options.
 ifndef STATIC_BUILD
 	MODULE_ARGS := --add-dynamic-module=$(CURDIR)/51Degrees_hash_module --add-dynamic-module=$(CURDIR)/51Degrees_ipi_module
@@ -121,13 +121,20 @@ build: clean
 	mkdir -p 51Degrees_hash_module/src/common-cxx
 	# exit
 	cp module_conf/hash_config 51Degrees_hash_module/config
-	cp device-detection-cxx/src/*.c 51Degrees_hash_module/src/
-	cp device-detection-cxx/src/*.h 51Degrees_hash_module/src/
-	cp device-detection-cxx/src/hash/*.c 51Degrees_hash_module/src/hash/
-	cp device-detection-cxx/src/hash/*.h 51Degrees_hash_module/src/hash/
-	cp device-detection-cxx/src/common-cxx/*.c 51Degrees_hash_module/src/common-cxx/
-	cp device-detection-cxx/src/common-cxx/*.h 51Degrees_hash_module/src/common-cxx/
-	# The IP intelligence module carries its own copy of the common-cxx
+	cp cxx/src/dd/*.c 51Degrees_hash_module/src/
+	cp cxx/src/dd/*.h 51Degrees_hash_module/src/
+	cp cxx/src/dd/hash/*.c 51Degrees_hash_module/src/hash/
+	cp cxx/src/dd/hash/*.h 51Degrees_hash_module/src/hash/
+	cp cxx/src/common/*.c 51Degrees_hash_module/src/common-cxx/
+	cp cxx/src/common/*.h 51Degrees_hash_module/src/common-cxx/
+	# The device detection sources include the common sources by relative
+	# path, so rewrite those include paths in the copied sources to match
+	# the directories they are copied to.
+	find 51Degrees_hash_module/src -maxdepth 1 \( -name "*.c" -o -name "*.h" \) -exec sed -i \
+		-e 's#"\.\./common/#"common-cxx/#g' {} +
+	find 51Degrees_hash_module/src/hash \( -name "*.c" -o -name "*.h" \) -exec sed -i \
+		-e 's#"\.\./\.\./common/#"../common-cxx/#g' {} +
+	# The IP intelligence module carries its own copy of the common
 	# sources as the IP intelligence data file format requires them to be
 	# compiled with different data file layout options to device detection.
 	# The directories are renamed (and the include paths rewritten below)
@@ -136,19 +143,19 @@ build: clean
 	mkdir -p 51Degrees_ipi_module/src/ipi-common-cxx
 	mkdir -p 51Degrees_ipi_module/src/ipi-graph
 	cp module_conf/ipi_config 51Degrees_ipi_module/config
-	cp ip-intelligence-cxx/src/*.c 51Degrees_ipi_module/src/
-	cp ip-intelligence-cxx/src/*.h 51Degrees_ipi_module/src/
-	cp ip-intelligence-cxx/src/ip-graph-cxx/*.c 51Degrees_ipi_module/src/ipi-graph/
-	cp ip-intelligence-cxx/src/ip-graph-cxx/*.h 51Degrees_ipi_module/src/ipi-graph/
-	cp ip-intelligence-cxx/src/common-cxx/*.c 51Degrees_ipi_module/src/ipi-common-cxx/
-	cp ip-intelligence-cxx/src/common-cxx/*.h 51Degrees_ipi_module/src/ipi-common-cxx/
+	cp cxx/src/ipi/*.c 51Degrees_ipi_module/src/
+	cp cxx/src/ipi/*.h 51Degrees_ipi_module/src/
+	cp cxx/src/ipi/graph/*.c 51Degrees_ipi_module/src/ipi-graph/
+	cp cxx/src/ipi/graph/*.h 51Degrees_ipi_module/src/ipi-graph/
+	cp cxx/src/common/*.c 51Degrees_ipi_module/src/ipi-common-cxx/
+	cp cxx/src/common/*.h 51Degrees_ipi_module/src/ipi-common-cxx/
 	# Rewrite the include paths in the copied sources to match the renamed
 	# directories.
 	find 51Degrees_ipi_module/src -maxdepth 1 \( -name "*.c" -o -name "*.h" \) -exec sed -i \
-		-e 's#"common-cxx/#"ipi-common-cxx/#g' \
-		-e 's#"ip-graph-cxx/#"ipi-graph/#g' {} +
+		-e 's#"\.\./common/#"ipi-common-cxx/#g' \
+		-e 's#"graph/#"ipi-graph/#g' {} +
 	find 51Degrees_ipi_module/src/ipi-graph \( -name "*.c" -o -name "*.h" \) -exec sed -i \
-		-e 's#"\.\./common-cxx/#"../ipi-common-cxx/#g' {} +
+		-e 's#"\.\./\.\./common/#"../ipi-common-cxx/#g' {} +
 	# Inject the data file layout defines into the copied IP intelligence
 	# sources. Nginx does not support per module compiler flags so the
 	# defines cannot be set globally without affecting the device detection

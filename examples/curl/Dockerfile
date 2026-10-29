@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y git curl ca-cer
 RUN git clone https://github.com/51Degrees/device-detection-nginx . && git submodule update --init --recursive
 
 #dev dependencies
-RUN curl -Lo device-detection-cxx/device-detection-data/51Degrees-LiteV4.1.hash https://github.com/51Degrees/device-detection-data/raw/main/51Degrees-LiteV4.1.hash
+RUN curl -Lo cxx/device-detection-data/51Degrees-LiteV4.1.hash https://github.com/51Degrees/device-detection-data/raw/main/51Degrees-LiteV4.1.hash
 
 RUN make install
 

@@ -28,7 +28,7 @@ sudo apt-get install git-lfs
 git lfs install
 ```
 
-Then, navigate to the `device-detection-cxx/device-detection-data` directory and execute:
+Then, navigate to the `cxx/device-detection-data` directory and execute:
 
 ```
 git lfs pull
@@ -38,7 +38,7 @@ git lfs pull
 
 The 'ip-intelligence-data' sub-module includes a free `51Degrees-IPIV4AsnIpiV41.ipi` file which contains the Asn properties (Asn and AsnName). This file is used by default for the IP intelligence examples and tests.
 
-The sub-module also provides scripts (`get-lite-file-from-azure.sh`) to download a free, 'lite' IP intelligence data file which has a different, reduced set of properties (RegisteredCountry, RegisteredName and RegisteredOwner). Note that the version of the downloaded data file must match the version expected by the ip-intelligence-cxx sub-module, as with any 51Degrees data file. To obtain a file with the complete set of properties see the [51Degrees website](https://51degrees.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=ip-intelligence-data-file).
+The sub-module also provides scripts (`get-lite-file-from-azure.sh`) to download a free, 'lite' IP intelligence data file which has a different, reduced set of properties (RegisteredCountry, RegisteredName and RegisteredOwner). Note that the version of the downloaded data file must match the version expected by the IP intelligence sources in the cxx sub-module, as with any 51Degrees data file. To obtain a file with the complete set of properties see the [51Degrees website](https://51degrees.com/pricing?utm_source=github&utm_medium=readme&utm_campaign=device-detection-nginx&utm_content=readme.md&utm_term=ip-intelligence-data-file).
 
 ## Quick Start (Device Detection)
 
@@ -284,7 +284,7 @@ To be able to test the 51Degrees module the following libraries are required.
 
 Before running any test, make sure to build the project with `make install` command. The tests are designed to test the dynamic build only so `STATIC_BUILD` will not work.
 
-To run the 51Degrees tests with the default 51Degrees Lite data file included in the `device-detection-cxx/device-detection-data` directory, run the following command:
+To run the 51Degrees tests with the default 51Degrees Lite data file included in the `cxx/device-detection-data` directory, run the following command:
 ```
 make test
 ```
@@ -304,11 +304,11 @@ The data file used by the tests is resolved in the following order:
 1. The `51DEGREES_DD_PATH` environment variable, which provides an explicit
    path to the data file.
 2. The legacy `FIFTYONEDEGREES_DATAFILE` variable, which provides a file name
-   that is combined with the `device-detection-cxx/device-detection-data`
+   that is combined with the `cxx/device-detection-data`
    folder. This variable is deprecated and will be removed in a future
    release. Using it prints a make warning, use `51DEGREES_DD_PATH` instead.
 3. When neither variable is set, the free Lite data file
-   `51Degrees-LiteV4.1.hash` in the `device-detection-cxx/device-detection-data`
+   `51Degrees-LiteV4.1.hash` in the `cxx/device-detection-data`
    folder is used.
 
 For example:
@@ -319,7 +319,7 @@ make test 51DEGREES_DD_PATH=/path/to/51Degrees-EnterpriseV4.1.hash
 Note that when running Nginx itself the data file is always specified
 explicitly with the `51D_file_path` directive in the configuration file.
 
-The IP intelligence tests resolve their data file in the same order. The `51DEGREES_IPI_PATH` environment variable provides an explicit path to the file. The legacy `FIFTYONEDEGREES_DATAFILE_IPI` variable provides a file name that is combined with the `ip-intelligence-cxx/ip-intelligence-data` folder, it is deprecated and using it prints a make warning. When neither variable is set the `51Degrees-IPIV4AsnIpiV41.ipi` file included in the sub-module is used. The IP intelligence example tests are skipped when the file is not present. e.g.
+The IP intelligence tests resolve their data file in the same order. The `51DEGREES_IPI_PATH` environment variable provides an explicit path to the file. The legacy `FIFTYONEDEGREES_DATAFILE_IPI` variable provides a file name that is combined with the `cxx/ip-intelligence-data` folder, it is deprecated and using it prints a make warning. When neither variable is set the `51Degrees-IPIV4AsnIpiV41.ipi` file included in the sub-module is used. The IP intelligence example tests are skipped when the file is not present. e.g.
 ```
 make test-examples 51DEGREES_IPI_PATH=/path/to/51Degrees-IPIV4AsnIpiV41.ipi
 ```

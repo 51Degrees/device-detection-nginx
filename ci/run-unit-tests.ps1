@@ -43,7 +43,7 @@ try {
         # As we're not using the makefile, we need to set the environment variables ourselves, and add common path to license_token
         $env:TEST_NGINX_BINARY="/usr/sbin/nginx"
         $env:TEST_NGINX_GLOBALS="mgmt {license_token /etc/nginx/license.jwt;} load_module $repo/build/modules/ngx_http_51D_module.so;"
-        $env:TEST_NGINX_GLOBALS_HTTP="51D_file_path $repo/device-detection-cxx/device-detection-data/TAC-HashV41.hash;"
+        $env:TEST_NGINX_GLOBALS_HTTP="51D_file_path $repo/cxx/device-detection-data/TAC-HashV41.hash;"
         prove --formatter TAP::Formatter::JUnit -v tests/51degrees.t tests/nginx-tests :: TAC-HashV41.hash > $results/${Name}_Full_Plus.xml || $($failed = $true)
         # Unset the environment variables for future tests.
         $env:TEST_NGINX_BINARY=""

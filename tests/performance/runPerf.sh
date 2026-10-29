@@ -44,7 +44,7 @@ echo $REPO_DIR
 # Create the nginx.conf
 MODULES_DIR=$REPO_DIR/build/modules
 if [ "$ENGINE" == "ipi" ]; then
-	DATA_FILE_DIR_IPI=$REPO_DIR/ip-intelligence-cxx/ip-intelligence-data
+	DATA_FILE_DIR_IPI=$REPO_DIR/cxx/ip-intelligence-data
 	sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.ipi.template > ./nginx.conf
 	sed -i "s/\${DATA_FILE_DIR_IPI}/${DATA_FILE_DIR_IPI//\//\\/}/g" ./nginx.conf
 	if [ "$DATA_FILE_NAME_IPI" ]; then
@@ -57,9 +57,9 @@ if [ "$ENGINE" == "ipi" ]; then
 	if [ ! -f uas.csv.bkp ]; then
 		cp uas.csv uas.csv.bkp
 	fi
-	cp $REPO_DIR/ip-intelligence-cxx/ip-intelligence-data/evidence.csv uas.csv
+	cp $REPO_DIR/cxx/ip-intelligence-data/evidence.csv uas.csv
 else
-	DATA_FILE_DIR=$REPO_DIR/device-detection-cxx/device-detection-data
+	DATA_FILE_DIR=$REPO_DIR/cxx/device-detection-data
 	sed "s/\${MODULES_DIR}/${MODULES_DIR//\//\\/}/g" ./nginx.conf.template > ./nginx.conf
 	sed -i "s/\${DATA_FILE_DIR}/${DATA_FILE_DIR//\//\\/}/g" ./nginx.conf
 	if [ "$DATA_FILE_NAME" ]; then
