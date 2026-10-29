@@ -20,7 +20,7 @@ ExternalProject_Add(ApacheBench
 # check guards against both an LFS pointer file (around 130 bytes) and an
 # empty download, either of which would silently degrade the benchmark.
 set(UAS_LOCAL
-    "${CMAKE_CURRENT_LIST_DIR}/../../device-detection-cxx/device-detection-data/20000 User Agents.csv")
+    "${CMAKE_CURRENT_LIST_DIR}/../../cxx/device-detection-data/20000 User Agents.csv")
 set(UAS_TARGET ${CMAKE_BINARY_DIR}/uas.csv)
 set(UAS_MIN_SIZE 100000)
 
@@ -65,7 +65,7 @@ endif()
 # copied to a name without spaces so it is simple to pass on a command
 # line.
 set(EVIDENCE_LOCAL
-    "${CMAKE_CURRENT_LIST_DIR}/../../device-detection-cxx/device-detection-data/20000 Evidence Records.yml")
+    "${CMAKE_CURRENT_LIST_DIR}/../../cxx/device-detection-data/20000 Evidence Records.yml")
 set(EVIDENCE_TARGET ${CMAKE_BINARY_DIR}/evidence.yml)
 set(EVIDENCE_MIN_SIZE 1000000)
 
