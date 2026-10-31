@@ -16,11 +16,7 @@ CONCURRENCY=${CONCURRENCY:-$(nproc)}
 
 # Number of requests per worker. The total passed to ApacheBench scales
 # with the concurrency so that each phase runs for the same wall-clock
-# time however many processors the machine has. The overhead is measured
-# as the difference between the calibration and processing wall times, so
-# holding that time constant keeps the measurement resolution constant
-# and stops the difference from disappearing into timing noise on a
-# machine with many cores.
+# time however many processors the machine has.
 PASSES_PER_WORKER=${PASSES_PER_WORKER:-20000}
 PASSES=$((PASSES_PER_WORKER * CONCURRENCY))
 
