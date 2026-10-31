@@ -31,7 +31,7 @@ my $t_lite = 1;
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-	$n += 20;
+	$n += 28;
 	$t_lite = 0;
 }
 
@@ -176,6 +176,18 @@ http {
 			51D_match_all x-javascript ScreenPixelsWidthJavascript;
 			51D_match_all x-screenpixelswidth ScreenPixelsWidth;
 			add_header x-screenpixelswidth $http_x_screenpixelswidth;
+			add_header x-worker $pid;
+		}
+
+		location /overrides-ua {
+			51D_match_ua x-screenpixelswidth ScreenPixelsWidth;
+			add_header x-screenpixelswidth $http_x_screenpixelswidth;
+			add_header x-worker $pid;
+		}
+
+		location /overrides-ua-variable {
+			51D_match_ua x-screenpixelswidth ScreenPixelsWidth $arg_ua;
+			add_header x-screenpixelswidth $http_x_screenpixelswidth;
 		}
 
 		location /clienthints {
@@ -233,6 +245,8 @@ $t->write_file('redirect', '');
 $t->write_file('locations', '');
 $t->write_file('variable', '');
 $t->write_file('overrides', '');
+$t->write_file('overrides-ua', '');
+$t->write_file('overrides-ua-variable', '');
 $t->write_file('clienthints', '');
 $t->write_file('clienthintsoff', '');
 $t->write_file('clienthintsnone', '');
@@ -247,6 +261,18 @@ sub get_content_with_ua {
 GET $uri HTTP/1.1
 Host: localhost
 Connection: close
+User-Agent: $ua
+
+EOF
+}
+
+sub get_content_with_ua_cookie {
+	my ($uri, $ua, $cookie) = @_;
+	return http(<<EOF);
+GET $uri HTTP/1.1
+Host: localhost
+Connection: close
+Cookie: $cookie
 User-Agent: $ua
 
 EOF
@@ -396,6 +422,45 @@ like($r, qr/x-more-properties: \w+\^sep\^\w+/, 'Concatinate multiple property va
 # Non-existent property.
 $r = http_get('/non-property');
 like($r, qr/x-non-property: NoMatch/, 'Handles non-existent property');
+
+###############################################################################
+# Test that an override goes no further than the match that read it.
+###############################################################################
+
+# A worker reuses one results structure for every request. These run before the
+# reload, whilst there is one worker, and its process id shows that each pair of
+# requests reached it.
+if (!$t_lite) {
+	# What a User-Agent match gives before any override has been set.
+	$r = get_with_ua('/overrides-ua', $desktopUserAgent);
+	my ($width) = $r =~ /x-screenpixelswidth: ([^\r\n]*)/;
+	my ($worker) = $r =~ /x-worker: (\d+)/;
+
+	# An override from a cookie, then a User-Agent match.
+	$r = get_with_ua_cookie('/overrides', $desktopUserAgent, '51D_ScreenPixelsWidth=12345');
+	like($r, qr/x-screenpixelswidth: 12345/, 'Override from cookie is used by the match that read it');
+	$r = get_with_ua('/overrides-ua', $desktopUserAgent);
+	like($r, qr/x-worker: $worker\b/, 'User-Agent match after a cookie override reaches the same worker');
+	like($r, qr/x-screenpixelswidth: \Q$width\E\r\n/, 'Override from cookie does not reach a later User-Agent match');
+
+	# An override from the query string, then a User-Agent match.
+	$r = get_with_ua('/overrides?51D_ScreenPixelsWidth=54321', $desktopUserAgent);
+	like($r, qr/x-screenpixelswidth: 54321/, 'Override from query string is used by the match that read it');
+	$r = get_with_ua('/overrides-ua', $desktopUserAgent);
+	like($r, qr/x-worker: $worker\b/, 'User-Agent match after a query string override reaches the same worker');
+	like($r, qr/x-screenpixelswidth: \Q$width\E\r\n/, 'Override from query string does not reach a later User-Agent match');
+
+	# A User-Agent from a variable is matched after the multiple header matches
+	# of the same request, which read the override in its cookie.
+	$r = get_with_ua_cookie('/overrides-ua-variable?ua='.uri_escape($desktopUserAgent), $desktopUserAgent, '51D_ScreenPixelsWidth=12345');
+	like($r, qr/x-screenpixelswidth: \Q$width\E\r\n/, 'Override from cookie does not reach a User-Agent match from a variable');
+
+	# Response headers make no detection of their own, so the script served after
+	# them reads the match the request already made, and the override in its
+	# cookie shows the script has already run.
+	$r = get_content_with_ua_cookie('/51D-chua.js', $chrome89UserAgent, '51D_ScreenPixelsWidth=12345');
+	like($r, qr/51Degrees Javascript not available/, 'Response headers keep the override of the match they read');
+}
 
 ###############################################################################
 # test the reload functionality.
