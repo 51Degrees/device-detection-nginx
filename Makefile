@@ -74,7 +74,8 @@ else
 	ifeq ($(API),ipi)
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_ipi_module
 		# Only the IP intelligence example uses just the IP intelligence module.
-		EXAMPLE_TESTS := tests/examples/ipiGettingStarted.t
+		EXAMPLE_TESTS := tests/examples/ipiGettingStarted.t \
+			tests/examples/ipiBadDataFile.t
 	else
 		MODULE_ARGS := --add-module=$(CURDIR)/51Degrees_hash_module
 		# The device detection examples use only the device detection module.
