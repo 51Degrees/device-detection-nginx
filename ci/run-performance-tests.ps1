@@ -10,16 +10,24 @@ $repo = (Get-Item $PSScriptRoot/..).FullName
 $summary = New-Item -ItemType directory -Force -Path $repo/test-results/performance-summary
 
 # Write the results of the last runPerf.sh run for comparison under the
-# given configuration name.
+# given configuration name. The figure is the clock time for every request,
+# the same measure as the console performance examples, as each request makes
+# one detection. A run that failed writes no results and only warns, because
+# failing here would fail the Test job and stop the night's release.
 function Write-Results {
     param([Parameter(Mandatory)][string]$ResultsName)
     $results = Get-Content -Raw ./summary.json | ConvertFrom-Json
+    $seconds = $results.request_s_process
+    if ($seconds -le 0 -or $results.failed_process -ne 0) {
+        Write-Warning "No results for ${ResultsName}: $seconds seconds a request, $($results.failed_process) failed"
+        return
+    }
     @{
         HigherIsBetter = @{
-            DetectionsPerSecond = 1/($results.overhead_ms / 1000)
+            DetectionsPerSecond = 1 / $seconds
         }
         LowerIsBetter = @{
-            AvgMillisecsPerDetection = $results.overhead_ms
+            AvgMillisecsPerDetection = $seconds * 1000
         }
     } | ConvertTo-Json > $summary/results_$ResultsName.json
 }
