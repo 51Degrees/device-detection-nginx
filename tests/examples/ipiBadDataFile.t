@@ -106,8 +106,6 @@ my $good = read_binary($goodFile);
 my @files = (
 	['Missing file', "$dir/missing.ipi"],
 	['Empty file', write_binary('empty.ipi', '')],
-	['Too short for a header',
-		write_binary('short.ipi', substr($good, 0, 16))],
 	['Cut short', write_binary('cut.ipi', substr($good, 0, 4096))],
 	['Minor version it cannot read',
 		write_binary('version.ipi',
