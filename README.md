@@ -171,6 +171,9 @@ Below is the list of directives that can be used with the 51Degrees modules. The
 ## Required Properties
 The properties named in the device detection match and javascript directives form the required properties which the engine is initialised with. Detection only evaluates the components which the required properties belong to, so naming only the properties that are needed makes each match faster and reduces the shared memory size. Match metric properties (Drift, Difference, Method, MatchedNodes, UserAgents and DeviceId) are computed from the match itself and do not affect initialisation. Directives which match on multiple headers also initialise the JavascriptGetHighEntropyValues property, so that decoded GetHighEntropyValues evidence can contribute to the match. All of the data file's properties are initialised when no data set properties are named in any directive, or when `51D_set_resp_headers` is on, as the SetHeader properties it uses are discovered from the data file rather than named in directives. The IP intelligence module initialises its engine with the properties named in `51D_match_ipi` directives in the same way.
 
+## Header Length Limit
+A single header such as `User-Agent`, or a pseudo header (several headers read as one), is ignored if it is over 500 bytes. Detection carries on with the rest of the evidence and nothing is logged, so the answer is the same as for a request without that header. Neither module has a directive to raise the limit.
+
 ## Proxy Passing
 When using the `proxy_pass` directive in a location block where a match directive is used, the properties selected are passed as additional HTTP headers with the name specified in the first argument of `51D_match_ua`/`51D_match_ua_client_hints`/`51D_match_all`/`51D_match_ipi`.
 
