@@ -1936,8 +1936,9 @@ static EvidenceKeyValuePairArray *get_evidence(
 }
 
 /**
- * Get match function. Gets a match for either a single User-Agent or 
- * all request headers.
+ * Get match function. Gets a match for either a single User-Agent or
+ * all request headers. With no bits set in multi it makes no detection and
+ * leaves the results of the last match as they are.
  *
  * @param fdmcf module main config.
  * @param r the current HTTP request.
@@ -1952,7 +1953,14 @@ static ngx_uint_t ngx_http_51D_get_match(
 	ngx_str_t *userAgent)
 {
 	ResultsHash *results = fdmcf->results;
-	
+
+	// A worker uses these results for every request, so each detection starts
+	// with no override values. No mode bits means no detection, and the caller
+	// reads the last match, so that match keeps its values.
+	if (multi != 0) {
+		fiftyoneDegreesOverrideValuesReset(results->b.overrides);
+	}
+
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
 	if (multi & ngx_http_51D_multi_mode_mask_ua_only)  {
@@ -1970,10 +1978,6 @@ static ngx_uint_t ngx_http_51D_get_match(
 	}
 	else if (multi & ngx_http_51D_multi_mode_mask_non_ua_only)
 	{
-		// Reset overrides array as we want a free
-		// detection per request.
-		fiftyoneDegreesOverrideValuesReset(results->b.overrides);
-
 		EvidenceKeyValuePairArray *evidence =
 			get_evidence(results, r, multi);
 		if (evidence != NULL) {
