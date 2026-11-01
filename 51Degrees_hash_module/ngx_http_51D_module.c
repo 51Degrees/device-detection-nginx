@@ -2144,26 +2144,31 @@ void ngx_http_51D_get_value(
 }
 
 /**
- * Get the user agent using the header name specified by the user in the
- * configuration. This is only applied to the single match.
+ * Get the User-Agent for a single match. The variable the directive names
+ * gives it if the variable has a value. Otherwise the request's User-Agent
+ * header does, as a value from the query takes precedence over a header only
+ * when there is one.
+ * @param r the HTTP request.
+ * @param data the directive, or NULL for the User-Agent header.
+ * @return the User-Agent, which is empty if there is none, or NULL if memory
+ * could not be allocated.
  */
 static ngx_str_t*
 ngx_http_51D_get_user_agent(
 	ngx_http_request_t *r,
 	ngx_http_51D_data_to_set *data)
 {
-	ngx_str_t *userAgent;
-	// Get the User-Agent from the request or variable.
+	ngx_str_t *userAgent = NULL;
 	if (data != NULL && (int)data->variableName.len > 0) {
 		userAgent = get_evidence_from_query_string_base(r, &data->variableName);
+		if (userAgent == NULL || userAgent->len > 0) {
+			return userAgent;
+		}
 	}
-	else if (r->headers_in.user_agent != NULL) {
-		userAgent = &r->headers_in.user_agent[0].value;
+	if (r->headers_in.user_agent != NULL) {
+		return &r->headers_in.user_agent[0].value;
 	}
-	else {
-		userAgent = empty_string(r);
-	}
-	return userAgent;
+	return userAgent != NULL ? userAgent : empty_string(r);
 }
 
 /**
@@ -2287,6 +2292,10 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 	int totalHeaderCount, matchConfIndex;
 	ngx_str_t *userAgent, *nextUserAgent;
 
+	// The User-Agent of the match the results hold, if that is a match of a
+	// User-Agent alone made for this request.
+	ngx_str_t *matchedUserAgent = NULL;
+
 	if (r->main->internal ||
 		ngx_http_51D_shm_resource_manager == NULL ||
 		r->headers_in.headers.last == NULL) {
@@ -2340,7 +2349,15 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 				if ((currentHeader->multi & (1<<rawMulti)) &&
 					(int)currentHeader->variableName.len <= 0 &&
 					userAgent != NULL) {
+					// A new match replaces the one the results hold.
+					if (haveMatch == 0) {
+						matchedUserAgent = NULL;
+					}
 					haveMatch = (process(r, fdmcf, currentHeader, h, matchIndex, haveMatch, userAgent) == NGX_OK);
+					if (haveMatch &&
+						rawMulti == ngx_http_51D_multi_mode_bit_ua_only) {
+						matchedUserAgent = userAgent;
+					}
 					matchIndex++;
 				}
 				// Look at the next header.
@@ -2349,26 +2366,33 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 		}
 	}
 
-	userAgent = &(ngx_str_t)ngx_string("");
+	// Perform the matches which use a User-Agent from a variable. The results
+	// are only reused when they hold a match of the same User-Agent made for
+	// this request.
 	for (matchConfIndex = 0;
 		matchConfIndex < FIFTYONE_DEGREES_CONFIG_LEVELS;
 		matchConfIndex++) {
 		currentHeader = matchConf[matchConfIndex]->header;
 		while (currentHeader != NULL) {
-			if ((currentHeader->multi & ngx_http_51D_multi_mode_mask_ua_only) && (int)currentHeader->variableName.len > 0) {
+			if ((currentHeader->multi & ngx_http_51D_multi_mode_mask_ua_only) &&
+				(int)currentHeader->variableName.len > 0) {
 				nextUserAgent = ngx_http_51D_get_user_agent(r, currentHeader);
 				if (nextUserAgent != NULL) {
-					if (userAgent != NULL &&
-						strcmp(
-							(const char *)userAgent->data,
-							(const char *)nextUserAgent->data) == 0) {
-						const int newHaveMatch = 1;
-						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
+					if (matchedUserAgent != NULL &&
+						matchedUserAgent->len == nextUserAgent->len &&
+						ngx_strncmp(
+							matchedUserAgent->data,
+							nextUserAgent->data,
+							nextUserAgent->len) == 0) {
+						process(r, fdmcf, currentHeader, h, matchIndex, 1,
+							matchedUserAgent);
+					}
+					else if (process(r, fdmcf, currentHeader, h, matchIndex, 0,
+						nextUserAgent) == NGX_OK) {
+						matchedUserAgent = nextUserAgent;
 					}
 					else {
-						userAgent = nextUserAgent;
-						const int newHaveMatch = 0;
-						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
+						matchedUserAgent = NULL;
 					}
 					matchIndex++;
 				}
