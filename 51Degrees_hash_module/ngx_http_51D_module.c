@@ -2001,70 +2001,28 @@ static ngx_uint_t ngx_http_51D_get_match(
 }
 
 /**
- * Remove Unknown string from a given string and updated
- * the number of characers added with 'Unknown' being removed.
- * @param dest pointer to the string to be updated
- * @param charsAdded number of characters added to the string
- * that might contains Unknown. This will be updated after
- * 'Unknown' string is removed.
- */
-static void removeUnknown(char *dest, ngx_int_t *charsAdded)
-{
-	const char *unknown = "Unknown";
-	size_t unknownLen = ngx_strlen(unknown);	
-	size_t destLen = ngx_strlen(dest);
-	size_t memToMove = 0;
-	dest = dest + (destLen - *charsAdded);
-
-	char *unknownPos = NULL;
-	while (*charsAdded > 0 &&
-		(unknownPos = ngx_strstr(dest, unknown)) != NULL) {
-		*charsAdded -= unknownLen;
-		memToMove = ngx_strlen(unknownPos) - unknownLen;
-		ngx_memmove(unknownPos, unknownPos + unknownLen, memToMove);
-		unknownPos[memToMove] = '\0';
-		dest = unknownPos;
-	}
-}
-
-/**
  * Get value function. Gets the requested value for the current match and
  * appends the value to the list of values separated by the delimiter specified
- * with 51D_valueSeparator.
+ * with 51D_valueSeparator. A property with no value adds
+ * FIFTYONE_DEGREES_PROPERTY_NOT_AVAILABLE, so that there is a value for each
+ * property requested.
  * @param fdmcf 51Degrees module main config.
  * @param r the current HTTP request.
  * @param values_string the string to append the returned value to.
  * @param requiredPropertyName the name of the property to get the value for.
  * @param length the size allocated to the values_string variable.
- * @param includeNotAvailable whether or not, property whose hasValues=false or
- * value is 'Unknown' should be included as part of the valuesString. In all cases
- * whether properties are required by "51D_match_*" directives, this has to be 1
- * so that the values returned match the number of property required. Where this
- * is called by "51D_set_resp_headers", this is not required since they won't be
- * valid.
- * @param customSeparator a separator to use instead of the 51D_value_separator.
- * This is normally used for internal construction of string such as Client Hints
- * response headers list where separator has to be ','.
  */
 void ngx_http_51D_get_value(
 	ngx_http_51D_main_conf_t *fdmcf,
 	ngx_http_request_t *r,
 	char *values_string,
 	const char *requiredPropertyName,
-	size_t length,
-	ngx_uint_t includeNotAvailable,
-	const char *customSeparator) {
+	size_t length) {
 	size_t remainingLength = length - strlen(values_string);
 	ResultsHash *results = fdmcf->results;
 	DataSetHash *dataSet =
 		(DataSetHash *)results->b.b.dataSet;
-	const char *valueDelimiter;
-	if (customSeparator == NULL) {
-		valueDelimiter = (const char *)fdmcf->valueSeparator.data;
-	}
-	else {
-		valueDelimiter = (const char *)customSeparator;
-	}
+	const char *valueDelimiter = (const char *)fdmcf->valueSeparator.data;
 	ngx_int_t charsAdded = 0;
 	char *dest = values_string + strlen(values_string);
 
@@ -2166,13 +2124,8 @@ void ngx_http_51D_get_value(
 						exception->status,
 						(const char *)fdmcf->dataFile.data);
 				}
-
-				// Remove 'Unknown' string.
-				if (!includeNotAvailable) {
-					removeUnknown(dest, &charsAdded);
-				}
 			}
-			else if (includeNotAvailable) {
+			else {
 				charsAdded = snprintf(
 					dest, remainingLength,
 					"%s",
@@ -2228,11 +2181,7 @@ ngx_http_51D_get_user_agent(
  * @param header a header to construct value string for.
  * @param haveMatch whether a match has already been perfomed for the
  * input User-Agents.
- * @param includeNotAvailable whether not available property (e.g. 'Unknown'
- * or hasValues=false) should be included in the value string.
  * @param userAgent a User-Agent string to perform the match on.
- * @param customSeparator custom separator to be used instead of the
- * 51D_value_separator.
  * @ return an escaped value string. NULL if error occurred.
  */
 u_char *getEscapedMatchedValueString(
@@ -2240,9 +2189,7 @@ u_char *getEscapedMatchedValueString(
 	ngx_http_51D_main_conf_t *fdmcf,
 	ngx_http_51D_data_to_set *header,
 	int haveMatch,
-	ngx_uint_t includeNotAvailable,
-	ngx_str_t *userAgent,
-	const char *customSeparator) {
+	ngx_str_t *userAgent) {
 	memset(fdmcf->valueString, 0, FIFTYONE_DEGREES_MAX_STRING);
 
 	// Get a match. If there are multiple instances of
@@ -2266,9 +2213,7 @@ u_char *getEscapedMatchedValueString(
 			r,
 			fdmcf->valueString,
 			(const char *)header->property[property_index]->data,
-			FIFTYONE_DEGREES_MAX_STRING,
-			includeNotAvailable,
-			customSeparator);
+			FIFTYONE_DEGREES_MAX_STRING);
 	}
 
 	// Escape characters which cannot be added in a header value, most
@@ -2312,7 +2257,7 @@ process(ngx_http_request_t *r,
 		int haveMatch,
 		ngx_str_t *userAgent) {
 	u_char *escapedValueString = getEscapedMatchedValueString(
-		r, fdmcf, header, haveMatch, 1, userAgent, NULL);
+		r, fdmcf, header, haveMatch, userAgent);
 	if (escapedValueString == NULL) {
 		return NGX_ERROR;
 	}
@@ -2477,6 +2422,188 @@ static ngx_table_elt_t *findResponseHeader(ngx_http_request_t *r, ngx_str_t head
 }
 
 /**
+ * Check whether a comma separated list holds a part.
+ * @param list the list to search.
+ * @param part the part to search for.
+ * @param length the length of the part.
+ * @return 1 if the list holds the part, otherwise 0.
+ */
+static ngx_uint_t hasPart(ngx_str_t *list, u_char *part, size_t length) {
+	u_char *start, *next, *end = list->data + list->len;
+	for (start = list->data; start < end; start = next + 1) {
+		next = ngx_strlchr(start, end, ',');
+		if (next == NULL) {
+			next = end;
+		}
+		if ((size_t)(next - start) == length &&
+			ngx_strncmp(start, part, length) == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/**
+ * Get the value of a response header from its SetHeader properties, as the
+ * Set Headers element of the Pipeline specification does. A property with no
+ * value, or with the value Unknown, adds nothing. Each value is split at its
+ * commas and each part is added once.
+ * @param r the current HTTP request.
+ * @param fdmcf 51Degrees module main config.
+ * @param header the response header to get the value of.
+ * @param value set to the value, which is empty if nothing was added.
+ * @return NGX_OK, or NGX_ERROR if memory could not be allocated.
+ */
+static ngx_int_t getRespHeaderValue(
+	ngx_http_request_t *r,
+	ngx_http_51D_main_conf_t *fdmcf,
+	ngx_http_51D_data_to_set *header,
+	ngx_str_t *value) {
+	ResultsHash *results = fdmcf->results;
+	DataSetHash *dataSet = (DataSetHash *)results->b.b.dataSet;
+	u_char *data, *part, *partEnd, *next, *end;
+	size_t length;
+	ngx_uint_t i;
+	int propertyIndex;
+
+	value->len = 0;
+	value->data = NULL;
+	for (i = 0; i < header->propertyCount; i++) {
+		EXCEPTION_CREATE
+		propertyIndex = PropertiesGetRequiredPropertyIndexFromName(
+			dataSet->b.b.available,
+			(const char *)header->property[i]->data);
+		if (propertyIndex < 0 ||
+			ResultsHashGetHasValues(results, propertyIndex, exception) == false) {
+			continue;
+		}
+		ResultsHashGetValuesStringByRequiredPropertyIndex(
+			results,
+			propertyIndex,
+			fdmcf->valueString,
+			FIFTYONE_DEGREES_MAX_STRING,
+			",",
+			exception);
+		if (EXCEPTION_FAILED) {
+			report_status(
+				r->connection->log,
+				exception->status,
+				(const char *)fdmcf->dataFile.data);
+			continue;
+		}
+		if (ngx_strcasecmp(
+			(u_char *)fdmcf->valueString, (u_char *)"Unknown") == 0) {
+			continue;
+		}
+
+		// The parts of the value and a comma before each can be at most one
+		// character longer than the value.
+		length = ngx_strlen(fdmcf->valueString);
+		data = ngx_pnalloc(r->pool, value->len + length + 1);
+		if (data == NULL) {
+			return report_insufficient_memory_status(r->connection->log);
+		}
+		if (value->len > 0) {
+			ngx_memcpy(data, value->data, value->len);
+		}
+		value->data = data;
+
+		// Add each part without the white space around it. An empty part
+		// would make the list invalid, so it is left out.
+		end = (u_char *)fdmcf->valueString + length;
+		for (part = (u_char *)fdmcf->valueString; part < end; part = next + 1) {
+			next = ngx_strlchr(part, end, ',');
+			if (next == NULL) {
+				next = end;
+			}
+			partEnd = next;
+			while (part < partEnd && (*part == ' ' || *part == '\t')) {
+				part++;
+			}
+			while (partEnd > part &&
+				(partEnd[-1] == ' ' || partEnd[-1] == '\t')) {
+				partEnd--;
+			}
+			if (partEnd > part && hasPart(value, part, partEnd - part) == 0) {
+				if (value->len > 0) {
+					value->data[value->len++] = ',';
+				}
+				ngx_memcpy(value->data + value->len, part, partEnd - part);
+				value->len += partEnd - part;
+			}
+		}
+	}
+	return NGX_OK;
+}
+
+/**
+ * Add a response header from its SetHeader properties. If the response
+ * already has the header then the value is added to the end of it, as the web
+ * integration feature of the Pipeline specification describes. An empty value
+ * adds nothing, as an empty list is sent as no header at all.
+ * @param r the current HTTP request.
+ * @param fdmcf 51Degrees module main config.
+ * @param header the response header to add.
+ * @return NGX_OK, or NGX_ERROR if memory could not be allocated.
+ */
+static ngx_int_t addRespHeader(
+	ngx_http_request_t *r,
+	ngx_http_51D_main_conf_t *fdmcf,
+	ngx_http_51D_data_to_set *header) {
+	ngx_table_elt_t *h;
+	ngx_str_t value;
+	size_t escapedChars;
+	u_char *data, *end;
+
+	if (getRespHeaderValue(r, fdmcf, header, &value) != NGX_OK) {
+		return NGX_ERROR;
+	}
+	if (value.len == 0) {
+		return NGX_OK;
+	}
+
+	// Escape characters which cannot be added in a header value, most
+	// importantly '\n' and '\r'.
+	escapedChars = (size_t)ngx_escape_json(NULL, value.data, value.len);
+	if (escapedChars > 0) {
+		data = ngx_pnalloc(r->pool, value.len + escapedChars);
+		if (data == NULL) {
+			return report_insufficient_memory_status(r->connection->log);
+		}
+		ngx_escape_json(data, value.data, value.len);
+		value.data = data;
+		value.len += escapedChars;
+	}
+
+	h = findResponseHeader(r, header->headerName);
+	if (h == NULL) {
+		h = ngx_list_push(&r->headers_out.headers);
+		if (h == NULL) {
+			return report_insufficient_memory_status(r->connection->log);
+		}
+		h->key = header->headerName;
+		h->hash = ngx_hash_key(h->key.data, h->key.len);
+		h->value = value;
+		h->lowcase_key = header->lowerHeaderName.data;
+#if nginx_version >= 1023000
+		h->next = NULL;
+#endif
+	}
+	else {
+		data = ngx_pnalloc(r->pool, h->value.len + 1 + value.len);
+		if (data == NULL) {
+			return report_insufficient_memory_status(r->connection->log);
+		}
+		end = ngx_cpymem(data, h->value.data, h->value.len);
+		*end++ = ',';
+		ngx_memcpy(end, value.data, value.len);
+		h->value.data = data;
+		h->value.len += 1 + value.len;
+	}
+	return NGX_OK;
+}
+
+/**
  * Header filter for response message. This is called first in the header
  * filter change. It then call subsequent filter in the chain with the updated
  * response.
@@ -2494,7 +2621,6 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 	ngx_http_51D_match_conf_t *lMatchConf, *sMatchConf, *mMatchConf;
 	ngx_str_t *userAgent;
 	size_t contentLength = 0;
-	ngx_uint_t i = 0;
 
 	if (ngx_http_51D_shm_resource_manager == NULL ||
 		r->headers_in.headers.last == NULL) {
@@ -2530,46 +2656,13 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 
 	// Setting the headers
 	if (setHeaders) {
-		ngx_table_elt_t *h;
-		ngx_http_51D_data_to_set *currentHeader = fdmcf->setRespHeader;
-		for (i = 0; currentHeader != NULL; i++) {
-			u_char *escapedValueString = getEscapedMatchedValueString(
-				r, fdmcf, currentHeader, i, 0, NULL, ",");
-			if (escapedValueString == NULL) {
+		ngx_http_51D_data_to_set *currentHeader;
+		for (currentHeader = fdmcf->setRespHeader;
+			currentHeader != NULL;
+			currentHeader = currentHeader->next) {
+			if (addRespHeader(r, fdmcf, currentHeader) != NGX_OK) {
 				return NGX_ERROR;
 			}
-
-			ngx_table_elt_t *header = findResponseHeader(r, currentHeader->headerName);
-
-			if (header == NULL) {
-				// For each property value pair, set a new header name and value.
-				h = ngx_list_push(&r->headers_out.headers);
-				h->key.data = (u_char *)currentHeader->headerName.data;
-				h->key.len = ngx_strlen(h->key.data);
-				h->hash = ngx_hash_key(h->key.data, h->key.len);
-				h->value.data = escapedValueString;
-				h->value.len = ngx_strlen(h->value.data);
-				h->lowcase_key = (u_char *)currentHeader->lowerHeaderName.data;
-			}
-			else {
-				size_t len = header->value.len + ngx_strlen(escapedValueString) + ngx_strlen(",") + 1;
-				u_char *newHeaderValue = (u_char *)ngx_palloc(r->pool, len);
-				if (newHeaderValue == NULL) {
-					report_insufficient_memory_status(r->connection->log);
-					return NGX_ERROR;
-				}
-
-				ngx_sprintf(
-					newHeaderValue,
-					"%s%s%s",
-					header->value.data,
-					",",
-					escapedValueString) ;
-				newHeaderValue[len] = '\0';
-				header->value.data = newHeaderValue;
-				header->value.len = len;
-			}
-			currentHeader = currentHeader->next;
 		}
 	}
 
@@ -2607,9 +2700,7 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 				r,
 				fdmcf->valueString,
 				(const char *)lMatchConf->body->property[0]->data,
-				FIFTYONE_DEGREES_MAX_STRING,
-				1,
-				NULL);
+				FIFTYONE_DEGREES_MAX_STRING);
 		}
 
 		// Send header
@@ -2672,9 +2763,7 @@ ngx_http_51D_body_filter(ngx_http_request_t *r, ngx_chain_t *in) {
 				r,
 				fdmcf->valueString,
 				(const char *)matchConf->body->property[0]->data,
-				FIFTYONE_DEGREES_MAX_STRING,
-				1,
-				NULL);
+				FIFTYONE_DEGREES_MAX_STRING);
 		}
 
 		// Send body
