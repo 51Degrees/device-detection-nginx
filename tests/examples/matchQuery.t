@@ -34,7 +34,7 @@ sub read_example($) {
 	return $content;
 }
 
-my $t = Test::Nginx->new()->has(qw/http/)->plan(2);
+my $t = Test::Nginx->new()->has(qw/http/)->plan(4);
 
 my $t_file = read_example('matchQuery.conf');
 # Remove documentation block
@@ -76,9 +76,17 @@ my $desktopUserAgent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:41.0) Gecko/20100
 # Test matchQuery.conf example.
 ###############################################################################
 
-my $r = get_with_ua('/query?User-Agent='.uri_escape($mobileUserAgent), $desktopUserAgent);
+# The variable of the single match reads the user_agent argument, and the
+# match of all evidence reads the argument named after the header.
+my $r = get_with_ua('/query?user_agent='.uri_escape($mobileUserAgent)
+	.'&User-Agent='.uri_escape($mobileUserAgent), $desktopUserAgent);
 like($r, qr/x-mobile-single: True/, 'Mobile match (single)');
 like($r, qr/x-mobile-all: True/, 'Mobile match (all)');
+
+# Without the arguments both match the User-Agent header.
+$r = get_with_ua('/query', $desktopUserAgent);
+like($r, qr/x-mobile-single: False/, 'Desktop match without the argument (single)');
+like($r, qr/x-mobile-all: False/, 'Desktop match without the argument (all)');
 
 ###############################################################################
 

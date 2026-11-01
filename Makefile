@@ -10,7 +10,7 @@ else
 	CLEANTESTS := 0
 endif
 
-TESTS := tests/51degrees.t
+TESTS := tests/51degrees.t tests/51degrees_own_match.t
 
 
 $(eval $(API):;@:)
