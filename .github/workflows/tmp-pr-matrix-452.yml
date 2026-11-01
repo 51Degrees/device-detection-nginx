@@ -1,0 +1,26 @@
+name: Temporary full build of pull request 452
+
+on:
+  push:
+    branches:
+      - 'tmp/pr-matrix-452'
+
+jobs:
+  Build:
+    uses: 51Degrees/common-ci/.github/workflows/nightly-pull-request.yml@main
+    with:
+      repo-name: device-detection-nginx
+      org-name: 51Degrees
+      pull-request-id: 452
+      dryrun: 'true'
+      branch: main
+      cache-assets: true
+      skip-compare-performance: true
+    secrets:
+      token: ${{ secrets.ACCESS_TOKEN }}
+      DeviceDetection: ${{ secrets.DEVICE_DETECTION_KEY }}
+      DeviceDetectionUrl: ${{ secrets.DEVICE_DETECTION_URL }}
+      IpIntelligenceUrl: ${{ secrets.IPI_DATA_FILE_URL }}
+      NginxKey: ${{ secrets.NGINX_PLUS_KEY }}
+      NginxCert: ${{ secrets.NGINX_PLUS_CERT }}
+      NginxJwtToken: ${{ secrets.NGINX_PLUS_JWT_TOKEN }}
