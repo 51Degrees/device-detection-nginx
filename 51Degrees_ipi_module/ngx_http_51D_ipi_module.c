@@ -256,6 +256,28 @@ report_insufficient_memory_status(
 }
 
 /**
+ * Report a data file that could not be used. Not every status message names
+ * the file, so it is named here as well.
+ * @param log the log to write the error message to.
+ * @param status the status code returned by one of the 51Degrees APIs.
+ * @param fileName of the data file being used.
+ * @return error
+ */
+static ngx_int_t
+report_data_file_status(
+	ngx_log_t *log,
+	StatusCode status,
+	const char *fileName) {
+	ngx_log_error(
+		NGX_LOG_ERR,
+		log,
+		0,
+		"51Degrees ipi could not use the data file '%s'.",
+		fileName);
+	return report_status(log, status, fileName);
+}
+
+/**
  * Get a fiftyoneDegreesConfigIpi instance based on the main configuration.
  * Only the in memory performance profile is supported as the data set is
  * held in shared memory.
@@ -375,9 +397,9 @@ ngx_http_51D_ipi_post_conf(ngx_conf_t *cf)
 		&properties,
 		(const char *)fdmcf->dataFile.data,
 		exception);
-	if ((int)size < 1 || EXCEPTION_FAILED) {
+	if (size < 1 || EXCEPTION_FAILED) {
 		// If there was a problem, throw an error.
-		return report_status(
+		return report_data_file_status(
 			cf->cycle->log,
 			exception->status,
 			(const char *)fdmcf->dataFile.data);
@@ -668,24 +690,29 @@ ngx_http_51D_ipi_init_module(ngx_cycle_t *cycle)
 	MallocAligned = ngx_http_51D_ipi_shm_alloc_aligned;
 	FreeAligned = ngx_http_51D_ipi_shm_free;
 
-	// Initialise the resource manager.
+	// Initialise the resource manager. A failure is in the status returned,
+	// and is not always in the exception as well. A worker cannot start
+	// without a resource manager, so every failure has to stop here.
 	ngx_shmtx_lock(&shpool->mutex);
+	EXCEPTION_CREATE;
+	StatusCode status = FIFTYONE_DEGREES_STATUS_INSUFFICIENT_MEMORY;
 	ngx_http_51D_ipi_worker_count =
 		(ngx_atomic_t *)ngx_http_51D_ipi_shm_alloc(sizeof(ngx_atomic_t));
-	ngx_atomic_cmp_set(ngx_http_51D_ipi_worker_count, 0, 0);
+	if (ngx_http_51D_ipi_worker_count != NULL) {
+		ngx_atomic_cmp_set(ngx_http_51D_ipi_worker_count, 0, 0);
 
-	// Need to determine the ConfigIpi at this point
-	ConfigIpi config = get_config_ipi(fdmcf);
-	PropertiesRequired properties = get_properties_ipi(fdmcf);
+		// Need to determine the ConfigIpi at this point
+		ConfigIpi config = get_config_ipi(fdmcf);
+		PropertiesRequired properties = get_properties_ipi(fdmcf);
 
-	EXCEPTION_CREATE;
-	IpiInitManagerFromFile(
-		fdmcf->resourceManager,
-		&config,
-		&properties,
-		(const char *)fdmcf->dataFile.data,
-		exception
-	);
+		status = IpiInitManagerFromFile(
+			fdmcf->resourceManager,
+			&config,
+			&properties,
+			(const char *)fdmcf->dataFile.data,
+			exception
+		);
+	}
 	// Release lock
 	ngx_shmtx_unlock(&shpool->mutex);
 
@@ -696,8 +723,14 @@ ngx_http_51D_ipi_init_module(ngx_cycle_t *cycle)
 	MallocAligned = MemoryStandardMallocAligned;
 	FreeAligned = MemoryStandardFreeAligned;
 
+	if (status != FIFTYONE_DEGREES_STATUS_SUCCESS) {
+		return report_data_file_status(
+			cycle->log,
+			status,
+			(const char *)fdmcf->dataFile.data);
+	}
 	if (EXCEPTION_FAILED) {
-		return report_status(
+		return report_data_file_status(
 			cycle->log,
 			exception->status,
 			(const char *)fdmcf->dataFile.data);

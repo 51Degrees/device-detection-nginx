@@ -24,14 +24,14 @@ use URI::Escape;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $n = 30;
+my $n = 35;
 my $t_lite = 1;
 
 # The Lite data file version does not contains properties that can be used
 # to test the overrides feature. Please consider to use one that have at least
 # ScreenPixelsWidth and ScreenPixelsWidthJavascript properties
 if (scalar(@ARGV) > 0 && index($ARGV[0], "51Degrees-Lite") == -1) {
-	$n += 28;
+	$n += 30;
 	$t_lite = 0;
 }
 
@@ -316,8 +316,12 @@ X-OperaMini-Phone-UA: $ua
 EOF
 }
 
+# An empty platform version leaves that hint out of the request.
 sub get_with_client_hints {
-	my ($uri) = @_;
+	my ($uri, $platformVersion) = @_;
+	$platformVersion = '"13.0.0"' if !defined $platformVersion;
+	my $versionHint = $platformVersion eq '' ? '' :
+		"sec-ch-ua-platform-version: $platformVersion\n";
 	return http(<<EOF);
 HEAD $uri HTTP/1.1
 Host: localhost
@@ -326,8 +330,7 @@ user-agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like G
 sec-ch-ua-platform: "Android"
 sec-ch-ua-model: "SM-S918B"
 sec-ch-ua-mobile: ?1
-sec-ch-ua-platform-version: "13.0.0"
-sec-ch-ua-full-version-list: "Google Chrome";v="117.0.5938.60", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.60"
+${versionHint}sec-ch-ua-full-version-list:"Google Chrome";v="117.0.5938.60", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.60"
 sec-ch-ua: "Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"
 
 EOF
@@ -475,6 +478,48 @@ if (!$t_lite) {
 	like($r, qr/51Degrees Javascript not available/,
 		'Response headers keep the override of the match they read');
 }
+
+###############################################################################
+# Test the header length limit.
+###############################################################################
+
+sub padded {
+	my ($value, $length) = @_;
+	return $value . ('x' x ($length - length($value)));
+}
+
+# The headers set from a response, so that two answers can be compared.
+sub answers {
+	my ($response) = @_;
+	return join("\n", grep { /^x-/ } split(/\r\n/, $response));
+}
+
+# A header over 500 bytes is ignored and nothing is logged, so the answer is the
+# same as for a request without the header.
+my $logStart = length($t->read_file('error.log'));
+
+foreach my $uri ('/ua', '/all') {
+	$r = get_with_ua($uri, padded($mobileUserAgent, 500));
+	like($r, qr/x-ismobile: True/, "User-Agent of 500 bytes is used ($uri)");
+	is(answers(get_with_ua($uri, padded($mobileUserAgent, 501))),
+		answers(http_get($uri)),
+		"User-Agent of 501 bytes is ignored ($uri)");
+}
+
+# The data file reads the platform and its version as one pseudo header, with a
+# one byte separator. The 9 bytes of "Android" and a version of 490 bytes make
+# 500, and neither hint is over the limit on its own.
+if (!$t_lite) {
+	$r = get_with_client_hints('/all', padded('"13.0.0"', 490));
+	like($r, qr/x-platform-version: 13\.0/, 'Pseudo header of 500 bytes is used');
+	is(answers(get_with_client_hints('/all', padded('"13.0.0"', 491))),
+		answers(get_with_client_hints('/all', '')),
+		'Pseudo header of 501 bytes is ignored');
+}
+
+unlike(substr($t->read_file('error.log'), $logStart),
+	qr/\[(error|crit|alert|emerg)\].*51Degrees/,
+	'Nothing is logged for a header that is ignored');
 
 ###############################################################################
 # test the reload functionality.
