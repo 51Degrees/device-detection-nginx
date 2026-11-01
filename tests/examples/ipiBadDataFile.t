@@ -91,7 +91,7 @@ EOF
 }
 
 sub expect_refused {
-	my ($name, $file, $mode, @args) = @_;
+	my ($name, $file, $reason, $mode, @args) = @_;
 	my ($code, $output) = run_nginx($file, @args);
 	ok($code != 0 && $code != 124 && $code < 128,
 		"$name: $mode fails without a signal")
@@ -100,21 +100,29 @@ sub expect_refused {
 		"$name: $mode has no memory error");
 	like($output, qr/51Degrees.*\Q$file\E/,
 		"$name: $mode logs a message naming the file");
+	like($output, $reason, "$name: $mode logs the reason");
 }
 
 my $good = read_binary($goodFile);
 my @files = (
-	['Missing file', "$dir/missing.ipi"],
-	['Empty file', write_binary('empty.ipi', '')],
-	['Cut short', write_binary('cut.ipi', substr($good, 0, 4096))],
+	['Missing file', "$dir/missing.ipi", qr/could not be found/],
+	['Empty file', write_binary('empty.ipi', ''),
+		qr/unknown error occurred accessing the file/],
+	['Too short for a header',
+		write_binary('short.ipi', substr($good, 0, 16)),
+		qr/not in the correct format/],
+	['Cut short', write_binary('cut.ipi', substr($good, 0, 4096)),
+		qr/not in the correct format/],
 	['Minor version it cannot read',
 		write_binary('version.ipi',
-			with_int32($good, $minorVersionOffset, 5))],
+			with_int32($good, $minorVersionOffset, 5)),
+		qr/is an unsupported version/],
 	['Shift it cannot read',
-		write_binary('shift.ipi', with_int32($good, $shiftOffset, 99))],
+		write_binary('shift.ipi', with_int32($good, $shiftOffset, 99)),
+		qr/is an unsupported version/],
 );
 
-plan(tests => 1 + scalar(@files) * 6);
+plan(tests => 1 + scalar(@files) * 8);
 
 # A good file passes with the same configuration, so that the failures below
 # come from the data file.
@@ -122,7 +130,7 @@ my ($goodCode, $goodOutput) = run_nginx($goodFile, '-t');
 is($goodCode, 0, 'Good file: nginx -t passes') or diag($goodOutput);
 
 foreach my $entry (@files) {
-	my ($name, $file) = @$entry;
-	expect_refused($name, $file, 'nginx -t', '-t');
-	expect_refused($name, $file, 'starting');
+	my ($name, $file, $reason) = @$entry;
+	expect_refused($name, $file, $reason, 'nginx -t', '-t');
+	expect_refused($name, $file, $reason, 'starting');
 }
