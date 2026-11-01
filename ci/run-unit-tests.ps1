@@ -44,7 +44,7 @@ try {
         $env:TEST_NGINX_BINARY="/usr/sbin/nginx"
         $env:TEST_NGINX_GLOBALS="mgmt {license_token /etc/nginx/license.jwt;} load_module $repo/build/modules/ngx_http_51D_module.so;"
         $env:TEST_NGINX_GLOBALS_HTTP="51D_file_path $repo/cxx/device-detection-data/TAC-HashV41.hash;"
-        prove --formatter TAP::Formatter::JUnit -v tests/51degrees.t tests/nginx-tests :: TAC-HashV41.hash > $results/${Name}_Full_Plus.xml || $($failed = $true)
+        prove --formatter TAP::Formatter::JUnit -v tests/51degrees.t tests/51degrees_own_match.t tests/nginx-tests :: TAC-HashV41.hash > $results/${Name}_Full_Plus.xml || $($failed = $true)
         # Unset the environment variables for future tests.
         $env:TEST_NGINX_BINARY=""
         $env:TEST_NGINX_GLOBALS=""

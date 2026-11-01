@@ -294,7 +294,7 @@ To run the 51Degrees together with the Nginx test suite, run the following comma
 make test-full
 ```
 
-These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth. Then, use the `51DEGREES_DD_PATH` variable to specify the path of the data file to run the tests with. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
+These do not run all the required tests as some tests requires properties that are not supported with the Lite version of the data file. To run all tests, obtain a data file with support properties JavascriptHardwareProfile,ScreenPixelsWidthJavascript and ScreenPixelsWidth, and the SetHeaderBrowserAccept-CH, SetHeaderHardwareAccept-CH and SetHeaderPlatformAccept-CH properties for the response header tests. Then, use the `51DEGREES_DD_PATH` variable to specify the path of the data file to run the tests with. If tests still fail, obtain data file with any other properties used in the tests. Below is an example of running tests with different data file:
 ```
 make [test|test-full] 51DEGREES_DD_PATH=/path/to/51Degrees-EnterpriseV4.1.hash
 ```
