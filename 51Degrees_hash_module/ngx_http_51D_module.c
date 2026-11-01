@@ -1356,12 +1356,9 @@ initRespHeaders(
 				return NGX_ERROR;
 			}
 
-			// header might have to be constructed
-			// with all evidence, not just a User-Agent. User-Agent
-			// might be deprecated in the future.
-			//
-			// Bits of this field will be populated later.
-			(*respHeaderPtr)->multi = 0;
+			// The headers are set from a match of all the evidence, as a web
+			// integration supplies all of it.
+			(*respHeaderPtr)->multi = ngx_http_51D_multi_mode_mask_all_evidence;
 	
 			// This doesn't need to be allocated in separate memmory
 			// as it won't be freed from available properties.
@@ -1937,8 +1934,7 @@ static EvidenceKeyValuePairArray *get_evidence(
 
 /**
  * Get match function. Gets a match for either a single User-Agent or
- * all request headers. With no bits set in multi it makes no detection and
- * leaves the results of the last match as they are.
+ * all request headers.
  *
  * @param fdmcf module main config.
  * @param r the current HTTP request.
@@ -1955,11 +1951,8 @@ static ngx_uint_t ngx_http_51D_get_match(
 	ResultsHash *results = fdmcf->results;
 
 	// A worker uses these results for every request, so each detection starts
-	// with no override values. No mode bits means no detection, and the caller
-	// reads the last match, so that match keeps its values.
-	if (multi != 0) {
-		fiftyoneDegreesOverrideValuesReset(results->b.overrides);
-	}
+	// with no override values.
+	fiftyoneDegreesOverrideValuesReset(results->b.overrides);
 
 	EXCEPTION_CREATE
 	// If single requested, match for single User-Agent.
@@ -2654,12 +2647,16 @@ ngx_http_51D_header_filter(ngx_http_request_t *r) {
 	}
 
 
-	// Setting the headers
-	if (setHeaders) {
-		ngx_http_51D_data_to_set *currentHeader;
-		for (currentHeader = fdmcf->setRespHeader;
-			currentHeader != NULL;
-			currentHeader = currentHeader->next) {
+	// Setting the headers. Other requests on this worker can have been matched
+	// since this request's match directives were, so the headers have a match
+	// of their own.
+	if (setHeaders && fdmcf->setRespHeader != NULL) {
+		ngx_http_51D_data_to_set *currentHeader = fdmcf->setRespHeader;
+		if (ngx_http_51D_get_match(
+			fdmcf, r, currentHeader->multi, NULL) != NGX_OK) {
+			return NGX_ERROR;
+		}
+		for (; currentHeader != NULL; currentHeader = currentHeader->next) {
 			if (addRespHeader(r, fdmcf, currentHeader) != NGX_OK) {
 				return NGX_ERROR;
 			}

@@ -467,9 +467,9 @@ if (!$t_lite) {
 	like($r, qr/x-screenpixelswidth: \Q$width\E\r\n/,
 		'Override from cookie does not reach a User-Agent match from a variable');
 
-	# Response headers make no detection of their own, so the script served
-	# after them reads the match the request already made, and the override
-	# in its cookie shows the script has already run.
+	# The script served after response headers reads their match, which has
+	# the override in the cookie, and the override shows the script has
+	# already run.
 	$r = get_content_with_ua_cookie('/51D-chua.js', $chrome89UserAgent,
 		'51D_ScreenPixelsWidth=12345');
 	like($r, qr/51Degrees Javascript not available/,
