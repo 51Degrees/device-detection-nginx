@@ -1859,12 +1859,15 @@ static int is_header_allowed_for_UA_UACH_mode(const char * const headerName) {
  * @param results the results to hold the return value of the detection
  * @param r the http request that contains the evidence
  * @param multiMode describes which headers to use for evidence.
+ * @param userAgent a User-Agent to use in place of the User-Agent header, or
+ * NULL or empty to use the header.
  * @return an array of evidence
  */
 static EvidenceKeyValuePairArray *get_evidence(
 	ResultsHash *results,
 	ngx_http_request_t *r,
-	ngx_http_51D_multi_header_mode multiMode) {
+	ngx_http_51D_multi_header_mode multiMode,
+	ngx_str_t *userAgent) {
 	DataSetHash *dataSet =
 		(DataSetHash *)results->b.b.dataSet;
 	ngx_table_elt_t *searchResult;
@@ -1896,7 +1899,20 @@ static EvidenceKeyValuePairArray *get_evidence(
 			searchResult =
 				search_headers_in(
 					r, (u_char *)headerName, ngx_strlen(headerName));
-			if (searchResult) {
+			// A User-Agent the caller gives takes the place of the header's.
+			// It goes in as a header, as a component with any query evidence
+			// is matched from that alone, without the other headers.
+			if (userAgent != NULL && userAgent->len > 0 &&
+				ngx_strcasecmp(
+					(u_char *)headerName,
+					(u_char *)NGX_HTTP_51D_HEADER_USER_AGENT) == 0) {
+				EvidenceAddString(
+					evidence,
+					FIFTYONE_DEGREES_EVIDENCE_HTTP_HEADER_STRING,
+					headerName,
+					(const char *)userAgent->data);
+			}
+			else if (searchResult) {
 				EvidenceAddString(
 					evidence,
 					FIFTYONE_DEGREES_EVIDENCE_HTTP_HEADER_STRING,
@@ -1943,7 +1959,8 @@ static EvidenceKeyValuePairArray *get_evidence(
  * @param fdmcf module main config.
  * @param r the current HTTP request.
  * @param multi Bit mask: what headers to use.
- * @param userAgent pointer to the user agent to perform the match on.
+ * @param userAgent the User-Agent for a match of a User-Agent alone, or for a
+ * client hints match the User-Agent to use in place of the header's.
  * @return Nginx status code.
  */
 static ngx_uint_t ngx_http_51D_get_match(
@@ -1978,8 +1995,12 @@ static ngx_uint_t ngx_http_51D_get_match(
 	}
 	else if (multi & ngx_http_51D_multi_mode_mask_non_ua_only)
 	{
-		EvidenceKeyValuePairArray *evidence =
-			get_evidence(results, r, multi);
+		EvidenceKeyValuePairArray *evidence = get_evidence(
+			results,
+			r,
+			multi,
+			multi == ngx_http_51D_multi_mode_mask_client_hints ?
+				userAgent : NULL);
 		if (evidence != NULL) {
 			ResultsHashFromEvidence(
 				results,
@@ -2431,6 +2452,44 @@ ngx_http_51D_handler(ngx_http_request_t *r)
 						userAgent = nextUserAgent;
 						const int newHaveMatch = 0;
 						process(r, fdmcf, currentHeader, h, matchIndex, newHaveMatch, userAgent);
+					}
+					matchIndex++;
+				}
+			}
+			currentHeader = currentHeader->next;
+		}
+	}
+
+	// Perform the client hints matches with a User-Agent from a variable. A
+	// variable with no value supplies no User-Agent, so the header's is used.
+	// A match is only reused for the same value.
+	ngx_str_t *hintsUserAgent = NULL;
+	for (matchConfIndex = 0;
+		matchConfIndex < FIFTYONE_DEGREES_CONFIG_LEVELS;
+		matchConfIndex++) {
+		currentHeader = matchConf[matchConfIndex]->header;
+		while (currentHeader != NULL) {
+			if ((currentHeader->multi &
+					ngx_http_51D_multi_mode_mask_client_hints) &&
+				(int)currentHeader->variableName.len > 0) {
+				nextUserAgent = get_evidence_from_query_string_base(
+					r, &currentHeader->variableName);
+				if (nextUserAgent != NULL) {
+					if (hintsUserAgent != NULL &&
+						hintsUserAgent->len == nextUserAgent->len &&
+						ngx_strncmp(
+							hintsUserAgent->data,
+							nextUserAgent->data,
+							nextUserAgent->len) == 0) {
+						process(r, fdmcf, currentHeader, h, matchIndex, 1,
+							hintsUserAgent);
+					}
+					else if (process(r, fdmcf, currentHeader, h, matchIndex, 0,
+						nextUserAgent) == NGX_OK) {
+						hintsUserAgent = nextUserAgent;
+					}
+					else {
+						hintsUserAgent = NULL;
 					}
 					matchIndex++;
 				}
